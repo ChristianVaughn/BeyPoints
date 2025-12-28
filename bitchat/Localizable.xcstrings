@@ -1,6 +1,12 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "-" : {
+
+    },
+    "#%@" : {
+
+    },
     "%@" : {
       "comment" : "Non-localizable symbol used in code",
       "extractionState" : "manual",
@@ -182,6 +188,26 @@
       },
       "shouldTranslate" : false
     },
+    "%@ - %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ - %2$@"
+          }
+        }
+      }
+    },
+    "%@ %@ - %@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@ - %3$@ %4$@"
+          }
+        }
+      }
+    },
     "%@ active" : {
       "comment" : "A label at the bottom of the people list sheet showing the number of active users.",
       "localizations" : {
@@ -360,6 +386,79 @@
           }
         }
       }
+    },
+    "%@ rounds" : {
+
+    },
+    "%@ vs %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ vs %2$@"
+          }
+        }
+      }
+    },
+    "%@ wins" : {
+
+    },
+    "%@ wins!" : {
+
+    },
+    "%@-%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@-%2$@"
+          }
+        }
+      }
+    },
+    "%@." : {
+
+    },
+    "%@/%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@/%2$@"
+          }
+        }
+      }
+    },
+    "%@/%@ matches" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@/%2$@ matches"
+          }
+        }
+      }
+    },
+    "+ %@ more" : {
+
+    },
+    "+%@" : {
+
+    },
+    "+1" : {
+
+    },
+    "+1 to opponent" : {
+
+    },
+    "Abandon Match" : {
+
+    },
+    "All matches are assigned or completed" : {
+
+    },
+    "All scoreboards are busy" : {
+
     },
     "app_info.app_name" : {
       "extractionState" : "manual",
@@ -6268,6 +6367,225 @@
         }
       }
     },
+    "Approvals" : {
+
+    },
+    "Approvals (%@)" : {
+
+    },
+    "Are you sure you want to leave the tournament room?" : {
+
+    },
+    "Are you the tournament organizer?" : {
+
+    },
+    "Assign to:" : {
+
+    },
+    "Back" : {
+
+    },
+    "Beyblade tournament scoring system with bracket management and multi-device support." : {
+
+    },
+    "BeyScore" : {
+
+    },
+    "Bracket" : {
+
+    },
+    "Bracket Preview" : {
+
+    },
+    "Cannot switch modes while scoring a match. Please complete or abandon the current match first." : {
+
+    },
+    "Change" : {
+
+    },
+    "Change your role in the tournament system" : {
+
+    },
+    "Choose an image" : {
+      "comment" : "A label displayed above a button that allows the user to choose an image to send.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اختر صورة"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "একটি ছবি নির্বাচন করুন"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bild auswählen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose an image"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige una imagen"
+          }
+        },
+        "fil" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pumili ng larawan"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir une image"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בחר תמונה"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "एक चित्र चुनें"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pilih gambar"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli un’immagine"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像を選択"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이미지를 선택하세요"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pilih imej"
+          }
+        },
+        "ne" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "एउटा तस्वीर चयन गर्नुहोस्"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kies een afbeelding"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wybierz obraz"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolher uma imagem"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha uma imagem"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите изображение"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Välj en bild"
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ஒரு படத்தைத் தேர்ந்தெடுக்கவும்"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "เลือกภาพ"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir görüntü seç"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Виберіть зображення"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ایک تصویر منتخب کریں"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chọn một hình ảnh"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择图像"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選擇圖像"
+          }
+        }
+      }
+    },
     "close" : {
       "comment" : "Button to dismiss fullscreen media viewer",
       "localizations" : {
@@ -6446,6 +6764,9 @@
           }
         }
       }
+    },
+    "Close" : {
+
     },
     "common.cancel" : {
       "extractionState" : "manual",
@@ -7699,6 +8020,9 @@
           }
         }
       }
+    },
+    "Connecting..." : {
+
     },
     "content.accessibility.add_favorite" : {
       "extractionState" : "manual",
@@ -19003,6 +19327,24 @@
         }
       }
     },
+    "Continue" : {
+
+    },
+    "Create a tournament to start managing matches and scoreboards." : {
+
+    },
+    "Current Mode" : {
+
+    },
+    "Devices" : {
+
+    },
+    "Done" : {
+
+    },
+    "Enabled" : {
+
+    },
     "encryption.accessibility.establishing" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -20792,6 +21134,12 @@
           }
         }
       }
+    },
+    "Enter exactly 6 digits" : {
+
+    },
+    "Enter the 6-digit room code from the tournament master" : {
+
     },
     "fingerprint.action.mark_verified" : {
       "extractionState" : "manual",
@@ -22583,6 +22931,12 @@
         }
       }
     },
+    "Format:" : {
+
+    },
+    "Generation:" : {
+
+    },
     "geohash_people.action.block" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -23477,6 +23831,194 @@
           }
         }
       }
+    },
+    "Images are only available in mesh chats." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الصور متاحة فقط في محادثات الميش."
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ছবি শুধু মেশ চ্যাটে উপলব্ধ।"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilder sind nur im Mesh-Chat verfügbar."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Images are only available in mesh chats."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las imágenes solo están disponibles en los chats de mesh."
+          }
+        },
+        "fil" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ang mga larawan ay available lamang sa mga mesh chat."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les images sont uniquement disponibles dans les discussions mesh."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תמונות זמינות רק בצ׳אט של mesh."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "चित्र केवल मेश चैट में ही उपलब्ध हैं।"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gambar hanya tersedia di obrolan mesh."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le immagini sono disponibili solo nelle chat mesh."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像はメッシュチャットでのみ利用できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이미지는 메쉬 채팅에서만 사용할 수 있습니다."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Imej hanya tersedia dalam sembang mesh."
+          }
+        },
+        "ne" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "तस्बिरहरू केवल मेष च्याटमा मात्र उपलब्ध छन्।"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afbeeldingen zijn alleen beschikbaar in mesh-chats."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obrazy są dostępne tylko na czatach mesh."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As imagens só estão disponíveis nos chats mesh."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As imagens só estão disponíveis nos chats mesh."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изображения доступны только в mesh-чатах."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilder är bara tillgängliga i mesh-chattar."
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "படங்கள் மெஷ் உரையாடல்களில் மட்டுமே கிடைக்கும்."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "รูปภาพใช้งานได้เฉพาะในแชต mesh เท่านั้น"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Görseller yalnızca mesh sohbetlerinde kullanılabilir."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зображення доступні лише в mesh-чатах."
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تصاویر صرف میش چیٹس میں دستیاب ہیں۔"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hình ảnh chỉ khả dụng trong các cuộc trò chuyện mesh."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "图片仅可在 mesh 聊天中使用。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "圖片僅能在 mesh 聊天中使用。"
+          }
+        }
+      }
+    },
+    "Join a room to participate in a tournament" : {
+
+    },
+    "Join Room" : {
+
+    },
+    "Join Tournament Room" : {
+
     },
     "location_channels.action.open_settings" : {
       "extractionState" : "manual",
@@ -30690,6 +31232,27 @@
         }
       }
     },
+    "Master" : {
+
+    },
+    "Match" : {
+
+    },
+    "Match History" : {
+
+    },
+    "Match in Progress" : {
+
+    },
+    "Match Settings" : {
+
+    },
+    "Match to Reject" : {
+
+    },
+    "Match Winner!" : {
+
+    },
     "mesh_peers.tooltip.new_messages" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -30868,6 +31431,69 @@
           }
         }
       }
+    },
+    "Minimum 2 players required. Players are seeded in order (drag to reorder)." : {
+
+    },
+    "New Match" : {
+
+    },
+    "Next Game" : {
+
+    },
+    "No Active Tournament" : {
+
+    },
+    "No available scoreboards" : {
+
+    },
+    "No devices connected" : {
+
+    },
+    "No History Yet" : {
+
+    },
+    "No matches available" : {
+
+    },
+    "No Pending Approvals" : {
+
+    },
+    "No scoreboards available" : {
+
+    },
+    "No Scoreboards Connected" : {
+
+    },
+    "Not in a Tournament Room" : {
+
+    },
+    "Or start a practice match" : {
+
+    },
+    "OWF" : {
+
+    },
+    "OWN" : {
+
+    },
+    "Own Finish:" : {
+
+    },
+    "PEN" : {
+
+    },
+    "Players (%@)" : {
+
+    },
+    "Practice Match" : {
+
+    },
+    "R%@" : {
+
+    },
+    "Randomizes player seeding when creating the bracket." : {
+
     },
     "recording %@" : {
       "comment" : "Voice note recording duration indicator",
@@ -31048,6 +31674,24 @@
         }
       }
     },
+    "Rejection Reason" : {
+
+    },
+    "Resume Match" : {
+
+    },
+    "Room Code" : {
+
+    },
+    "Room Code:" : {
+
+    },
+    "Room: %@" : {
+
+    },
+    "Round %@" : {
+
+    },
     "save" : {
       "comment" : "Button to save media to device",
       "localizations" : {
@@ -31226,6 +31870,73 @@
           }
         }
       }
+    },
+    "Score submissions from scoreboards will appear here for your review." : {
+
+    },
+    "Score Submitted" : {
+
+    },
+    "Score: %@ - %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Score: %1$@ - %2$@"
+          }
+        }
+      }
+    },
+    "Scoreboard" : {
+
+    },
+    "Scoreboards" : {
+
+    },
+    "Scoreboards will appear here when they join the tournament room." : {
+
+    },
+    "Scoreboards will need the room code to join your tournament." : {
+
+    },
+    "Scoring events will appear here" : {
+
+    },
+    "Select Match" : {
+
+    },
+    "Select Scoreboard" : {
+
+    },
+    "Select Your Role" : {
+
+    },
+    "Set %@ Complete" : {
+
+    },
+    "Sets" : {
+
+    },
+    "Sets:" : {
+
+    },
+    "Share this code with scoreboard devices to let them join" : {
+
+    },
+    "Start a practice match or join a tournament room" : {
+
+    },
+    "Start Practice Match" : {
+
+    },
+    "Statistics" : {
+
+    },
+    "Submit Score" : {
+
+    },
+    "Switch to %@" : {
+
     },
     "system.chat.blocked" : {
       "extractionState" : "manual",
@@ -33912,6 +34623,24 @@
         }
       }
     },
+    "The scoreboard will be notified and can re-score the match." : {
+
+    },
+    "The tournament master rejected your score: %@" : {
+
+    },
+    "The tournament master rejected your score. Please re-score the match." : {
+
+    },
+    "Tournament Info" : {
+
+    },
+    "Tournament Room Code" : {
+
+    },
+    "Tournament System" : {
+
+    },
     "verification.my_qr.accessibility_label" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -35702,6 +36431,12 @@
         }
       }
     },
+    "View all (%@)" : {
+
+    },
+    "View History" : {
+
+    },
     "Voice notes are only available in mesh chats." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -35881,364 +36616,35 @@
         }
       }
     },
-    "Images are only available in mesh chats." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الصور متاحة فقط في محادثات الميش."
-          }
-        },
-        "bn" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ছবি শুধু মেশ চ্যাটে উপলব্ধ।"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bilder sind nur im Mesh-Chat verfügbar."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Images are only available in mesh chats."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Las imágenes solo están disponibles en los chats de mesh."
-          }
-        },
-        "fil" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ang mga larawan ay available lamang sa mga mesh chat."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les images sont uniquement disponibles dans les discussions mesh."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "תמונות זמינות רק בצ׳אט של mesh."
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "चित्र केवल मेश चैट में ही उपलब्ध हैं।"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gambar hanya tersedia di obrolan mesh."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le immagini sono disponibili solo nelle chat mesh."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "画像はメッシュチャットでのみ利用できます。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "이미지는 메쉬 채팅에서만 사용할 수 있습니다."
-          }
-        },
-        "ms" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Imej hanya tersedia dalam sembang mesh."
-          }
-        },
-        "ne" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "तस्बिरहरू केवल मेष च्याटमा मात्र उपलब्ध छन्।"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Afbeeldingen zijn alleen beschikbaar in mesh-chats."
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Obrazy są dostępne tylko na czatach mesh."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "As imagens só estão disponíveis nos chats mesh."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "As imagens só estão disponíveis nos chats mesh."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Изображения доступны только в mesh-чатах."
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bilder är bara tillgängliga i mesh-chattar."
-          }
-        },
-        "ta" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "படங்கள் மெஷ் உரையாடல்களில் மட்டுமே கிடைக்கும்."
-          }
-        },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "รูปภาพใช้งานได้เฉพาะในแชต mesh เท่านั้น"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Görseller yalnızca mesh sohbetlerinde kullanılabilir."
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Зображення доступні лише в mesh-чатах."
-          }
-        },
-        "ur" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تصاویر صرف میش چیٹس میں دستیاب ہیں۔"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hình ảnh chỉ khả dụng trong các cuộc trò chuyện mesh."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "图片仅可在 mesh 聊天中使用。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "圖片僅能在 mesh 聊天中使用。"
-          }
-        }
-      }
+    "vs" : {
+
     },
-    "Choose an image" : {
-      "comment" : "A label displayed above a button that allows the user to choose an image to send.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "اختر صورة"
-          }
-        },
-        "bn" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "একটি ছবি নির্বাচন করুন"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bild auswählen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose an image"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Elige una imagen"
-          }
-        },
-        "fil" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pumili ng larawan"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choisir une image"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "בחר תמונה"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "एक चित्र चुनें"
-          }
-        },
-        "id" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pilih gambar"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scegli un’immagine"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "画像を選択"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "이미지를 선택하세요"
-          }
-        },
-        "ms" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pilih imej"
-          }
-        },
-        "ne" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "एउटा तस्वीर चयन गर्नुहोस्"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kies een afbeelding"
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wybierz obraz"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Escolher uma imagem"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Escolha uma imagem"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Выберите изображение"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Välj en bild"
-          }
-        },
-        "ta" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ஒரு படத்தைத் தேர்ந்தெடுக்கவும்"
-          }
-        },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "เลือกภาพ"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bir görüntü seç"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Виберіть зображення"
-          }
-        },
-        "ur" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ایک تصویر منتخب کریں"
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chọn một hình ảnh"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "选择图像"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "選擇圖像"
-          }
-        }
-      }
+    "Waiting for match assignment..." : {
+
+    },
+    "Waiting for tournament master approval..." : {
+
+    },
+    "Warning" : {
+
+    },
+    "Warning issued" : {
+
+    },
+    "Win Condition:" : {
+
+    },
+    "Winner: %@" : {
+
+    },
+    "You are connected to a tournament room. Switching to Master mode will disconnect you from the current room." : {
+
+    },
+    "You have an active tournament. Switching to Scoreboard mode will end the tournament and disconnect all connected scoreboards." : {
+
+    },
+    "You selected %@. You can change this later in settings." : {
+
     }
   },
   "version" : "1.1"

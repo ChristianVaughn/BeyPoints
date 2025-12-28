@@ -3,6 +3,19 @@ import SwiftUI
 struct AppInfoView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
+
+    // BeyScore mode sheets
+    @State private var showScoreboardMode = false
+    @State private var showMasterMode = false
+
+    // Mode switching confirmation alerts
+    @State private var showMasterWarning = false
+    @State private var showScoreboardWarning = false
+    @State private var showMatchInProgressError = false
+
+    // Manager references for state checking
+    @StateObject private var roomManager = TournamentRoomManager.shared
+    @StateObject private var tournamentManager = TournamentManager.shared
     
     private var backgroundColor: Color {
         colorScheme == .dark ? Color.black : Color.white
@@ -113,6 +126,35 @@ struct AppInfoView: View {
             .background(backgroundColor)
         }
         .frame(width: 600, height: 700)
+        .sheet(isPresented: $showScoreboardMode) {
+            ScoreboardCoordinator()
+                .frame(minWidth: 500, minHeight: 600)
+        }
+        .sheet(isPresented: $showMasterMode) {
+            MasterMainView()
+                .frame(minWidth: 600, minHeight: 700)
+        }
+        .alert("End Tournament?", isPresented: $showScoreboardWarning) {
+            Button("Cancel", role: .cancel) { }
+            Button("End Tournament", role: .destructive) {
+                confirmSwitchToScoreboard()
+            }
+        } message: {
+            Text("You have an active tournament. Switching to Scoreboard mode will end the tournament and disconnect all connected scoreboards.")
+        }
+        .alert("Leave Room?", isPresented: $showMasterWarning) {
+            Button("Cancel", role: .cancel) { }
+            Button("Leave Room", role: .destructive) {
+                confirmSwitchToMaster()
+            }
+        } message: {
+            Text("You are connected to a tournament room. Switching to Master mode will disconnect you from the current room.")
+        }
+        .alert("Match In Progress", isPresented: $showMatchInProgressError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Cannot switch modes while scoring a match. Please complete or abandon the current match first.")
+        }
         #else
         NavigationView {
             ScrollView {
@@ -132,6 +174,33 @@ struct AppInfoView: View {
                     .accessibilityLabel("app_info.close")
                 }
             }
+        }
+        .fullScreenCover(isPresented: $showScoreboardMode) {
+            ScoreboardCoordinator()
+        }
+        .fullScreenCover(isPresented: $showMasterMode) {
+            MasterMainView()
+        }
+        .alert("End Tournament?", isPresented: $showScoreboardWarning) {
+            Button("Cancel", role: .cancel) { }
+            Button("End Tournament", role: .destructive) {
+                confirmSwitchToScoreboard()
+            }
+        } message: {
+            Text("You have an active tournament. Switching to Scoreboard mode will end the tournament and disconnect all connected scoreboards.")
+        }
+        .alert("Leave Room?", isPresented: $showMasterWarning) {
+            Button("Cancel", role: .cancel) { }
+            Button("Leave Room", role: .destructive) {
+                confirmSwitchToMaster()
+            }
+        } message: {
+            Text("You are connected to a tournament room. Switching to Master mode will disconnect you from the current room.")
+        }
+        .alert("Match In Progress", isPresented: $showMatchInProgressError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Cannot switch modes while scoring a match. Please complete or abandon the current match first.")
         }
         #endif
     }
@@ -182,6 +251,58 @@ struct AppInfoView: View {
                 FeatureRow(info: Strings.Features.mentions)
             }
 
+            // BeyScore Tournament System
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    Image(systemName: "trophy.fill")
+                        .font(.bitchatSystem(size: 20))
+                        .foregroundColor(.orange)
+                    Text("BeyScore")
+                        .font(.bitchatSystem(size: 16, weight: .bold, design: .monospaced))
+                        .foregroundColor(.orange)
+                }
+                .padding(.top, 8)
+
+                Text("Beyblade tournament scoring system with bracket management and multi-device support.")
+                    .font(.bitchatSystem(size: 12, design: .monospaced))
+                    .foregroundColor(secondaryTextColor)
+
+                HStack(spacing: 12) {
+                    Button(action: handleScoreboardTap) {
+                        HStack {
+                            Image(systemName: "rectangle.split.2x1.fill")
+                            Text("Scoreboard")
+                        }
+                        .font(.bitchatSystem(size: 14, weight: .medium))
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                    }
+                    .buttonStyle(.plain)
+
+                    Button(action: handleMasterTap) {
+                        HStack {
+                            Image(systemName: "crown.fill")
+                            Text("Master")
+                        }
+                        .font(.bitchatSystem(size: 14, weight: .medium))
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.orange)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding()
+            .background(Color.orange.opacity(0.1))
+            .cornerRadius(12)
+
             // Privacy
             VStack(alignment: .leading, spacing: 16) {
                 SectionHeader(Strings.Privacy.title)
@@ -212,6 +333,57 @@ struct AppInfoView: View {
             .padding(.top)
         }
         .padding()
+    }
+
+    // MARK: - Mode Switching Handlers
+
+    /// Handles tap on Scoreboard button - checks if Master mode has an active tournament.
+    private func handleScoreboardTap() {
+        if tournamentManager.currentTournament != nil {
+            // Has active tournament - warn about ending it
+            showScoreboardWarning = true
+        } else {
+            // No tournament - open directly
+            showScoreboardMode = true
+        }
+    }
+
+    /// Handles tap on Master button - checks if Scoreboard mode is connected to a room.
+    private func handleMasterTap() {
+        if roomManager.isInRoom && roomManager.deviceMode == .scoreboard {
+            // Connected to a room as scoreboard
+            if roomManager.hasActiveMatch {
+                // Match in progress - block completely
+                showMatchInProgressError = true
+            } else {
+                // Just connected, no active match - warn about leaving
+                showMasterWarning = true
+            }
+        } else {
+            // Not in a room or already in master mode - open directly
+            showMasterMode = true
+        }
+    }
+
+    /// Confirms switching to Scoreboard mode - ends tournament and notifies all connected devices.
+    private func confirmSwitchToScoreboard() {
+        // Broadcast room closed to all connected scoreboards
+        TournamentMessageHandler.shared.broadcastRoomClosed(reason: "Tournament ended")
+
+        // Clear the tournament (this also leaves the room)
+        tournamentManager.clearTournament()
+
+        // Open Scoreboard mode
+        showScoreboardMode = true
+    }
+
+    /// Confirms switching to Master mode - leaves the current room.
+    private func confirmSwitchToMaster() {
+        // Leave the room
+        roomManager.leaveRoom()
+
+        // Open Master mode
+        showMasterMode = true
     }
 }
 

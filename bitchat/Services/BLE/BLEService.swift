@@ -802,7 +802,7 @@ final class BLEService: NSObject {
         switch MessageType(rawValue: type) {
         case .noiseEncrypted, .noiseHandshake:
             return true
-        case .none, .announce, .message, .leave, .requestSync, .fragment, .fileTransfer:
+        case .none, .announce, .message, .leave, .requestSync, .fragment, .fileTransfer, .roomMessage:
             return false
         }
     }
@@ -1269,15 +1269,27 @@ final class BLEService: NSObject {
         // Send on main thread
         notifyUI { [weak self] in
             guard let self = self else { return }
-            
+
             // Get current peer list (after removal)
             let currentPeerIDs = self.collectionsQueue.sync { Array(self.peers.keys) }
-            
+
             self.delegate?.didDisconnectFromPeer(peerID)
             self.delegate?.didUpdatePeerList(currentPeerIDs)
         }
     }
-    
+
+    private func handleRoomMessage(_ packet: BitchatPacket, from peerID: PeerID) {
+        // Forward room messages to the tournament message handler
+        // The handler will validate the HMAC and route appropriately
+        print("[BeyScore] BLEService.handleRoomMessage: received from \(peerID.id)")
+        notifyUI { [weak self] in
+            guard self != nil else { return }
+            Task { @MainActor in
+                TournamentMessageHandler.shared.handleIncomingPacket(packet)
+            }
+        }
+    }
+
     // MARK: - Helper Functions
 
     private func applicationFilesDirectory() throws -> URL {
@@ -3327,7 +3339,10 @@ extension BLEService {
             
         case .leave:
             handleLeave(packet, from: senderID)
-            
+
+        case .roomMessage:
+            handleRoomMessage(packet, from: senderID)
+
         case .none:
             SecureLogger.warning("⚠️ Unknown message type: \(packet.type)", category: .session)
             break

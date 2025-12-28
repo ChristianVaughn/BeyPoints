@@ -19,6 +19,7 @@ struct SyncTypeFlags: OptionSet {
         case .fragment: return 5
         case .requestSync: return 6
         case .fileTransfer: return 7
+        case .roomMessage: return 8  // Tournament room messages
         }
     }
 
@@ -32,6 +33,7 @@ struct SyncTypeFlags: OptionSet {
         case 5: return .fragment
         case 6: return .requestSync
         case 7: return .fileTransfer
+        case 8: return .roomMessage
         default:
             return nil
         }

@@ -69,18 +69,21 @@ import CoreBluetooth
 enum MessageType: UInt8 {
     // Public messages (unencrypted)
     case announce = 0x01        // "I'm here" with nickname
-    case message = 0x02         // Public chat message  
+    case message = 0x02         // Public chat message
     case leave = 0x03           // "I'm leaving"
     case requestSync = 0x21     // GCS filter-based sync request (local-only)
-    
+
     // Noise encryption
     case noiseHandshake = 0x10  // Handshake (init or response determined by payload)
     case noiseEncrypted = 0x11  // All encrypted payloads (messages, receipts, etc.)
-    
+
     // Fragmentation (simplified)
     case fragment = 0x20        // Single fragment type for large messages
     case fileTransfer = 0x22    // Binary file/audio/image payloads
-    
+
+    // Tournament Room Messages (0x30-0x4F) - BeyScore Tournament System
+    case roomMessage = 0x30     // Container for HMAC-signed tournament messages
+
     var description: String {
         switch self {
         case .announce: return "announce"
@@ -91,6 +94,7 @@ enum MessageType: UInt8 {
         case .noiseEncrypted: return "noiseEncrypted"
         case .fragment: return "fragment"
         case .fileTransfer: return "fileTransfer"
+        case .roomMessage: return "roomMessage"
         }
     }
 }

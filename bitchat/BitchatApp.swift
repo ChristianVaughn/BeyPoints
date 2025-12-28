@@ -184,11 +184,19 @@ struct BitchatApp: App {
 #if os(iOS)
 final class AppDelegate: NSObject, UIApplicationDelegate {
     weak var chatViewModel: ChatViewModel?
-    
+
+    /// Orientation lock - default to portrait, scoreboard can unlock
+    static var orientationLock = UIInterfaceOrientationMask.portrait
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         return true
     }
-    
+
+    func application(_ application: UIApplication,
+                     supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+        return AppDelegate.orientationLock
+    }
+
     func applicationWillTerminate(_ application: UIApplication) {
         chatViewModel?.applicationWillTerminate()
     }

@@ -494,6 +494,9 @@ final class ChatViewModel: ObservableObject, BitchatDelegate, CommandContextProv
             if let bleService = self.meshService as? BLEService {
                 let state = bleService.getCurrentBluetoothState()
                 self.updateBluetoothState(state)
+
+                // Connect BLEService to TournamentMessageHandler for BeyScore messaging
+                TournamentMessageHandler.shared.setBLEService(bleService)
             }
         }
 
