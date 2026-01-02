@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @EnvironmentObject var viewModel: ChatViewModel
+    @EnvironmentObject var profileManager: ProfileManager
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) var colorScheme
     @FocusState private var isNicknameFieldFocused: Bool
@@ -26,7 +26,7 @@ struct SettingsView: View {
                             .font(.bitchatSystem(size: 16, design: .monospaced))
                             .foregroundColor(.secondary)
 
-                        TextField("Nickname", text: $viewModel.nickname)
+                        TextField("Nickname", text: $profileManager.nickname)
                             .font(.bitchatSystem(size: 16, design: .monospaced))
                             .foregroundColor(textColor)
                             .focused($isNicknameFieldFocused)
@@ -35,7 +35,7 @@ struct SettingsView: View {
                             .textInputAutocapitalization(.never)
                             #endif
                             .onSubmit {
-                                viewModel.validateAndSaveNickname()
+                                profileManager.validateAndSaveNickname()
                             }
                     }
                 }
@@ -45,14 +45,14 @@ struct SettingsView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
-                        viewModel.validateAndSaveNickname()
+                        profileManager.validateAndSaveNickname()
                         dismiss()
                     }
                 }
             }
             .onChange(of: isNicknameFieldFocused) { isFocused in
                 if !isFocused {
-                    viewModel.validateAndSaveNickname()
+                    profileManager.validateAndSaveNickname()
                 }
             }
         }

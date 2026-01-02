@@ -75,7 +75,6 @@ final class BLEService: NSObject {
         formatter.dateFormat = "yyyyMMdd_HHmmss"
         return formatter
     }()
-    private let meshTopology = MeshTopologyTracker()
     
     // 5. Fragment Reassembly (necessary for messages > MTU)
     private struct FragmentKey: Hashable { let sender: UInt64; let id: UInt64 }
@@ -570,7 +569,6 @@ final class BLEService: NSObject {
         peerToPeripheralUUID.removeAll()
         subscribedCentrals.removeAll()
         centralToPeerID.removeAll()
-        meshTopology.reset()
     }
     
     // MARK: Connectivity and peers
@@ -2445,26 +2443,25 @@ extension BLEService {
     }
 
     private func registerDirectLink(with peerID: PeerID) {
-        meshTopology.recordDirectLink(between: myPeerIDData, and: routingData(for: peerID))
+        // Mesh topology tracking removed
     }
 
     private func clearDirectLink(with peerID: PeerID) {
-        meshTopology.removeDirectLink(between: myPeerIDData, and: routingData(for: peerID))
+        // Mesh topology tracking removed
     }
 
     private func registerRoute(_ route: [Data]?) {
-        guard let hops = route, !hops.isEmpty else { return }
-        meshTopology.recordRoute(hops)
+        // Mesh topology tracking removed
     }
 
     private func computeRoute(to peerID: PeerID) -> [Data]? {
-        meshTopology.computeRoute(from: myPeerIDData, to: routingData(for: peerID))
+        // Mesh topology tracking removed
+        return nil
     }
 
     private func applyRouteIfAvailable(_ packet: inout BitchatPacket, to recipient: PeerID) {
         guard let route = computeRoute(to: recipient), route.count >= 2 else { return }
         packet.route = route
-        meshTopology.recordRoute(route)
     }
 
     private func routingPeer(from data: Data) -> PeerID? {
@@ -2530,7 +2527,6 @@ extension BLEService {
         let fingerprint = noiseService.getIdentityFingerprint()
         myPeerID = PeerID(str: fingerprint.prefix(16))
         myPeerIDData = Data(hexString: myPeerID.id) ?? Data()
-        meshTopology.reset()
     }
 
     private func restartGossipManager() {

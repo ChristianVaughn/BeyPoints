@@ -13,9 +13,6 @@
     "#%@" : {
 
     },
-    "#mesh" : {
-
-    },
     "%@" : {
       "comment" : "Non-localizable symbol used in code",
       "extractionState" : "manual",
@@ -219,6 +216,7 @@
     },
     "%@ active" : {
       "comment" : "A label at the bottom of the people list sheet showing the number of active users.",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -6397,9 +6395,6 @@
     "Back" : {
 
     },
-    "Beyblade tournament scoring system with bracket management and multi-device support." : {
-
-    },
     "beypoints" : {
 
     },
@@ -6416,9 +6411,6 @@
 
     },
     "Change your role in the tournament system" : {
-
-    },
-    "Chat" : {
 
     },
     "Choose an image" : {
@@ -6603,6 +6595,7 @@
     },
     "close" : {
       "comment" : "Button to dismiss fullscreen media viewer",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -31554,6 +31547,7 @@
     },
     "recording %@" : {
       "comment" : "Voice note recording duration indicator",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -31766,6 +31760,7 @@
     },
     "save" : {
       "comment" : "Button to save media to device",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {

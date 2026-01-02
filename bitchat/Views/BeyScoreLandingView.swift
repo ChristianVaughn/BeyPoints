@@ -8,13 +8,12 @@
 import SwiftUI
 
 struct BeyScoreLandingView: View {
-    @EnvironmentObject var chatViewModel: ChatViewModel
+    @EnvironmentObject var profileManager: ProfileManager
     @Environment(\.colorScheme) var colorScheme
 
     // Navigation state
     @State private var showScoreboard = false
     @State private var showMaster = false
-    @State private var showChat = false
     @State private var showSettings = false
 
     // Mode switching confirmation alerts
@@ -98,21 +97,6 @@ struct BeyScoreLandingView: View {
                         .cornerRadius(12)
                     }
                     .buttonStyle(.plain)
-
-                    // Chat button
-                    Button(action: { showChat = true }) {
-                        HStack {
-                            Image(systemName: "bubble.left.and.bubble.right")
-                            Text("Chat")
-                        }
-                        .font(.bitchatSystem(size: 16, weight: .medium, design: .monospaced))
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color(.secondarySystemBackground))
-                        .foregroundColor(.primary)
-                        .cornerRadius(12)
-                    }
-                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal, 40)
 
@@ -127,10 +111,6 @@ struct BeyScoreLandingView: View {
         .fullScreenCover(isPresented: $showMaster) {
             MasterMainView()
         }
-        .fullScreenCover(isPresented: $showChat) {
-            ContentView()
-                .environmentObject(chatViewModel)
-        }
         #else
         .sheet(isPresented: $showScoreboard) {
             ScoreboardCoordinator()
@@ -140,15 +120,10 @@ struct BeyScoreLandingView: View {
             MasterMainView()
                 .frame(minWidth: 600, minHeight: 700)
         }
-        .sheet(isPresented: $showChat) {
-            ContentView()
-                .environmentObject(chatViewModel)
-                .frame(minWidth: 600, minHeight: 700)
-        }
         #endif
         .sheet(isPresented: $showSettings) {
             SettingsView()
-                .environmentObject(chatViewModel)
+                .environmentObject(profileManager)
         }
         // Mode switching alerts
         .alert("End Tournament?", isPresented: $showScoreboardWarning) {
