@@ -144,6 +144,8 @@ struct BracketMatchCard: View {
     let isSelected: Bool
     let onTap: () -> Void
 
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         VStack(spacing: 0) {
             // Player 1
@@ -193,9 +195,9 @@ struct BracketMatchCard: View {
         case .complete:
             return Color(.systemBackground)
         case .inProgress, .assigned:
-            return Color.blue.opacity(0.1)
+            return Color.matchAssignedLight(for: colorScheme)
         case .awaitingApproval:
-            return Color.orange.opacity(0.1)
+            return Color.matchAwaitingApprovalLight(for: colorScheme)
         default:
             return Color(.systemBackground)
         }
@@ -227,6 +229,8 @@ struct PlayerSlot: View {
     let bestOf: BestOf
     let isWinner: Bool
     let status: MatchStatus
+
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         HStack(spacing: 8) {
@@ -269,7 +273,7 @@ struct PlayerSlot: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(isWinner && status == .complete ? Color.green.opacity(0.1) : Color.clear)
+        .background(isWinner && status == .complete ? Color.winnerHighlight(for: colorScheme) : Color.clear)
     }
 }
 
@@ -277,6 +281,8 @@ struct PlayerSlot: View {
 
 struct MatchStatusBadge: View {
     let status: MatchStatus
+
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         Text(status.displayName)
@@ -291,19 +297,19 @@ struct MatchStatusBadge: View {
     private var backgroundColor: Color {
         switch status {
         case .pending: return Color(.systemGray5)
-        case .assigned: return Color.blue.opacity(0.2)
-        case .inProgress: return Color.green.opacity(0.2)
-        case .awaitingApproval: return Color.orange.opacity(0.2)
-        case .complete: return Color.green.opacity(0.2)
+        case .assigned: return Color.matchAssigned(for: colorScheme)
+        case .inProgress: return Color.matchInProgress(for: colorScheme)
+        case .awaitingApproval: return Color.matchAwaitingApproval(for: colorScheme)
+        case .complete: return Color.matchComplete(for: colorScheme)
         }
     }
 
     private var foregroundColor: Color {
         switch status {
         case .pending: return .secondary
-        case .assigned: return .blue
+        case .assigned: return Color.primaryBlue(for: colorScheme)
         case .inProgress: return .green
-        case .awaitingApproval: return .orange
+        case .awaitingApproval: return Color.primaryOrange(for: colorScheme)
         case .complete: return .green
         }
     }

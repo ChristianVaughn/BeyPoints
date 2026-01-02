@@ -222,6 +222,8 @@ struct GridCell: View {
     @Binding var selectedMatchId: UUID?
     let onMatchSelected: ((TournamentMatch) -> Void)?
 
+    @Environment(\.colorScheme) private var colorScheme
+
     private var match: TournamentMatch? {
         matches.first { m in
             (m.player1Name == player1 && m.player2Name == player2) ||
@@ -284,11 +286,11 @@ struct GridCell: View {
     private func cellBackground(for match: TournamentMatch) -> Color {
         switch match.status {
         case .complete:
-            return match.winner == player1 ? Color.green.opacity(0.15) : Color.red.opacity(0.1)
+            return match.winner == player1 ? Color.winnerHighlight(for: colorScheme) : Color.loserHighlight(for: colorScheme)
         case .inProgress, .assigned:
-            return Color.blue.opacity(0.1)
+            return Color.matchAssignedLight(for: colorScheme)
         case .awaitingApproval:
-            return Color.orange.opacity(0.1)
+            return Color.matchAwaitingApprovalLight(for: colorScheme)
         default:
             return Color(.systemBackground)
         }
@@ -339,6 +341,8 @@ struct RoundRobinMatchRow: View {
     let isSelected: Bool
     let onTap: () -> Void
 
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
@@ -376,11 +380,11 @@ struct RoundRobinMatchRow: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(isSelected ? Color.blue.opacity(0.1) : Color(.systemGray6).opacity(0.5))
+        .background(isSelected ? Color.selectionBackground(for: colorScheme) : Color(.systemGray6).opacity(0.5))
         .cornerRadius(8)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2)
+                .stroke(isSelected ? Color.primaryBlue(for: colorScheme) : Color.clear, lineWidth: 2)
         )
         .onTapGesture {
             if match.isReady && match.status == .pending {

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var profileManager: ProfileManager
+    @EnvironmentObject var themeManager: ThemeManager
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) var colorScheme
     @FocusState private var isNicknameFieldFocused: Bool
@@ -38,6 +39,15 @@ struct SettingsView: View {
                                 profileManager.validateAndSaveNickname()
                             }
                     }
+                }
+
+                Section(header: Text("Appearance")) {
+                    Picker("Theme", selection: $themeManager.selectedTheme) {
+                        ForEach(AppTheme.allCases, id: \.self) { theme in
+                            Text(theme.displayName).tag(theme)
+                        }
+                    }
+                    .pickerStyle(.segmented)
                 }
             }
             .navigationTitle("Settings")

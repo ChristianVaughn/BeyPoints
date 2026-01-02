@@ -17,6 +17,8 @@ struct SwissBracketView: View {
     @State private var selectedRound: Int
     @State private var selectedMatchId: UUID?
 
+    @Environment(\.colorScheme) private var colorScheme
+
     init(tournament: Tournament, onMatchSelected: ((TournamentMatch) -> Void)? = nil) {
         self.tournament = tournament
         self.onMatchSelected = onMatchSelected
@@ -77,15 +79,15 @@ struct SwissBracketView: View {
                                         .foregroundColor(.green)
                                         .padding(.horizontal, 8)
                                         .padding(.vertical, 4)
-                                        .background(Color.green.opacity(0.1))
+                                        .background(Color.matchInProgressLight(for: colorScheme))
                                         .cornerRadius(4)
                                 } else if selectedRound == tournament.currentSwissRound {
                                     Text("Current")
                                         .font(.caption)
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(Color.primaryBlue(for: colorScheme))
                                         .padding(.horizontal, 8)
                                         .padding(.vertical, 4)
-                                        .background(Color.blue.opacity(0.1))
+                                        .background(Color.matchAssignedLight(for: colorScheme))
                                         .cornerRadius(4)
                                 } else if selectedRound > tournament.currentSwissRound {
                                     Text("Upcoming")
@@ -153,6 +155,8 @@ struct RoundChip: View {
     let isComplete: Bool
     let isCurrent: Bool
 
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         Text("R\(round)")
             .font(.subheadline.weight(isSelected ? .semibold : .regular))
@@ -169,11 +173,11 @@ struct RoundChip: View {
 
     private var chipBackground: Color {
         if isSelected {
-            return .blue.opacity(0.2)
+            return Color.matchAssigned(for: colorScheme)
         } else if isComplete {
-            return Color.green.opacity(0.15)
+            return Color.winnerHighlight(for: colorScheme)
         } else if isCurrent {
-            return Color.blue.opacity(0.1)
+            return Color.matchAssignedLight(for: colorScheme)
         } else {
             return Color(.systemGray5)
         }
@@ -285,6 +289,8 @@ struct SwissMatchCard: View {
     let isSelected: Bool
     let onTap: () -> Void
 
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         VStack(spacing: 0) {
             // Player 1
@@ -325,9 +331,9 @@ struct SwissMatchCard: View {
         case .complete:
             return Color(.systemBackground)
         case .inProgress, .assigned:
-            return Color.blue.opacity(0.1)
+            return Color.matchAssignedLight(for: colorScheme)
         case .awaitingApproval:
-            return Color.orange.opacity(0.1)
+            return Color.matchAwaitingApprovalLight(for: colorScheme)
         default:
             return Color(.systemBackground)
         }
@@ -350,6 +356,8 @@ struct SwissPlayerRow: View {
     let isWinner: Bool
     let isBye: Bool
     let status: MatchStatus
+
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         HStack(spacing: 8) {
@@ -380,7 +388,7 @@ struct SwissPlayerRow: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
-        .background(isWinner && status == .complete ? Color.green.opacity(0.1) : Color.clear)
+        .background(isWinner && status == .complete ? Color.winnerHighlight(for: colorScheme) : Color.clear)
     }
 }
 

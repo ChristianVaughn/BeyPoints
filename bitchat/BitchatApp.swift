@@ -15,6 +15,7 @@ struct BitchatApp: App {
     static let groupID = "group.\(bundleID)"
 
     @StateObject private var profileManager = ProfileManager.shared
+    @StateObject private var themeManager = ThemeManager.shared
     private let bleService: BLEService
 
     #if os(iOS)
@@ -42,6 +43,8 @@ struct BitchatApp: App {
         WindowGroup {
             BeyScoreLandingView()
                 .environmentObject(profileManager)
+                .environmentObject(themeManager)
+                .preferredColorScheme(themeManager.selectedTheme.colorScheme)
                 .onAppear {
                     bleService.startServices()
                 }

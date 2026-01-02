@@ -277,6 +277,8 @@ struct HistoryEntryRow: View {
     let player1Name: String
     let player2Name: String
 
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         HStack(spacing: 8) {
             // Player indicator
@@ -291,7 +293,7 @@ struct HistoryEntryRow: View {
                 .fontWeight(.medium)
                 .padding(.horizontal, 4)
                 .padding(.vertical, 1)
-                .background(conditionColor.opacity(0.2))
+                .background(conditionColor.opacity(colorScheme == .dark ? 0.35 : 0.2))
                 .foregroundColor(conditionColor)
                 .cornerRadius(2)
 

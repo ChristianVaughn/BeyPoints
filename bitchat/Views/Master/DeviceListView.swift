@@ -89,6 +89,8 @@ struct DeviceRow: View {
     let isSelected: Bool
     let onTap: () -> Void
 
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 12) {
@@ -133,7 +135,7 @@ struct DeviceRow: View {
             .padding(.vertical, 4)
         }
         .buttonStyle(.plain)
-        .listRowBackground(isSelected ? Color.blue.opacity(0.1) : Color.clear)
+        .listRowBackground(isSelected ? Color.selectionBackground(for: colorScheme) : Color.clear)
     }
 
     private var deviceIcon: String {
@@ -175,6 +177,8 @@ struct DeviceRow: View {
 struct DeviceStatusBadge: View {
     let status: ScoreboardStatus
 
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         Text(status.displayName)
             .font(.caption2)
@@ -188,18 +192,18 @@ struct DeviceStatusBadge: View {
     private var backgroundColor: Color {
         switch status {
         case .idle: return Color(.systemGray5)
-        case .matchAssigned: return Color.blue.opacity(0.2)
-        case .scoring: return Color.green.opacity(0.2)
-        case .awaitingApproval: return Color.orange.opacity(0.2)
+        case .matchAssigned: return Color.matchAssigned(for: colorScheme)
+        case .scoring: return Color.matchInProgress(for: colorScheme)
+        case .awaitingApproval: return Color.matchAwaitingApproval(for: colorScheme)
         }
     }
 
     private var foregroundColor: Color {
         switch status {
         case .idle: return .secondary
-        case .matchAssigned: return .blue
+        case .matchAssigned: return Color.primaryBlue(for: colorScheme)
         case .scoring: return .green
-        case .awaitingApproval: return .orange
+        case .awaitingApproval: return Color.primaryOrange(for: colorScheme)
         }
     }
 }

@@ -145,6 +145,8 @@ struct GrandFinalsSection: View {
     @Binding var selectedMatchId: UUID?
     let onMatchSelected: ((TournamentMatch) -> Void)?
 
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         HStack(spacing: 20) {
             // Grand Final
@@ -183,10 +185,10 @@ struct GrandFinalsSection: View {
                         if needsReset {
                             Text("Required")
                                 .font(.caption2)
-                                .foregroundColor(.orange)
+                                .foregroundColor(Color.primaryOrange(for: colorScheme))
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
-                                .background(Color.orange.opacity(0.1))
+                                .background(Color.matchAwaitingApprovalLight(for: colorScheme))
                                 .cornerRadius(4)
                         } else {
                             Text("If needed")

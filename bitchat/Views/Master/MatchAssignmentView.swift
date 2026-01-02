@@ -133,6 +133,8 @@ struct MatchSelectionCard: View {
     let isSelected: Bool
     let onSelect: () -> Void
 
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         Button(action: onSelect) {
             VStack(alignment: .leading, spacing: 8) {
@@ -176,11 +178,11 @@ struct MatchSelectionCard: View {
             }
             .padding()
             .frame(width: 160)
-            .background(isSelected ? Color.blue.opacity(0.1) : Color(.secondarySystemBackground))
+            .background(isSelected ? Color.selectionBackground(for: colorScheme) : Color(.secondarySystemBackground))
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2)
+                    .stroke(isSelected ? Color.primaryBlue(for: colorScheme) : Color.clear, lineWidth: 2)
             )
         }
         .buttonStyle(.plain)
@@ -247,6 +249,8 @@ struct DeviceSelectionCard: View {
     let isSelected: Bool
     let onSelect: () -> Void
 
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         Button(action: onSelect) {
             VStack(spacing: 8) {
@@ -266,11 +270,11 @@ struct DeviceSelectionCard: View {
             }
             .padding()
             .frame(width: 120)
-            .background(isSelected ? Color.blue.opacity(0.1) : Color(.secondarySystemBackground))
+            .background(isSelected ? Color.selectionBackground(for: colorScheme) : Color(.secondarySystemBackground))
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2)
+                    .stroke(isSelected ? Color.primaryBlue(for: colorScheme) : Color.clear, lineWidth: 2)
             )
         }
         .buttonStyle(.plain)
@@ -343,6 +347,8 @@ struct QuickAssignmentRow: View {
         self.onAssigned = onAssigned
     }
 
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Assign to:")
@@ -381,8 +387,8 @@ struct QuickAssignmentRow: View {
                                 }
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
-                                .background(Color.blue.opacity(0.1))
-                                .foregroundColor(.blue)
+                                .background(Color.selectionBackground(for: colorScheme))
+                                .foregroundColor(Color.primaryBlue(for: colorScheme))
                                 .cornerRadius(8)
                             }
                             .buttonStyle(.plain)
