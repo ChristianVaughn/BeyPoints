@@ -34,6 +34,18 @@ struct TournamentMatch: Codable, Identifiable, Equatable {
     var nextMatchId: UUID?
     var nextMatchSlot: Player?  // Which slot in the next match
 
+    // Tournament stage (for multi-stage and group tournaments)
+    var stage: TournamentStage
+
+    // Double Elimination specifics
+    var bracketType: BracketType
+    var isGrandFinal: Bool
+    var isGrandFinalReset: Bool
+
+    // Losers bracket: where loser goes after this match
+    var loserNextMatchId: UUID?
+    var loserNextMatchSlot: Player?
+
     // MARK: - Initialization
 
     init(
@@ -43,7 +55,9 @@ struct TournamentMatch: Codable, Identifiable, Equatable {
         player1Name: String? = nil,
         player2Name: String? = nil,
         nextMatchId: UUID? = nil,
-        nextMatchSlot: Player? = nil
+        nextMatchSlot: Player? = nil,
+        stage: TournamentStage = .main,
+        bracketType: BracketType = .winners
     ) {
         self.id = id
         self.roundNumber = roundNumber
@@ -60,6 +74,12 @@ struct TournamentMatch: Codable, Identifiable, Equatable {
         self.matchHistory = []
         self.nextMatchId = nextMatchId
         self.nextMatchSlot = nextMatchSlot
+        self.stage = stage
+        self.bracketType = bracketType
+        self.isGrandFinal = false
+        self.isGrandFinalReset = false
+        self.loserNextMatchId = nil
+        self.loserNextMatchSlot = nil
     }
 
     // MARK: - Computed Properties

@@ -41,6 +41,63 @@ struct TournamentCreationView: View {
                     Text("Tournament Info")
                 }
 
+                // Tournament Format Section
+                Section {
+                    Picker("Format", selection: $viewModel.tournamentType) {
+                        ForEach(TournamentType.allCases, id: \.self) { type in
+                            Text(type.displayName).tag(type)
+                        }
+                    }
+                } header: {
+                    Text("Tournament Format")
+                } footer: {
+                    Text(viewModel.tournamentType.description)
+                }
+
+                // Multi-Stage Section (for non-elimination formats)
+                if viewModel.showMultiStageOptions {
+                    Section {
+                        Toggle("Multi-Stage Tournament", isOn: $viewModel.isMultiStage)
+
+                        if viewModel.isMultiStage {
+                            Picker("Finals Format", selection: $viewModel.finalsType) {
+                                Text("Single Elimination").tag(TournamentType.singleElimination)
+                                Text("Double Elimination").tag(TournamentType.doubleElimination)
+                            }
+
+                            Picker("Finals Size", selection: $viewModel.finalsSize) {
+                                Text("Top 4").tag(4)
+                                Text("Top 8").tag(8)
+                                Text("Top 16").tag(16)
+                                Text("Top 32").tag(32)
+                            }
+
+                            Divider()
+
+                            // Finals match settings
+                            Picker("Finals Match Type", selection: $viewModel.finalsMatchType) {
+                                Text("Same as Stage 1").tag(nil as MatchType?)
+                                ForEach(MatchType.availableTypes(for: viewModel.generation), id: \.self) { type in
+                                    Text(type.displayName).tag(type as MatchType?)
+                                }
+                            }
+
+                            Picker("Finals Best Of", selection: $viewModel.finalsBestOf) {
+                                Text("Same as Stage 1").tag(nil as BestOf?)
+                                ForEach(BestOf.allCases, id: \.self) { bo in
+                                    Text(bo.displayName).tag(bo as BestOf?)
+                                }
+                            }
+                        }
+                    } header: {
+                        Text("Tournament Stages")
+                    } footer: {
+                        if viewModel.isMultiStage {
+                            Text("Top \(viewModel.finalsSize) players from \(viewModel.tournamentType.displayName) advance to \(viewModel.finalsType.displayName) finals.")
+                        }
+                    }
+                }
+
                 // Players Section
                 Section {
                     PlayerListEditor(players: $viewModel.players)
@@ -49,13 +106,13 @@ struct TournamentCreationView: View {
                         Text("Players (\(viewModel.players.count))")
                         Spacer()
                         if viewModel.players.count >= 2 {
-                            Text("\(viewModel.numberOfRounds) rounds")
+                            Text(viewModel.roundsDescription)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
                     }
                 } footer: {
-                    Text("Minimum 2 players required. Players are seeded in order (drag to reorder).")
+                    Text(viewModel.playersFooterText)
                 }
 
                 // Match Settings Section
@@ -101,10 +158,13 @@ struct TournamentCreationView: View {
                     Section {
                         BracketPreview(
                             playerCount: viewModel.players.count,
-                            numberOfRounds: viewModel.numberOfRounds
+                            numberOfRounds: viewModel.numberOfRounds,
+                            tournamentType: viewModel.tournamentType,
+                            isMultiStage: viewModel.isMultiStage,
+                            finalsSize: viewModel.finalsSize
                         )
                     } header: {
-                        Text("Bracket Preview")
+                        Text("Tournament Summary")
                     }
                 }
             }
@@ -144,6 +204,16 @@ final class TournamentCreationViewModel: ObservableObject {
     @Published var ownFinishEnabled: Bool = false
     @Published var shufflePlayers: Bool = false
 
+    // Tournament format
+    @Published var tournamentType: TournamentType = .singleElimination
+    @Published var isMultiStage: Bool = false
+    @Published var finalsType: TournamentType = .singleElimination
+    @Published var finalsSize: Int = 8
+
+    // Finals-specific match settings (nil = same as stage 1)
+    @Published var finalsMatchType: MatchType?
+    @Published var finalsBestOf: BestOf?
+
     init() {
         regenerateRoomCode()
     }
@@ -151,12 +221,63 @@ final class TournamentCreationViewModel: ObservableObject {
     var canCreateTournament: Bool {
         !tournamentName.trimmingCharacters(in: .whitespaces).isEmpty &&
         players.count >= 2 &&
-        roomCode.count == 6
+        roomCode.count == 6 &&
+        (!isMultiStage || finalsSize <= players.count)
     }
 
+    /// Whether to show multi-stage options.
+    var showMultiStageOptions: Bool {
+        !tournamentType.isEliminationFormat
+    }
+
+    /// Number of rounds based on tournament type.
     var numberOfRounds: Int {
         guard players.count > 1 else { return 0 }
-        return Int(ceil(log2(Double(players.count))))
+
+        switch tournamentType {
+        case .singleElimination:
+            return Int(ceil(log2(Double(players.count))))
+        case .doubleElimination:
+            let winnerRounds = Int(ceil(log2(Double(players.count))))
+            return winnerRounds * 2 + 1
+        case .swiss:
+            return SwissGenerator.numberOfRounds(for: players.count)
+        case .roundRobin:
+            return RoundRobinGenerator.numberOfRounds(for: players.count)
+        case .groupRoundRobin:
+            let groupSize = players.count / 2
+            return RoundRobinGenerator.numberOfRounds(for: groupSize)
+        }
+    }
+
+    /// Description of rounds for display.
+    var roundsDescription: String {
+        switch tournamentType {
+        case .singleElimination, .doubleElimination:
+            return "\(numberOfRounds) rounds"
+        case .swiss:
+            return "\(numberOfRounds) Swiss rounds"
+        case .roundRobin:
+            return "\(RoundRobinGenerator.totalMatches(for: players.count)) matches"
+        case .groupRoundRobin:
+            let groupSize = players.count / 2
+            let matchesPerGroup = RoundRobinGenerator.totalMatches(for: groupSize)
+            return "2 groups, \(matchesPerGroup * 2) matches"
+        }
+    }
+
+    /// Footer text for players section.
+    var playersFooterText: String {
+        switch tournamentType {
+        case .singleElimination, .doubleElimination:
+            return "Minimum 2 players required. Players are seeded in order (drag to reorder)."
+        case .swiss:
+            return "Minimum 2 players. Players will be paired each round based on standings."
+        case .roundRobin:
+            return "Every player will play every other player once."
+        case .groupRoundRobin:
+            return "Players will be divided into 2 equal groups. Minimum 4 players recommended."
+        }
     }
 
     func regenerateRoomCode() {
@@ -169,6 +290,15 @@ final class TournamentCreationViewModel: ObservableObject {
         let filteredPlayers = players.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
         guard filteredPlayers.count >= 2 else { return nil }
 
+        // Build stage config
+        var stageConfig = TournamentStageConfig()
+        stageConfig.isMultiStage = isMultiStage && showMultiStageOptions
+        stageConfig.stage1Type = tournamentType
+        stageConfig.finalsType = finalsType
+        stageConfig.finalsSize = finalsSize
+        stageConfig.finalsMatchType = finalsMatchType
+        stageConfig.finalsBestOf = finalsBestOf
+
         return Tournament.create(
             name: tournamentName.trimmingCharacters(in: .whitespaces),
             roomCode: roomCode,
@@ -177,6 +307,8 @@ final class TournamentCreationViewModel: ObservableObject {
             matchType: matchType,
             bestOf: bestOf,
             ownFinishEnabled: ownFinishEnabled,
+            tournamentType: tournamentType,
+            stageConfig: stageConfig,
             shuffle: shufflePlayers
         )
     }
@@ -187,75 +319,51 @@ final class TournamentCreationViewModel: ObservableObject {
 struct BracketPreview: View {
     let playerCount: Int
     let numberOfRounds: Int
-
-    private var bracketSize: Int {
-        var power = 1
-        while power < playerCount {
-            power *= 2
-        }
-        return power
-    }
-
-    private var byeCount: Int {
-        bracketSize - playerCount
-    }
+    let tournamentType: TournamentType
+    let isMultiStage: Bool
+    let finalsSize: Int
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Label("\(playerCount) players", systemImage: "person.2")
-                Spacer()
-                Label("\(numberOfRounds) rounds", systemImage: "rectangle.3.group")
-            }
-            .font(.subheadline)
+        HStack(spacing: 24) {
+            // Players
+            Label("\(playerCount)", systemImage: "person.2")
 
-            HStack {
-                Label("\(bracketSize - 1) matches", systemImage: "sportscourt")
-                Spacer()
-                if byeCount > 0 {
-                    Label("\(byeCount) byes", systemImage: "arrow.right.circle")
-                }
-            }
-            .font(.subheadline)
-            .foregroundColor(.secondary)
+            // Rounds
+            Label("\(numberOfRounds)", systemImage: "rectangle.3.group")
 
-            // Visual bracket representation
-            HStack(spacing: 4) {
-                ForEach(1...numberOfRounds, id: \.self) { round in
-                    RoundColumn(
-                        round: round,
-                        matchCount: bracketSize / Int(pow(2.0, Double(round))),
-                        isLast: round == numberOfRounds
-                    )
-                }
-            }
-            .frame(height: 60)
+            // Matches
+            Label("\(numberOfMatches)", systemImage: "sportscourt")
         }
+        .font(.subheadline)
     }
-}
 
-struct RoundColumn: View {
-    let round: Int
-    let matchCount: Int
-    let isLast: Bool
+    private var numberOfMatches: Int {
+        var total = stage1Matches
 
-    var body: some View {
-        VStack(spacing: 2) {
-            Text("R\(round)")
-                .font(.caption2)
-                .foregroundColor(.secondary)
+        // Add finals matches if multi-stage
+        if isMultiStage && finalsSize > 0 {
+            total += finalsSize - 1  // Single elimination finals
+        }
 
-            HStack(spacing: 1) {
-                ForEach(0..<matchCount, id: \.self) { _ in
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(isLast ? Color.yellow : Color.blue.opacity(0.5))
-                        .frame(width: 8, height: 20)
-                }
-            }
+        return total
+    }
 
-            Text("\(matchCount)")
-                .font(.caption2)
-                .foregroundColor(.secondary)
+    private var stage1Matches: Int {
+        switch tournamentType {
+        case .singleElimination:
+            return playerCount - 1
+        case .doubleElimination:
+            // Winners: n-1, Losers: n-2, Grand Finals: 1-2
+            return (playerCount - 1) + (playerCount - 2) + 2
+        case .swiss:
+            // players/2 matches per round * rounds
+            let rounds = SwissGenerator.numberOfRounds(for: playerCount)
+            return (playerCount / 2) * rounds
+        case .roundRobin:
+            return RoundRobinGenerator.totalMatches(for: playerCount)
+        case .groupRoundRobin:
+            let groupSize = playerCount / 2
+            return RoundRobinGenerator.totalMatches(for: groupSize) * 2
         }
     }
 }

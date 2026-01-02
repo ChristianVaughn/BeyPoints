@@ -193,12 +193,42 @@ enum BracketGenerator {
 
 extension Tournament {
 
-    /// Generates the bracket for this tournament.
+    /// Generates the bracket for this tournament based on tournament type.
     mutating func generateBracket(shuffle: Bool = false) {
         guard status == .notStarted else { return }
         guard players.count >= 2 else { return }
 
-        matches = BracketGenerator.generateBracket(players: players, shuffle: shuffle)
+        switch tournamentType {
+        case .singleElimination:
+            matches = BracketGenerator.generateBracket(players: players, shuffle: shuffle)
+
+        case .doubleElimination:
+            matches = DoubleEliminationGenerator.generateBracket(players: players, shuffle: shuffle)
+
+        case .swiss:
+            // Initialize standings
+            initializeSwissStandings()
+            // Generate first round
+            matches = SwissGenerator.generateFirstRound(players: players, shuffle: shuffle)
+
+        case .roundRobin:
+            // Generate all matches
+            matches = RoundRobinGenerator.generateMatches(players: players)
+            // Initialize standings
+            initializeRoundRobinStandings()
+
+        case .groupRoundRobin:
+            // Generate groups and matches
+            let result = GroupRoundRobinGenerator.generateTournament(
+                players: players,
+                shuffle: shuffle
+            )
+            matches = result.matches
+            group1Players = result.group1Players
+            group2Players = result.group2Players
+            // Initialize standings
+            initializeRoundRobinStandings()
+        }
     }
 
     /// Creates a new tournament with generated bracket.
@@ -210,6 +240,8 @@ extension Tournament {
         matchType: MatchType = .points4,
         bestOf: BestOf = .none,
         ownFinishEnabled: Bool = false,
+        tournamentType: TournamentType = .singleElimination,
+        stageConfig: TournamentStageConfig = TournamentStageConfig(),
         shuffle: Bool = false
     ) -> Tournament {
         var tournament = Tournament(
@@ -219,7 +251,9 @@ extension Tournament {
             matchType: matchType,
             bestOf: bestOf,
             ownFinishEnabled: ownFinishEnabled,
-            players: players
+            players: players,
+            tournamentType: tournamentType,
+            stageConfig: stageConfig
         )
         tournament.generateBracket(shuffle: shuffle)
         return tournament

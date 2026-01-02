@@ -69,10 +69,10 @@ struct MasterMainView: View {
                     if tournamentManager.hasPendingSubmissions {
                         ToolbarItem(placement: .topBarLeading) {
                             NavigationLink {
-                                ApprovalQueueView(tournamentManager: tournamentManager)
+                                ApprovalQueueView()
                                     .navigationTitle("Approvals")
                             } label: {
-                                ApprovalBadge(tournamentManager: tournamentManager)
+                                ApprovalBadge()
                             }
                         }
                     }
@@ -85,7 +85,7 @@ struct MasterMainView: View {
                 }
             }
             .sheet(isPresented: $showingAssignMatch) {
-                MatchAssignmentView(tournamentManager: tournamentManager)
+                MatchAssignmentView()
             }
         }
     }
@@ -177,9 +177,9 @@ struct TournamentDashboardView: View {
                         }
                     )
                 case 1:
-                    DeviceListView(tournamentManager: tournamentManager)
+                    DeviceListView()
             case 2:
-                ApprovalQueueView(tournamentManager: tournamentManager)
+                ApprovalQueueView()
             default:
                 EmptyView()
             }
@@ -335,7 +335,7 @@ struct MasterSplitView: View {
 
                             if tournamentManager.pendingSubmissions.count > 3 {
                                 NavigationLink {
-                                    ApprovalQueueView(tournamentManager: tournamentManager)
+                                    ApprovalQueueView()
                                 } label: {
                                     Text("View all (\(tournamentManager.pendingSubmissions.count))")
                                 }

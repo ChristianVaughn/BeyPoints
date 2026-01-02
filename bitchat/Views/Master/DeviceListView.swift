@@ -16,10 +16,16 @@ struct DeviceListView: View {
     @State private var selectedDeviceId: String?
 
     init(
-        tournamentManager: TournamentManager = .shared,
+        tournamentManager: TournamentManager,
         onDeviceSelected: ((ConnectedScoreboard) -> Void)? = nil
     ) {
         self.tournamentManager = tournamentManager
+        self.onDeviceSelected = onDeviceSelected
+    }
+
+    @MainActor
+    init(onDeviceSelected: ((ConnectedScoreboard) -> Void)? = nil) {
+        self.tournamentManager = .shared
         self.onDeviceSelected = onDeviceSelected
     }
 
@@ -227,8 +233,13 @@ struct EmptyDevicesView: View {
 struct CompactDeviceList: View {
     @ObservedObject var tournamentManager: TournamentManager
 
-    init(tournamentManager: TournamentManager = .shared) {
+    init(tournamentManager: TournamentManager) {
         self.tournamentManager = tournamentManager
+    }
+
+    @MainActor
+    init() {
+        self.tournamentManager = .shared
     }
 
     var body: some View {

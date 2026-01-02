@@ -18,11 +18,17 @@ struct MatchAssignmentView: View {
     @State private var selectedDevice: ConnectedScoreboard?
 
     init(
-        tournamentManager: TournamentManager = .shared,
-        messageHandler: TournamentMessageHandler = .shared
+        tournamentManager: TournamentManager,
+        messageHandler: TournamentMessageHandler
     ) {
         self.tournamentManager = tournamentManager
         self.messageHandler = messageHandler
+    }
+
+    @MainActor
+    init() {
+        self.tournamentManager = .shared
+        self.messageHandler = .shared
     }
 
     var body: some View {
@@ -318,13 +324,21 @@ struct QuickAssignmentRow: View {
     let onAssigned: (() -> Void)?
 
     init(
-        tournamentManager: TournamentManager = .shared,
-        messageHandler: TournamentMessageHandler = .shared,
+        tournamentManager: TournamentManager,
+        messageHandler: TournamentMessageHandler,
         match: TournamentMatch,
         onAssigned: (() -> Void)? = nil
     ) {
         self.tournamentManager = tournamentManager
         self.messageHandler = messageHandler
+        self.match = match
+        self.onAssigned = onAssigned
+    }
+
+    @MainActor
+    init(match: TournamentMatch, onAssigned: (() -> Void)? = nil) {
+        self.tournamentManager = .shared
+        self.messageHandler = .shared
         self.match = match
         self.onAssigned = onAssigned
     }

@@ -109,7 +109,7 @@ final class AppState: ObservableObject {
 // MARK: - Environment Key
 
 private struct AppStateKey: EnvironmentKey {
-    static let defaultValue: AppState = AppState.shared
+    @MainActor static let defaultValue: AppState = AppState.shared
 }
 
 extension EnvironmentValues {

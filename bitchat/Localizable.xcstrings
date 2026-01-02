@@ -4,6 +4,9 @@
     "-" : {
 
     },
+    "#" : {
+
+    },
     "#%@" : {
 
     },
@@ -440,6 +443,9 @@
       }
     },
     "+ %@ more" : {
+
+    },
+    "+/-" : {
 
     },
     "+%@" : {
@@ -6394,9 +6400,6 @@
     "Bracket" : {
 
     },
-    "Bracket Preview" : {
-
-    },
     "Cannot switch modes while scoring a match. Please complete or abandon the current match first." : {
 
     },
@@ -8020,6 +8023,9 @@
           }
         }
       }
+    },
+    "Complete" : {
+
     },
     "Connecting..." : {
 
@@ -19333,6 +19339,9 @@
     "Create a tournament to start managing matches and scoreboards." : {
 
     },
+    "Current" : {
+
+    },
     "Current Mode" : {
 
     },
@@ -19340,6 +19349,9 @@
 
     },
     "Done" : {
+
+    },
+    "Double Elimination" : {
 
     },
     "Enabled" : {
@@ -23832,6 +23844,21 @@
         }
       }
     },
+    "Grand Final" : {
+
+    },
+    "Grand Finals" : {
+
+    },
+    "Group A" : {
+
+    },
+    "Group B" : {
+
+    },
+    "If needed" : {
+
+    },
     "Images are only available in mesh chats." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -24018,6 +24045,9 @@
 
     },
     "Join Tournament Room" : {
+
+    },
+    "L" : {
 
     },
     "location_channels.action.open_settings" : {
@@ -31232,6 +31262,9 @@
         }
       }
     },
+    "Losers Bracket" : {
+
+    },
     "Master" : {
 
     },
@@ -31251,6 +31284,9 @@
 
     },
     "Match Winner!" : {
+
+    },
+    "Matches" : {
 
     },
     "mesh_peers.tooltip.new_messages" : {
@@ -31483,10 +31519,16 @@
     "PEN" : {
 
     },
+    "Player" : {
+
+    },
     "Players (%@)" : {
 
     },
     "Practice Match" : {
+
+    },
+    "Pts" : {
 
     },
     "R%@" : {
@@ -31677,6 +31719,12 @@
     "Rejection Reason" : {
 
     },
+    "Required" : {
+
+    },
+    "Reset" : {
+
+    },
     "Resume Match" : {
 
     },
@@ -31690,6 +31738,15 @@
 
     },
     "Round %@" : {
+
+    },
+    "Round not yet generated" : {
+
+    },
+    "Rounds" : {
+
+    },
+    "Same as Stage 1" : {
 
     },
     "save" : {
@@ -31921,6 +31978,12 @@
 
     },
     "Share this code with scoreboard devices to let them join" : {
+
+    },
+    "Single Elimination" : {
+
+    },
+    "Standings" : {
 
     },
     "Start a practice match or join a tournament room" : {
@@ -34632,13 +34695,47 @@
     "The tournament master rejected your score. Please re-score the match." : {
 
     },
+    "Top %@ players from %@ advance to %@ finals." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Top %1$@ players from %2$@ advance to %3$@ finals."
+          }
+        }
+      }
+    },
+    "Top 4" : {
+
+    },
+    "Top 8" : {
+
+    },
+    "Top 16" : {
+
+    },
+    "Top 32" : {
+
+    },
+    "Tournament Format" : {
+
+    },
     "Tournament Info" : {
 
     },
     "Tournament Room Code" : {
 
     },
+    "Tournament Stages" : {
+
+    },
+    "Tournament Summary" : {
+
+    },
     "Tournament System" : {
+
+    },
+    "Upcoming" : {
 
     },
     "verification.my_qr.accessibility_label" : {
@@ -36619,6 +36716,9 @@
     "vs" : {
 
     },
+    "W" : {
+
+    },
     "Waiting for match assignment..." : {
 
     },
@@ -36635,6 +36735,9 @@
 
     },
     "Winner: %@" : {
+
+    },
+    "Winners Bracket" : {
 
     },
     "You are connected to a tournament room. Switching to Master mode will disconnect you from the current room." : {

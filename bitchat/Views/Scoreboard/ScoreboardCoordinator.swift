@@ -226,7 +226,7 @@ struct ScoreboardCoordinator: View {
     private var idleView: some View {
         VStack(spacing: 24) {
             // Room status
-            if roomManager.isInRoom, let roomCode = roomManager.currentRoomCode {
+            if roomManager.isInRoom, roomManager.currentRoomCode != nil {
                 RoomStatusView()
                     .padding(.horizontal)
 

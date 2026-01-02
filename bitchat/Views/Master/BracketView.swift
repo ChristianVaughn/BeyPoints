@@ -9,6 +9,7 @@
 import SwiftUI
 
 /// Visual bracket display for a tournament.
+/// Routes to the appropriate view based on tournament type.
 struct BracketView: View {
     let tournament: Tournament
     let onMatchSelected: ((TournamentMatch) -> Void)?
@@ -21,9 +22,51 @@ struct BracketView: View {
     }
 
     var body: some View {
+        switch tournament.tournamentType {
+        case .singleElimination:
+            SingleEliminationBracketView(
+                tournament: tournament,
+                onMatchSelected: onMatchSelected
+            )
+
+        case .doubleElimination:
+            DoubleEliminationView(
+                tournament: tournament,
+                onMatchSelected: onMatchSelected
+            )
+
+        case .swiss:
+            SwissBracketView(
+                tournament: tournament,
+                onMatchSelected: onMatchSelected
+            )
+
+        case .roundRobin:
+            RoundRobinView(
+                tournament: tournament,
+                onMatchSelected: onMatchSelected
+            )
+
+        case .groupRoundRobin:
+            GroupRoundRobinView(
+                tournament: tournament,
+                onMatchSelected: onMatchSelected
+            )
+        }
+    }
+}
+
+/// Single Elimination bracket view (original BracketView logic).
+struct SingleEliminationBracketView: View {
+    let tournament: Tournament
+    let onMatchSelected: ((TournamentMatch) -> Void)?
+
+    @State private var selectedMatchId: UUID?
+
+    var body: some View {
         ScrollView([.horizontal, .vertical], showsIndicators: true) {
             HStack(alignment: .center, spacing: 20) {
-                ForEach(1...tournament.numberOfRounds, id: \.self) { round in
+                ForEach(1...max(1, tournament.numberOfRounds), id: \.self) { round in
                     BracketRoundColumn(
                         round: round,
                         matches: tournament.matches(inRound: round),

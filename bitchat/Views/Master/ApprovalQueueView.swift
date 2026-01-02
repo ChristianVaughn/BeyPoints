@@ -17,11 +17,17 @@ struct ApprovalQueueView: View {
     @State private var rejectionReason = ""
 
     init(
-        tournamentManager: TournamentManager = .shared,
-        messageHandler: TournamentMessageHandler = .shared
+        tournamentManager: TournamentManager,
+        messageHandler: TournamentMessageHandler
     ) {
         self.tournamentManager = tournamentManager
         self.messageHandler = messageHandler
+    }
+
+    @MainActor
+    init() {
+        self.tournamentManager = .shared
+        self.messageHandler = .shared
     }
 
     var body: some View {
@@ -403,8 +409,13 @@ struct EmptyApprovalQueueView: View {
 struct ApprovalBadge: View {
     @ObservedObject var tournamentManager: TournamentManager
 
-    init(tournamentManager: TournamentManager = .shared) {
+    init(tournamentManager: TournamentManager) {
         self.tournamentManager = tournamentManager
+    }
+
+    @MainActor
+    init() {
+        self.tournamentManager = .shared
     }
 
     var body: some View {
