@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		17901751FD8010AFC8E750F2 /* bitchatShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 61F92EBA29C47C0FCC482F1F /* bitchatShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		17901751FD8010AFC8E750F2 /* beypointsShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 61F92EBA29C47C0FCC482F1F /* beypointsShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3EE336D150427F736F32B56C /* P256K in Frameworks */ = {isa = PBXBuildFile; productRef = B1D9136AA0083366353BFA2F /* P256K */; };
 		885BBED78092484A5B069461 /* P256K in Frameworks */ = {isa = PBXBuildFile; productRef = 4EB6BA1B8464F1EA38F4E286 /* P256K */; };
 		A6E3E5702E77036A0032EA8A /* BitLogger in Frameworks */ = {isa = PBXBuildFile; productRef = A6E3E56F2E77036A0032EA8A /* BitLogger */; };
@@ -46,68 +46,68 @@
 			dstPath = "";
 			dstSubfolder = PlugIns;
 			files = (
-				17901751FD8010AFC8E750F2 /* bitchatShareExtension.appex in Embed Foundation Extensions */,
+				17901751FD8010AFC8E750F2 /* beypointsShareExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		03C57F452B55FD0FD8F51421 /* bitchatTests_macOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = bitchatTests_macOS.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		61F92EBA29C47C0FCC482F1F /* bitchatShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = bitchatShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		8F3A7C058C2C8E1A06C8CF8B /* bitchat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = bitchat.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		96D0D41CA19EE5A772AA8434 /* bitchat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = bitchat.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C0DB1DE27F0AAB5092663E8E /* bitchatTests_iOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = bitchatTests_iOS.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		03C57F452B55FD0FD8F51421 /* beypointsTests_macOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = beypointsTests_macOS.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		61F92EBA29C47C0FCC482F1F /* beypointsShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = beypointsShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		8F3A7C058C2C8E1A06C8CF8B /* beypoints.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = beypoints.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		96D0D41CA19EE5A772AA8434 /* beypoints.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = beypoints.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0DB1DE27F0AAB5092663E8E /* beypointsTests_iOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = beypointsTests_iOS.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E0A1B2C3D4E5F6012345678A /* relays/online_relays_gps.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = relays/online_relays_gps.csv; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		A6E32D1B2E762EA70032EA8A /* Exceptions for "bitchat" folder in "bitchatShareExtension" target */ = {
+		A6E32D1B2E762EA70032EA8A /* Exceptions for "bitchat" folder in "beypointsShareExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Services/TransportConfig.swift,
 			);
-			target = 57CA17A36A2532A6CFF367BB /* bitchatShareExtension */;
+			target = 57CA17A36A2532A6CFF367BB /* beypointsShareExtension */;
 		};
-		A6E32D1C2E762EA70032EA8A /* Exceptions for "bitchat" folder in "bitchat_iOS" target */ = {
+		A6E32D1C2E762EA70032EA8A /* Exceptions for "bitchat" folder in "beypoints_iOS" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = AF077EA0474EDEDE2C72716C /* bitchat_iOS */;
+			target = AF077EA0474EDEDE2C72716C /* beypoints_iOS */;
 		};
-		A6E32D1D2E762EA70032EA8A /* Exceptions for "bitchat" folder in "bitchat_macOS" target */ = {
+		A6E32D1D2E762EA70032EA8A /* Exceptions for "bitchat" folder in "beypoints_macOS" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 				LaunchScreen.storyboard,
 			);
-			target = 0576A29205865664C0937536 /* bitchat_macOS */;
+			target = 0576A29205865664C0937536 /* beypoints_macOS */;
 		};
-		A6E32D232E762EAB0032EA8A /* Exceptions for "bitchatShareExtension" folder in "bitchatShareExtension" target */ = {
+		A6E32D232E762EAB0032EA8A /* Exceptions for "bitchatShareExtension" folder in "beypointsShareExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				ShareViewController.swift,
 			);
-			target = 57CA17A36A2532A6CFF367BB /* bitchatShareExtension */;
+			target = 57CA17A36A2532A6CFF367BB /* beypointsShareExtension */;
 		};
-		C5E027A52ECCDFD700BD6012 /* Exceptions for "bitchatTests" folder in "bitchatTests_macOS" target */ = {
+		C5E027A52ECCDFD700BD6012 /* Exceptions for "bitchatTests" folder in "beypointsTests_macOS" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 				Localization/PrimaryLocalizationKeys.json,
 				README.md,
 			);
-			target = 47FF23248747DD7CB666CB91 /* bitchatTests_macOS */;
+			target = 47FF23248747DD7CB666CB91 /* beypointsTests_macOS */;
 		};
-		C5E027A82ECCDFE200BD6012 /* Exceptions for "bitchatTests" folder in "bitchatTests_iOS" target */ = {
+		C5E027A82ECCDFE200BD6012 /* Exceptions for "bitchatTests" folder in "beypointsTests_iOS" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 				Localization/PrimaryLocalizationKeys.json,
 				README.md,
 			);
-			target = 6CB97DF2EA57234CB3E563B8 /* bitchatTests_iOS */;
+			target = 6CB97DF2EA57234CB3E563B8 /* beypointsTests_iOS */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -115,9 +115,9 @@
 		A6E32C972E762EA70032EA8A /* bitchat */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				A6E32D1B2E762EA70032EA8A /* Exceptions for "bitchat" folder in "bitchatShareExtension" target */,
-				A6E32D1C2E762EA70032EA8A /* Exceptions for "bitchat" folder in "bitchat_iOS" target */,
-				A6E32D1D2E762EA70032EA8A /* Exceptions for "bitchat" folder in "bitchat_macOS" target */,
+				A6E32D1B2E762EA70032EA8A /* Exceptions for "bitchat" folder in "beypointsShareExtension" target */,
+				A6E32D1C2E762EA70032EA8A /* Exceptions for "bitchat" folder in "beypoints_iOS" target */,
+				A6E32D1D2E762EA70032EA8A /* Exceptions for "bitchat" folder in "beypoints_macOS" target */,
 			);
 			path = bitchat;
 			sourceTree = "<group>";
@@ -125,7 +125,7 @@
 		A6E32D212E762EAB0032EA8A /* bitchatShareExtension */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				A6E32D232E762EAB0032EA8A /* Exceptions for "bitchatShareExtension" folder in "bitchatShareExtension" target */,
+				A6E32D232E762EAB0032EA8A /* Exceptions for "bitchatShareExtension" folder in "beypointsShareExtension" target */,
 			);
 			path = bitchatShareExtension;
 			sourceTree = "<group>";
@@ -133,8 +133,8 @@
 		A6E32D412E762EAE0032EA8A /* bitchatTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				C5E027A82ECCDFE200BD6012 /* Exceptions for "bitchatTests" folder in "bitchatTests_iOS" target */,
-				C5E027A52ECCDFD700BD6012 /* Exceptions for "bitchatTests" folder in "bitchatTests_macOS" target */,
+				C5E027A82ECCDFE200BD6012 /* Exceptions for "bitchatTests" folder in "beypointsTests_iOS" target */,
+				C5E027A52ECCDFD700BD6012 /* Exceptions for "bitchatTests" folder in "beypointsTests_macOS" target */,
 			);
 			path = bitchatTests;
 			sourceTree = "<group>";
@@ -180,11 +180,11 @@
 		9F37F9F2C353B58AC809E93B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				96D0D41CA19EE5A772AA8434 /* bitchat.app */,
-				8F3A7C058C2C8E1A06C8CF8B /* bitchat.app */,
-				61F92EBA29C47C0FCC482F1F /* bitchatShareExtension.appex */,
-				C0DB1DE27F0AAB5092663E8E /* bitchatTests_iOS.xctest */,
-				03C57F452B55FD0FD8F51421 /* bitchatTests_macOS.xctest */,
+				96D0D41CA19EE5A772AA8434 /* beypoints.app */,
+				8F3A7C058C2C8E1A06C8CF8B /* beypoints.app */,
+				61F92EBA29C47C0FCC482F1F /* beypointsShareExtension.appex */,
+				C0DB1DE27F0AAB5092663E8E /* beypointsTests_iOS.xctest */,
+				03C57F452B55FD0FD8F51421 /* beypointsTests_macOS.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -199,9 +199,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		0576A29205865664C0937536 /* bitchat_macOS */ = {
+		0576A29205865664C0937536 /* beypoints_macOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = DA5644925338B8189B035657 /* Build configuration list for PBXNativeTarget "bitchat_macOS" */;
+			buildConfigurationList = DA5644925338B8189B035657 /* Build configuration list for PBXNativeTarget "beypoints_macOS" */;
 			buildPhases = (
 				137ABE739BF20ACDDF8CC605 /* Sources */,
 				0214973A876129753D39EB47 /* Resources */,
@@ -212,18 +212,18 @@
 			fileSystemSynchronizedGroups = (
 				A6E32C972E762EA70032EA8A /* bitchat */,
 			);
-			name = bitchat_macOS;
+			name = beypoints_macOS;
 			packageProductDependencies = (
 				B1D9136AA0083366353BFA2F /* P256K */,
 				A6E3E5712E7703760032EA8A /* BitLogger */,
 			);
 			productName = bitchat_macOS;
-			productReference = 8F3A7C058C2C8E1A06C8CF8B /* bitchat.app */;
+			productReference = 8F3A7C058C2C8E1A06C8CF8B /* beypoints.app */;
 			productType = "com.apple.product-type.application";
 		};
-		47FF23248747DD7CB666CB91 /* bitchatTests_macOS */ = {
+		47FF23248747DD7CB666CB91 /* beypointsTests_macOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1C27B5BA3DB46DDF0DBFEF62 /* Build configuration list for PBXNativeTarget "bitchatTests_macOS" */;
+			buildConfigurationList = 1C27B5BA3DB46DDF0DBFEF62 /* Build configuration list for PBXNativeTarget "beypointsTests_macOS" */;
 			buildPhases = (
 				5C22AA7B9ACC5A861445C769 /* Sources */,
 				C5E027A42ECCDFD700BD6012 /* Resources */,
@@ -236,27 +236,27 @@
 			fileSystemSynchronizedGroups = (
 				A6E32D412E762EAE0032EA8A /* bitchatTests */,
 			);
-			name = bitchatTests_macOS;
+			name = beypointsTests_macOS;
 			productName = bitchatTests_macOS;
-			productReference = 03C57F452B55FD0FD8F51421 /* bitchatTests_macOS.xctest */;
+			productReference = 03C57F452B55FD0FD8F51421 /* beypointsTests_macOS.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		57CA17A36A2532A6CFF367BB /* bitchatShareExtension */ = {
+		57CA17A36A2532A6CFF367BB /* beypointsShareExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E4EA6DC648DF55FF84032EB5 /* Build configuration list for PBXNativeTarget "bitchatShareExtension" */;
+			buildConfigurationList = E4EA6DC648DF55FF84032EB5 /* Build configuration list for PBXNativeTarget "beypointsShareExtension" */;
 			buildPhases = (
 				0A08E70F08F55FD5BA8C7EF3 /* Sources */,
 			);
 			buildRules = (
 			);
-			name = bitchatShareExtension;
+			name = beypointsShareExtension;
 			productName = bitchatShareExtension;
-			productReference = 61F92EBA29C47C0FCC482F1F /* bitchatShareExtension.appex */;
+			productReference = 61F92EBA29C47C0FCC482F1F /* beypointsShareExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		6CB97DF2EA57234CB3E563B8 /* bitchatTests_iOS */ = {
+		6CB97DF2EA57234CB3E563B8 /* beypointsTests_iOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 38C4AF6313E5037F25CEF30B /* Build configuration list for PBXNativeTarget "bitchatTests_iOS" */;
+			buildConfigurationList = 38C4AF6313E5037F25CEF30B /* Build configuration list for PBXNativeTarget "beypointsTests_iOS" */;
 			buildPhases = (
 				865C8403EF02C089369A9FCB /* Sources */,
 				C5E027A72ECCDFE200BD6012 /* Resources */,
@@ -269,14 +269,14 @@
 			fileSystemSynchronizedGroups = (
 				A6E32D412E762EAE0032EA8A /* bitchatTests */,
 			);
-			name = bitchatTests_iOS;
+			name = beypointsTests_iOS;
 			productName = bitchatTests_iOS;
-			productReference = C0DB1DE27F0AAB5092663E8E /* bitchatTests_iOS.xctest */;
+			productReference = C0DB1DE27F0AAB5092663E8E /* beypointsTests_iOS.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		AF077EA0474EDEDE2C72716C /* bitchat_iOS */ = {
+		AF077EA0474EDEDE2C72716C /* beypoints_iOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 53EADEF7546F94DDF82271B9 /* Build configuration list for PBXNativeTarget "bitchat_iOS" */;
+			buildConfigurationList = 53EADEF7546F94DDF82271B9 /* Build configuration list for PBXNativeTarget "beypoints_iOS" */;
 			buildPhases = (
 				4E49E34F00154C051AE90FED /* Sources */,
 				CD6E8F32BC38357473954F97 /* Resources */,
@@ -291,13 +291,13 @@
 			fileSystemSynchronizedGroups = (
 				A6E32C972E762EA70032EA8A /* bitchat */,
 			);
-			name = bitchat_iOS;
+			name = beypoints_iOS;
 			packageProductDependencies = (
 				4EB6BA1B8464F1EA38F4E286 /* P256K */,
 				A6E3E56F2E77036A0032EA8A /* BitLogger */,
 			);
 			productName = bitchat_iOS;
-			productReference = 96D0D41CA19EE5A772AA8434 /* bitchat.app */;
+			productReference = 96D0D41CA19EE5A772AA8434 /* beypoints.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -309,7 +309,7 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1640;
 			};
-			buildConfigurationList = 3EA424CBD51200895D361189 /* Build configuration list for PBXProject "bitchat" */;
+			buildConfigurationList = 3EA424CBD51200895D361189 /* Build configuration list for PBXProject "beypoints" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -340,11 +340,11 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				57CA17A36A2532A6CFF367BB /* bitchatShareExtension */,
-				6CB97DF2EA57234CB3E563B8 /* bitchatTests_iOS */,
-				47FF23248747DD7CB666CB91 /* bitchatTests_macOS */,
-				AF077EA0474EDEDE2C72716C /* bitchat_iOS */,
-				0576A29205865664C0937536 /* bitchat_macOS */,
+				57CA17A36A2532A6CFF367BB /* beypointsShareExtension */,
+				6CB97DF2EA57234CB3E563B8 /* beypointsTests_iOS */,
+				47FF23248747DD7CB666CB91 /* beypointsTests_macOS */,
+				AF077EA0474EDEDE2C72716C /* beypoints_iOS */,
+				0576A29205865664C0937536 /* beypoints_macOS */,
 			);
 		};
 /* End PBXProject section */
@@ -405,23 +405,23 @@
 /* Begin PBXTargetDependency section */
 		4AA8605DCAA64A45657EF0CA /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 0576A29205865664C0937536 /* bitchat_macOS */;
+			target = 0576A29205865664C0937536 /* beypoints_macOS */;
 			targetProxy = FF470234EF8C6BB8865B80B5 /* PBXContainerItemProxy */;
 		};
 		6EB655BA5DB11909C1DEC460 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 57CA17A36A2532A6CFF367BB /* bitchatShareExtension */;
+			target = 57CA17A36A2532A6CFF367BB /* beypointsShareExtension */;
 			targetProxy = E35E7AF9854A2E72452DD34F /* PBXContainerItemProxy */;
 		};
 		D8C09F21DB7DC06E8E672C21 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = AF077EA0474EDEDE2C72716C /* bitchat_iOS */;
+			target = AF077EA0474EDEDE2C72716C /* beypoints_iOS */;
 			targetProxy = 96415D4F989854F908EAD303 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		077A5203074247CF8F766E2F /* Debug configuration for PBXNativeTarget "bitchatTests_iOS" */ = {
+		077A5203074247CF8F766E2F /* Debug configuration for PBXNativeTarget "beypointsTests_iOS" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = A6E367C92E76469E0032EA8A /* Configs */;
 			baseConfigurationReferenceRelativePath = Debug.xcconfig;
@@ -439,14 +439,17 @@
 					"@loader_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER).tests";
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = app.beypoints.MJ99ZKZZ28.tests;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = app.beypoints.MJ99ZKZZ28.tests;
+				PRODUCT_NAME = beypointsTests_iOS;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = "$(SWIFT_VERSION)";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/bitchat.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/bitchat";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/beypoints.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/beypoints";
 			};
 			name = Debug;
 		};
-		0DACAA261446D178EDD30ECA /* Release configuration for PBXNativeTarget "bitchatTests_iOS" */ = {
+		0DACAA261446D178EDD30ECA /* Release configuration for PBXNativeTarget "beypointsTests_iOS" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = A6E367C92E76469E0032EA8A /* Configs */;
 			baseConfigurationReferenceRelativePath = Release.xcconfig;
@@ -464,14 +467,17 @@
 					"@loader_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER).tests";
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = app.beypoints.MJ99ZKZZ28.tests;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = app.beypoints.MJ99ZKZZ28.tests;
+				PRODUCT_NAME = beypointsTests_iOS;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = "$(SWIFT_VERSION)";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/bitchat.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/bitchat";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/beypoints.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/beypoints";
 			};
 			name = Release;
 		};
-		147FDAE548082D5B921C6F0B /* Release configuration for PBXNativeTarget "bitchatTests_macOS" */ = {
+		147FDAE548082D5B921C6F0B /* Release configuration for PBXNativeTarget "beypointsTests_macOS" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = A6E367C92E76469E0032EA8A /* Configs */;
 			baseConfigurationReferenceRelativePath = Release.xcconfig;
@@ -491,13 +497,15 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = "$(MACOSX_DEPLOYMENT_TARGET)";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER).tests";
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = app.beypoints.MJ99ZKZZ28.tests;
+				PRODUCT_NAME = beypointsTests_macOS;
 				SDKROOT = macosx;
 				SWIFT_VERSION = "$(SWIFT_VERSION)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/bitchat.app/Contents/MacOS/bitchat";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/beypoints.app/Contents/MacOS/beypoints";
 			};
 			name = Release;
 		};
-		3DCF45111852FB2AEBE05E31 /* Release configuration for PBXNativeTarget "bitchatShareExtension" */ = {
+		3DCF45111852FB2AEBE05E31 /* Release configuration for PBXNativeTarget "beypointsShareExtension" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = A6E367C92E76469E0032EA8A /* Configs */;
 			baseConfigurationReferenceRelativePath = Release.xcconfig;
@@ -509,7 +517,7 @@
 				CODE_SIGN_STYLE = "$(CODE_SIGN_STYLE)";
 				DEVELOPMENT_TEAM = MJ99ZKZZ28;
 				INFOPLIST_FILE = bitchatShareExtension/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = bitchat;
+				INFOPLIST_KEY_CFBundleDisplayName = BeyPoints;
 				IPHONEOS_DEPLOYMENT_TARGET = "$(IPHONEOS_DEPLOYMENT_TARGET)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -518,6 +526,8 @@
 				);
 				MARKETING_VERSION = "$(MARKETING_VERSION)";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER).ShareExtension";
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = app.beypoints.MJ99ZKZZ28.ShareExtension;
+				PRODUCT_NAME = beypointsShareExtension;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -528,7 +538,7 @@
 			};
 			name = Release;
 		};
-		702E7395723CADA4B830F4A9 /* Debug configuration for PBXNativeTarget "bitchat_iOS" */ = {
+		702E7395723CADA4B830F4A9 /* Debug configuration for PBXNativeTarget "beypoints_iOS" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = A6E367C92E76469E0032EA8A /* Configs */;
 			baseConfigurationReferenceRelativePath = Debug.xcconfig;
@@ -542,8 +552,8 @@
 				DEVELOPMENT_TEAM = MJ99ZKZZ28;
 				ENABLE_PREVIEWS = NO;
 				INFOPLIST_FILE = bitchat/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = bitchat;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				INFOPLIST_KEY_CFBundleDisplayName = BeyPoints;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				IPHONEOS_DEPLOYMENT_TARGET = "$(IPHONEOS_DEPLOYMENT_TARGET)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -551,7 +561,8 @@
 				);
 				MARKETING_VERSION = "$(MARKETING_VERSION)";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER)";
-				PRODUCT_NAME = bitchat;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = app.beypoints.MJ99ZKZZ28;
+				PRODUCT_NAME = beypoints;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -562,7 +573,7 @@
 			};
 			name = Debug;
 		};
-		7FA2BADBF3B325125030CAB1 /* Debug configuration for PBXNativeTarget "bitchatTests_macOS" */ = {
+		7FA2BADBF3B325125030CAB1 /* Debug configuration for PBXNativeTarget "beypointsTests_macOS" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = A6E367C92E76469E0032EA8A /* Configs */;
 			baseConfigurationReferenceRelativePath = Debug.xcconfig;
@@ -582,13 +593,15 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = "$(MACOSX_DEPLOYMENT_TARGET)";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER).tests";
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = app.beypoints.MJ99ZKZZ28.tests;
+				PRODUCT_NAME = beypointsTests_macOS;
 				SDKROOT = macosx;
 				SWIFT_VERSION = "$(SWIFT_VERSION)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/bitchat.app/Contents/MacOS/bitchat";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/beypoints.app/Contents/MacOS/beypoints";
 			};
 			name = Debug;
 		};
-		B36671AEACCBF92BE10852E9 /* Release configuration for PBXNativeTarget "bitchat_iOS" */ = {
+		B36671AEACCBF92BE10852E9 /* Release configuration for PBXNativeTarget "beypoints_iOS" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = A6E367C92E76469E0032EA8A /* Configs */;
 			baseConfigurationReferenceRelativePath = Release.xcconfig;
@@ -602,8 +615,8 @@
 				DEVELOPMENT_TEAM = MJ99ZKZZ28;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = bitchat/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = bitchat;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				INFOPLIST_KEY_CFBundleDisplayName = BeyPoints;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				IPHONEOS_DEPLOYMENT_TARGET = "$(IPHONEOS_DEPLOYMENT_TARGET)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -611,7 +624,8 @@
 				);
 				MARKETING_VERSION = "$(MARKETING_VERSION)";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER)";
-				PRODUCT_NAME = bitchat;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = app.beypoints.MJ99ZKZZ28;
+				PRODUCT_NAME = beypoints;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -622,7 +636,7 @@
 			};
 			name = Release;
 		};
-		BB044400A0F06B93F22D0D55 /* Release configuration for PBXNativeTarget "bitchat_macOS" */ = {
+		BB044400A0F06B93F22D0D55 /* Release configuration for PBXNativeTarget "beypoints_macOS" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = A6E367C92E76469E0032EA8A /* Configs */;
 			baseConfigurationReferenceRelativePath = Release.xcconfig;
@@ -638,8 +652,8 @@
 				DEVELOPMENT_TEAM = MJ99ZKZZ28;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = bitchat/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = bitchat;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				INFOPLIST_KEY_CFBundleDisplayName = BeyPoints;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -647,14 +661,15 @@
 				MACOSX_DEPLOYMENT_TARGET = "$(MACOSX_DEPLOYMENT_TARGET)";
 				MARKETING_VERSION = "$(MARKETING_VERSION)";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER)";
-				PRODUCT_NAME = bitchat;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = app.beypoints.MJ99ZKZZ28;
+				PRODUCT_NAME = beypoints;
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
 				SWIFT_VERSION = "$(SWIFT_VERSION)";
 			};
 			name = Release;
 		};
-		BF0D85727BCB6E346962F419 /* Release configuration for PBXProject "bitchat" */ = {
+		BF0D85727BCB6E346962F419 /* Release configuration for PBXProject "beypoints" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -714,7 +729,7 @@
 			};
 			name = Release;
 		};
-		CC79F65842D42034ACEE79B7 /* Debug configuration for PBXNativeTarget "bitchat_macOS" */ = {
+		CC79F65842D42034ACEE79B7 /* Debug configuration for PBXNativeTarget "beypoints_macOS" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = A6E367C92E76469E0032EA8A /* Configs */;
 			baseConfigurationReferenceRelativePath = Debug.xcconfig;
@@ -730,8 +745,8 @@
 				DEVELOPMENT_TEAM = MJ99ZKZZ28;
 				ENABLE_PREVIEWS = NO;
 				INFOPLIST_FILE = bitchat/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = bitchat;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				INFOPLIST_KEY_CFBundleDisplayName = BeyPoints;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -739,14 +754,15 @@
 				MACOSX_DEPLOYMENT_TARGET = "$(MACOSX_DEPLOYMENT_TARGET)";
 				MARKETING_VERSION = "$(MARKETING_VERSION)";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER)";
-				PRODUCT_NAME = bitchat;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=macosx*]" = app.beypoints.MJ99ZKZZ28;
+				PRODUCT_NAME = beypoints;
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
 				SWIFT_VERSION = "$(SWIFT_VERSION)";
 			};
 			name = Debug;
 		};
-		D8C5BF109BB2630752185FA0 /* Debug configuration for PBXProject "bitchat" */ = {
+		D8C5BF109BB2630752185FA0 /* Debug configuration for PBXProject "beypoints" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -813,7 +829,7 @@
 			};
 			name = Debug;
 		};
-		DAC5E82049F8A97360BE63D6 /* Debug configuration for PBXNativeTarget "bitchatShareExtension" */ = {
+		DAC5E82049F8A97360BE63D6 /* Debug configuration for PBXNativeTarget "beypointsShareExtension" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = A6E367C92E76469E0032EA8A /* Configs */;
 			baseConfigurationReferenceRelativePath = Debug.xcconfig;
@@ -825,7 +841,7 @@
 				CODE_SIGN_STYLE = "$(CODE_SIGN_STYLE)";
 				DEVELOPMENT_TEAM = MJ99ZKZZ28;
 				INFOPLIST_FILE = bitchatShareExtension/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = bitchat;
+				INFOPLIST_KEY_CFBundleDisplayName = BeyPoints;
 				IPHONEOS_DEPLOYMENT_TARGET = "$(IPHONEOS_DEPLOYMENT_TARGET)";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -834,6 +850,8 @@
 				);
 				MARKETING_VERSION = "$(MARKETING_VERSION)";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER).ShareExtension";
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = app.beypoints.MJ99ZKZZ28.ShareExtension;
+				PRODUCT_NAME = beypointsShareExtension;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -847,51 +865,51 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1C27B5BA3DB46DDF0DBFEF62 /* Build configuration list for PBXNativeTarget "bitchatTests_macOS" */ = {
+		1C27B5BA3DB46DDF0DBFEF62 /* Build configuration list for PBXNativeTarget "beypointsTests_macOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				7FA2BADBF3B325125030CAB1 /* Debug configuration for PBXNativeTarget "bitchatTests_macOS" */,
-				147FDAE548082D5B921C6F0B /* Release configuration for PBXNativeTarget "bitchatTests_macOS" */,
+				7FA2BADBF3B325125030CAB1 /* Debug configuration for PBXNativeTarget "beypointsTests_macOS" */,
+				147FDAE548082D5B921C6F0B /* Release configuration for PBXNativeTarget "beypointsTests_macOS" */,
 			);
 			defaultConfigurationName = Debug;
 		};
-		38C4AF6313E5037F25CEF30B /* Build configuration list for PBXNativeTarget "bitchatTests_iOS" */ = {
+		38C4AF6313E5037F25CEF30B /* Build configuration list for PBXNativeTarget "beypointsTests_iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				077A5203074247CF8F766E2F /* Debug configuration for PBXNativeTarget "bitchatTests_iOS" */,
-				0DACAA261446D178EDD30ECA /* Release configuration for PBXNativeTarget "bitchatTests_iOS" */,
+				077A5203074247CF8F766E2F /* Debug configuration for PBXNativeTarget "beypointsTests_iOS" */,
+				0DACAA261446D178EDD30ECA /* Release configuration for PBXNativeTarget "beypointsTests_iOS" */,
 			);
 			defaultConfigurationName = Debug;
 		};
-		3EA424CBD51200895D361189 /* Build configuration list for PBXProject "bitchat" */ = {
+		3EA424CBD51200895D361189 /* Build configuration list for PBXProject "beypoints" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				D8C5BF109BB2630752185FA0 /* Debug configuration for PBXProject "bitchat" */,
-				BF0D85727BCB6E346962F419 /* Release configuration for PBXProject "bitchat" */,
+				D8C5BF109BB2630752185FA0 /* Debug configuration for PBXProject "beypoints" */,
+				BF0D85727BCB6E346962F419 /* Release configuration for PBXProject "beypoints" */,
 			);
 			defaultConfigurationName = Debug;
 		};
-		53EADEF7546F94DDF82271B9 /* Build configuration list for PBXNativeTarget "bitchat_iOS" */ = {
+		53EADEF7546F94DDF82271B9 /* Build configuration list for PBXNativeTarget "beypoints_iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				702E7395723CADA4B830F4A9 /* Debug configuration for PBXNativeTarget "bitchat_iOS" */,
-				B36671AEACCBF92BE10852E9 /* Release configuration for PBXNativeTarget "bitchat_iOS" */,
+				702E7395723CADA4B830F4A9 /* Debug configuration for PBXNativeTarget "beypoints_iOS" */,
+				B36671AEACCBF92BE10852E9 /* Release configuration for PBXNativeTarget "beypoints_iOS" */,
 			);
 			defaultConfigurationName = Debug;
 		};
-		DA5644925338B8189B035657 /* Build configuration list for PBXNativeTarget "bitchat_macOS" */ = {
+		DA5644925338B8189B035657 /* Build configuration list for PBXNativeTarget "beypoints_macOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				CC79F65842D42034ACEE79B7 /* Debug configuration for PBXNativeTarget "bitchat_macOS" */,
-				BB044400A0F06B93F22D0D55 /* Release configuration for PBXNativeTarget "bitchat_macOS" */,
+				CC79F65842D42034ACEE79B7 /* Debug configuration for PBXNativeTarget "beypoints_macOS" */,
+				BB044400A0F06B93F22D0D55 /* Release configuration for PBXNativeTarget "beypoints_macOS" */,
 			);
 			defaultConfigurationName = Debug;
 		};
-		E4EA6DC648DF55FF84032EB5 /* Build configuration list for PBXNativeTarget "bitchatShareExtension" */ = {
+		E4EA6DC648DF55FF84032EB5 /* Build configuration list for PBXNativeTarget "beypointsShareExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				DAC5E82049F8A97360BE63D6 /* Debug configuration for PBXNativeTarget "bitchatShareExtension" */,
-				3DCF45111852FB2AEBE05E31 /* Release configuration for PBXNativeTarget "bitchatShareExtension" */,
+				DAC5E82049F8A97360BE63D6 /* Debug configuration for PBXNativeTarget "beypointsShareExtension" */,
+				3DCF45111852FB2AEBE05E31 /* Release configuration for PBXNativeTarget "beypointsShareExtension" */,
 			);
 			defaultConfigurationName = Debug;
 		};

@@ -27,7 +27,7 @@ final class ProfileManager: ObservableObject {
     // MARK: - Dependencies
 
     private let userDefaults = UserDefaults.standard
-    private let nicknameKey = "bitchat.nickname"
+    private let nicknameKey = "beypoints.nickname"
     private weak var bleService: BLEService?
 
     // MARK: - Initialization

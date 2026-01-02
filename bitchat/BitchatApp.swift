@@ -11,7 +11,7 @@ import UserNotifications
 
 @main
 struct BitchatApp: App {
-    static let bundleID = Bundle.main.bundleIdentifier ?? "chat.bitchat"
+    static let bundleID = Bundle.main.bundleIdentifier ?? "app.beypoints"
     static let groupID = "group.\(bundleID)"
 
     @StateObject private var profileManager = ProfileManager.shared

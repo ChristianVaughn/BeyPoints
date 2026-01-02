@@ -14,24 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "57CA17A36A2532A6CFF367BB"
-               BuildableName = "bitchatShareExtension.appex"
-               BlueprintName = "bitchatShareExtension"
-               ReferencedContainer = "container:bitchat.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "AF077EA0474EDEDE2C72716C"
+               BlueprintIdentifier = "0576A29205865664C0937536"
                BuildableName = "bitchat.app"
-               BlueprintName = "bitchat_iOS"
-               ReferencedContainer = "container:bitchat.xcodeproj">
+               BlueprintName = "beypoints_macOS"
+               ReferencedContainer = "container:beypoints.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -40,38 +26,26 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      shouldUseLaunchSchemeArgsEnv = "YES"
-      codeCoverageEnabled = "YES"
-      onlyGenerateCoverageForSpecifiedTargets = "YES">
+      shouldUseLaunchSchemeArgsEnv = "YES">
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "AF077EA0474EDEDE2C72716C"
+            BlueprintIdentifier = "0576A29205865664C0937536"
             BuildableName = "bitchat.app"
-            BlueprintName = "bitchat_iOS"
-            ReferencedContainer = "container:bitchat.xcodeproj">
+            BlueprintName = "beypoints_macOS"
+            ReferencedContainer = "container:beypoints.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
-      <CodeCoverageTargets>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "AF077EA0474EDEDE2C72716C"
-            BuildableName = "bitchat.app"
-            BlueprintName = "bitchat_iOS"
-            ReferencedContainer = "container:bitchat.xcodeproj">
-         </BuildableReference>
-      </CodeCoverageTargets>
       <Testables>
          <TestableReference
             skipped = "NO"
-            parallelizable = "YES"
-            testExecutionOrdering = "random">
+            parallelizable = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "6CB97DF2EA57234CB3E563B8"
-               BuildableName = "bitchatTests_iOS.xctest"
-               BlueprintName = "bitchatTests_iOS"
-               ReferencedContainer = "container:bitchat.xcodeproj">
+               BlueprintIdentifier = "47FF23248747DD7CB666CB91"
+               BuildableName = "beypointsTests_macOS.xctest"
+               BlueprintName = "beypointsTests_macOS"
+               ReferencedContainer = "container:beypoints.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -90,10 +64,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "AF077EA0474EDEDE2C72716C"
+            BlueprintIdentifier = "0576A29205865664C0937536"
             BuildableName = "bitchat.app"
-            BlueprintName = "bitchat_iOS"
-            ReferencedContainer = "container:bitchat.xcodeproj">
+            BlueprintName = "beypoints_macOS"
+            ReferencedContainer = "container:beypoints.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <EnvironmentVariables>
@@ -114,10 +88,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "AF077EA0474EDEDE2C72716C"
+            BlueprintIdentifier = "0576A29205865664C0937536"
             BuildableName = "bitchat.app"
-            BlueprintName = "bitchat_iOS"
-            ReferencedContainer = "container:bitchat.xcodeproj">
+            BlueprintName = "beypoints_macOS"
+            ReferencedContainer = "container:beypoints.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
