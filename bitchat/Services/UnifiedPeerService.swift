@@ -23,25 +23,22 @@ final class UnifiedPeerService: ObservableObject, TransportPeerEventsDelegate {
     @Published private(set) var mutualFavorites: [BitchatPeer] = []
     
     // MARK: - Private Properties
-    
+
     private var peerIndex: [PeerID: BitchatPeer] = [:]
     private var fingerprintCache: [PeerID: String] = [:]
     private let meshService: Transport
-    private let idBridge: NostrIdentityBridge
     private let identityManager: SecureIdentityStateManagerProtocol
     weak var messageRouter: MessageRouter?
     private let favoritesService = FavoritesPersistenceService.shared
     private var cancellables = Set<AnyCancellable>()
-    
+
     // MARK: - Initialization
-    
+
     init(
         meshService: Transport,
-        idBridge: NostrIdentityBridge,
         identityManager: SecureIdentityStateManagerProtocol
     ) {
         self.meshService = meshService
-        self.idBridge = idBridge
         self.identityManager = identityManager
         
         // Subscribe to changes from both services
@@ -287,17 +284,10 @@ final class UnifiedPeerService: ObservableObject, TransportPeerEventsDelegate {
             // Remove favorite
             favoritesService.removeFavorite(peerNoisePublicKey: peer.noisePublicKey)
         } else {
-            // Get or derive peer's Nostr public key if not already known
-            var peerNostrKey = peer.nostrPublicKey
-            if peerNostrKey == nil {
-                // Try to get from NostrIdentityBridge association
-                peerNostrKey = idBridge.getNostrPublicKey(for: peer.noisePublicKey)
-            }
-            
             // Add favorite
             favoritesService.addFavorite(
                 peerNoisePublicKey: peer.noisePublicKey,
-                peerNostrPublicKey: peerNostrKey,
+                peerNostrPublicKey: peer.nostrPublicKey,
                 peerNickname: finalNickname
             )
         }

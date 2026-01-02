@@ -18,10 +18,6 @@ struct PeerID: Equatable, Hashable {
         case name = "name:"
         /// `"noise:"` (+ 64 characters hex)
         case noise = "noise:"
-        /// `"nostr_"` (+ 16 characters hex)
-        case geoDM = "nostr_"
-        /// `"nostr:"` (+ 8 characters hex)
-        case geoChat = "nostr:"
     }
     
     let prefix: Prefix
@@ -42,16 +38,6 @@ struct PeerID: Equatable, Hashable {
 // MARK: - Convenience Inits
 
 extension PeerID {
-    /// Convenience init to create GeoDM PeerID by appending `"nostr_"` to the first 16 characters of `pubKey`
-    init(nostr_ pubKey: String) {
-        self.init(prefix: .geoDM, bare: pubKey.prefix(TransportConfig.nostrConvKeyPrefixLength))
-    }
-    
-    /// Convenience init to create GeoChat PeerID by appending `"nostr:"` to the first 8 characters of `pubKey`
-    init(nostr pubKey: String) {
-        self.init(prefix: .geoChat, bare: pubKey.prefix(TransportConfig.nostrShortKeyDisplayLength))
-    }
-    
     /// Convenience init to create PeerID from String/Substring by splitting it into prefix and bare parts
     init(str: any StringProtocol) {
         if let prefix = Prefix.allCases.first(where: { $0 != .empty && str.hasPrefix($0.rawValue) }) {
@@ -120,17 +106,7 @@ extension PeerID {
     var isEmpty: Bool {
         id.isEmpty
     }
-    
-    /// Returns true if `id` starts with "`nostr:`"
-    var isGeoChat: Bool {
-        prefix == .geoChat
-    }
-    
-    /// Returns true if `id` starts with "`nostr_`"
-    var isGeoDM: Bool {
-        prefix == .geoDM
-    }
-    
+
     func toPercentEncoded() -> String {
         id.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? id
     }

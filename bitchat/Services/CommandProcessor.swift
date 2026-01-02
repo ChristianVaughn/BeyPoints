@@ -30,12 +30,9 @@ protocol CommandContextProvider: AnyObject {
     var selectedPrivateChatPeer: PeerID? { get }
     var blockedUsers: Set<String> { get }
     var privateChats: [PeerID: [BitchatMessage]] { get set }
-    var idBridge: NostrIdentityBridge { get }
 
     // MARK: - Peer Lookup
     func getPeerIDForNickname(_ nickname: String) -> PeerID?
-    func getVisibleGeoParticipants() -> [CommandGeoParticipant]
-    func nostrPubkeyForDisplayName(_ displayName: String) -> String?
 
     // MARK: - Chat Actions
     func startPrivateChat(with peerID: PeerID)
@@ -82,15 +79,6 @@ final class CommandProcessor {
         let parts = command.split(separator: " ", maxSplits: 1, omittingEmptySubsequences: false)
         guard let cmd = parts.first else { return .error(message: "Invalid command") }
         let args = parts.count > 1 ? String(parts[1]) : ""
-        
-        // Geohash context: disable favoriting in public geohash or GeoDM
-        let inGeoPublic: Bool = {
-            switch LocationChannelManager.shared.selectedChannel {
-            case .mesh: return false
-            case .location: return true
-            }
-        }()
-        let inGeoDM = contextProvider?.selectedPrivateChatPeer?.isGeoDM == true
 
         switch cmd {
         case "/m", "/msg":
@@ -108,10 +96,8 @@ final class CommandProcessor {
         case "/unblock":
             return handleUnblock(args)
         case "/fav":
-            if inGeoPublic || inGeoDM { return .error(message: "favorites are only for mesh peers in #mesh") }
             return handleFavorite(args, add: true)
         case "/unfav":
-            if inGeoPublic || inGeoDM { return .error(message: "favorites are only for mesh peers in #mesh") }
             return handleFavorite(args, add: false)
         default:
             return .error(message: "unknown command: \(cmd)")
@@ -144,27 +130,12 @@ final class CommandProcessor {
     }
     
     private func handleWho() -> CommandResult {
-        // Show geohash participants when in a geohash channel; otherwise mesh peers
-        switch LocationChannelManager.shared.selectedChannel {
-        case .location(let ch):
-            // Geohash context: show visible geohash participants (exclude self)
-            guard let vm = contextProvider else { return .success(message: "nobody around") }
-            let myHex = (try? vm.idBridge.deriveIdentity(forGeohash: ch.geohash))?.publicKeyHex.lowercased()
-            let people = vm.getVisibleGeoParticipants().filter { person in
-                if let me = myHex { return person.id.lowercased() != me }
-                return true
-            }
-            let names = people.map { $0.displayName }
-            if names.isEmpty { return .success(message: "no one else is online right now") }
-            return .success(message: "online: " + names.sorted().joined(separator: ", "))
-        case .mesh:
-            // Mesh context: show connected peer nicknames
-            guard let peers = meshService?.getPeerNicknames(), !peers.isEmpty else {
-                return .success(message: "no one else is online right now")
-            }
-            let onlineList = peers.values.sorted().joined(separator: ", ")
-            return .success(message: "online: \(onlineList)")
+        // Show connected mesh peer nicknames
+        guard let peers = meshService?.getPeerNicknames(), !peers.isEmpty else {
+            return .success(message: "no one else is online right now")
         }
+        let onlineList = peers.values.sorted().joined(separator: ", ")
+        return .success(message: "online: \(onlineList)")
     }
     
     private func handleClear() -> CommandResult {
@@ -235,25 +206,8 @@ final class CommandProcessor {
                 }
             }
 
-            // Geohash blocked names (prefer visible display names; fallback to #suffix)
-            let geoBlocked = Array(identityManager.getBlockedNostrPubkeys())
-            var geoNames: [String] = []
-            if let vm = contextProvider {
-                let visible = vm.getVisibleGeoParticipants()
-                let visibleIndex = Dictionary(uniqueKeysWithValues: visible.map { ($0.id.lowercased(), $0.displayName) })
-                for pk in geoBlocked {
-                    if let name = visibleIndex[pk.lowercased()] {
-                        geoNames.append(name)
-                    } else {
-                        let suffix = String(pk.suffix(4))
-                        geoNames.append("anon#\(suffix)")
-                    }
-                }
-            }
-
             let meshList = blockedNicknames.isEmpty ? "none" : blockedNicknames.sorted().joined(separator: ", ")
-            let geoList = geoNames.isEmpty ? "none" : geoNames.sorted().joined(separator: ", ")
-            return .success(message: "blocked peers: \(meshList) | geohash blocks: \(geoList)")
+            return .success(message: "blocked peers: \(meshList)")
         }
         
         let nickname = targetName.hasPrefix("@") ? String(targetName.dropFirst()) : targetName
@@ -282,15 +236,7 @@ final class CommandProcessor {
             }
             return .success(message: "blocked \(nickname). you will no longer receive messages from them")
         }
-        // Mesh lookup failed; try geohash (Nostr) participant by display name
-        if let pub = contextProvider?.nostrPubkeyForDisplayName(nickname) {
-            if identityManager.isNostrBlocked(pubkeyHexLowercased: pub) {
-                return .success(message: "\(nickname) is already blocked")
-            }
-            identityManager.setNostrBlocked(pub, isBlocked: true)
-            return .success(message: "blocked \(nickname) in geohash chats")
-        }
-        
+
         return .error(message: "cannot block \(nickname): not found or unable to verify identity")
     }
     
@@ -309,14 +255,6 @@ final class CommandProcessor {
             }
             identityManager.setBlocked(fingerprint, isBlocked: false)
             return .success(message: "unblocked \(nickname)")
-        }
-        // Try geohash unblock
-        if let pub = contextProvider?.nostrPubkeyForDisplayName(nickname) {
-            if !identityManager.isNostrBlocked(pubkeyHexLowercased: pub) {
-                return .success(message: "\(nickname) is not blocked")
-            }
-            identityManager.setNostrBlocked(pub, isBlocked: false)
-            return .success(message: "unblocked \(nickname) in geohash chats")
         }
         return .error(message: "cannot unblock \(nickname): not found")
     }

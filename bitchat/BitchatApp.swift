@@ -6,7 +6,6 @@
 // For more information, see <https://unlicense.org>
 //
 
-import Tor
 import SwiftUI
 import UserNotifications
 
@@ -14,34 +13,25 @@ import UserNotifications
 struct BitchatApp: App {
     static let bundleID = Bundle.main.bundleIdentifier ?? "chat.bitchat"
     static let groupID = "group.\(bundleID)"
-    
+
     @StateObject private var chatViewModel: ChatViewModel
     #if os(iOS)
     @Environment(\.scenePhase) var scenePhase
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    // Skip the very first .active-triggered Tor restart on cold launch
-    @State private var didHandleInitialActive: Bool = false
-    @State private var didEnterBackground: Bool = false
     #elseif os(macOS)
     @NSApplicationDelegateAdaptor(MacAppDelegate.self) var appDelegate
     #endif
-    
-    private let idBridge = NostrIdentityBridge()
-    
+
     init() {
         let keychain = KeychainManager()
-        let idBridge = self.idBridge
         _chatViewModel = StateObject(
             wrappedValue: ChatViewModel(
                 keychain: keychain,
-                idBridge: idBridge,
                 identityManager: SecureIdentityStateManager(keychain)
             )
         )
-        
+
         UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
-        // Warm up georelay directory and refresh if stale (once/day)
-        GeoRelayDirectory.shared.prefetchIfNeeded()
     }
     
     var body: some Scene {
@@ -52,17 +42,14 @@ struct BitchatApp: App {
                     NotificationDelegate.shared.chatViewModel = chatViewModel
                     // Inject live Noise service into VerificationService to avoid creating new BLE instances
                     VerificationService.shared.configure(with: chatViewModel.meshService.getNoiseService())
-                    // Prewarm Nostr identity and QR to make first VERIFY sheet fast
+                    // Prewarm QR code for verification
                     let nickname = chatViewModel.nickname
                     DispatchQueue.global(qos: .utility).async {
-                        let npub = try? idBridge.getCurrentNostrIdentity()?.npub
-                        _ = VerificationService.shared.buildMyQRString(nickname: nickname, npub: npub)
+                        _ = VerificationService.shared.buildMyQRString(nickname: nickname, npub: nil)
                     }
 
                     appDelegate.chatViewModel = chatViewModel
 
-                    // Initialize network activation policy; will start Tor/Nostr only when allowed
-                    NetworkActivationService.shared.start()
                     // Check for shared content
                     checkForSharedContent()
                 }
@@ -74,41 +61,10 @@ struct BitchatApp: App {
                     switch newPhase {
                     case .background:
                         // Keep BLE mesh running in background; BLEService adapts scanning automatically
-                        // Always send Tor to dormant on background for a clean restart later.
-                        TorManager.shared.setAppForeground(false)
-                        TorManager.shared.goDormantOnBackground()
-                        // Stop geohash sampling while backgrounded
-                        Task { @MainActor in
-                            chatViewModel.endGeohashSampling()
-                        }
-                        // Proactively disconnect Nostr to avoid spurious socket errors while Tor is down
-                        NostrRelayManager.shared.disconnect()
-                        didEnterBackground = true
+                        break
                     case .active:
-                        // Restart services when becoming active
+                        // Restart BLE services when becoming active
                         chatViewModel.meshService.startServices()
-                        TorManager.shared.setAppForeground(true)
-                        // On initial cold launch, Tor was just started in onAppear.
-                        // Skip the deterministic restart the first time we become active.
-                        if didHandleInitialActive && didEnterBackground {
-                            if TorManager.shared.isAutoStartAllowed() && !TorManager.shared.isReady {
-                                TorManager.shared.ensureRunningOnForeground()
-                            }
-                        } else {
-                            didHandleInitialActive = true
-                        }
-                        didEnterBackground = false
-                        if TorManager.shared.isAutoStartAllowed() {
-                            Task.detached {
-                                let _ = await TorManager.shared.awaitReady(timeout: 60)
-                                await MainActor.run {
-                                    // Rebuild proxied sessions to bind to the live Tor after readiness
-                                    TorURLSession.shared.rebuild()
-                                    // Reconnect Nostr via fresh sessions; will gate until Tor 100%
-                                    NostrRelayManager.shared.resetAllConnections()
-                                }
-                            }
-                        }
                         checkForSharedContent()
                     case .inactive:
                         break
@@ -251,7 +207,7 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         let identifier = notification.request.identifier
         let userInfo = notification.request.content.userInfo
-        
+
         // Check if this is a private message notification
         if identifier.hasPrefix("private-") {
             // Get peer ID from userInfo
@@ -268,16 +224,7 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
                 return
             }
         }
-        // Suppress geohash activity notification if we're already in that geohash channel
-        if identifier.hasPrefix("geo-activity-"),
-           let deep = userInfo["deeplink"] as? String,
-           let gh = deep.components(separatedBy: "/").last {
-            if case .location(let ch) = LocationChannelManager.shared.selectedChannel, ch.geohash == gh {
-                completionHandler([])
-                return
-            }
-        }
-        
+
         // Show notification in all other cases
         completionHandler([.banner, .sound])
     }

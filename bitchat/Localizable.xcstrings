@@ -10,6 +10,9 @@
     "#%@" : {
 
     },
+    "#mesh" : {
+
+    },
     "%@" : {
       "comment" : "Non-localizable symbol used in code",
       "extractionState" : "manual",

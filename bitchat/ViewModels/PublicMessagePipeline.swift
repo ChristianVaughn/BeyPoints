@@ -169,8 +169,6 @@ private extension PublicMessagePipeline {
         switch channel {
         case .mesh:
             return TransportConfig.uiLateInsertThreshold
-        case .location:
-            return TransportConfig.uiLateInsertThresholdGeo
         }
     }
 

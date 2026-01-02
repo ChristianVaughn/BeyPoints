@@ -372,9 +372,9 @@ final class TournamentMessageHandler: ObservableObject {
             matchId: match.id.uuidString,
             player1Name: match.player1Name ?? "TBD",
             player2Name: match.player2Name ?? "TBD",
-            generation: config.generation.rawValue,
-            matchType: config.matchType.rawValue,
-            bestOf: config.bestOf.rawValue,
+            generation: config.generation.byteValue,
+            matchType: config.matchType.byteValue,
+            bestOf: config.bestOf.byteValue,
             ownFinishEnabled: config.ownFinishEnabled
         )
         sendTournamentMessage(message)
@@ -450,10 +450,10 @@ enum TournamentMessageError: Error, LocalizedError {
     }
 }
 
-// MARK: - Extensions for Raw Value Access
+// MARK: - Extensions for Byte Value Access
 
 extension BeybladeGeneration {
-    var rawValue: UInt8 {
+    var byteValue: UInt8 {
         switch self {
         case .x: return 0x01
         case .burst: return 0x02
@@ -462,8 +462,8 @@ extension BeybladeGeneration {
         }
     }
 
-    init?(rawValue: UInt8) {
-        switch rawValue {
+    init?(byteValue: UInt8) {
+        switch byteValue {
         case 0x01: self = .x
         case 0x02: self = .burst
         case 0x03: self = .metalFight
@@ -474,7 +474,7 @@ extension BeybladeGeneration {
 }
 
 extension MatchType {
-    var rawValue: UInt8 {
+    var byteValue: UInt8 {
         switch self {
         case .points3: return 3
         case .points4: return 4
@@ -484,8 +484,8 @@ extension MatchType {
         }
     }
 
-    init?(rawValue: UInt8) {
-        switch rawValue {
+    init?(byteValue: UInt8) {
+        switch byteValue {
         case 3: self = .points3
         case 4: self = .points4
         case 5: self = .points5
@@ -497,7 +497,7 @@ extension MatchType {
 }
 
 extension BestOf {
-    var rawValue: UInt8 {
+    var byteValue: UInt8 {
         switch self {
         case .none: return 0
         case .bestOf3: return 3
@@ -505,8 +505,8 @@ extension BestOf {
         }
     }
 
-    init?(rawValue: UInt8) {
-        switch rawValue {
+    init?(byteValue: UInt8) {
+        switch byteValue {
         case 0: self = .none
         case 3: self = .bestOf3
         case 5: self = .bestOf5

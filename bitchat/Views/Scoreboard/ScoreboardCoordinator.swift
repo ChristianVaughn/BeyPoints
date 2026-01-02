@@ -477,9 +477,9 @@ struct ScoreboardCoordinator: View {
         currentMatchId = UUID(uuidString: message.matchId)
 
         // Create config from assigned match
-        let generation = BeybladeGeneration(rawValue: message.generation) ?? .x
-        let matchType = MatchType(rawValue: message.matchType) ?? .points4
-        let bestOf = BestOf(rawValue: message.bestOf) ?? .none
+        let generation = BeybladeGeneration(byteValue: message.generation) ?? .x
+        let matchType = MatchType(byteValue: message.matchType) ?? .points4
+        let bestOf = BestOf(byteValue: message.bestOf) ?? .none
 
         let config = MatchConfiguration(
             generation: generation,

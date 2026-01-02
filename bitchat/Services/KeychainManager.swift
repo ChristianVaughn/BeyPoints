@@ -15,11 +15,68 @@ protocol KeychainManagerProtocol {
     func getIdentityKey(forKey key: String) -> Data?
     func deleteIdentityKey(forKey key: String) -> Bool
     func deleteAllKeychainData() -> Bool
-    
+
     func secureClear(_ data: inout Data)
     func secureClear(_ string: inout String)
-    
+
     func verifyIdentityKeyExists() -> Bool
+}
+
+/// Simple keychain helper protocol for generic data storage (used by FavoritesPersistenceService)
+protocol KeychainHelperProtocol {
+    func save(key: String, data: Data, service: String, accessible: CFString?)
+    func load(key: String, service: String) -> Data?
+    func delete(key: String, service: String)
+}
+
+/// Simple keychain helper for generic data storage
+final class KeychainHelper: KeychainHelperProtocol {
+    func save(key: String, data: Data, service: String, accessible: CFString?) {
+        // Delete existing item first
+        delete(key: key, service: service)
+
+        var query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: key,
+            kSecAttrService as String: service,
+            kSecValueData as String: data,
+            kSecAttrAccessible as String: accessible ?? kSecAttrAccessibleWhenUnlocked
+        ]
+
+        #if os(macOS)
+        query[kSecAttrSynchronizable as String] = false
+        #endif
+
+        SecItemAdd(query as CFDictionary, nil)
+    }
+
+    func load(key: String, service: String) -> Data? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: key,
+            kSecAttrService as String: service,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+
+        if status == errSecSuccess {
+            return result as? Data
+        }
+        return nil
+    }
+
+    func delete(key: String, service: String) {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: key,
+            kSecAttrService as String: service
+        ]
+
+        SecItemDelete(query as CFDictionary)
+    }
 }
 
 final class KeychainManager: KeychainManagerProtocol {

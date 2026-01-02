@@ -110,7 +110,6 @@ final class BLEService: NSObject {
     private var noiseService: NoiseEncryptionService
     private let identityManager: SecureIdentityStateManagerProtocol
     private let keychain: KeychainManagerProtocol
-    private let idBridge: NostrIdentityBridge
     private var myPeerIDData: Data = Data()
 
     // MARK: - Advertising Privacy
@@ -245,11 +244,9 @@ final class BLEService: NSObject {
     
     init(
         keychain: KeychainManagerProtocol,
-        idBridge: NostrIdentityBridge,
         identityManager: SecureIdentityStateManagerProtocol
     ) {
         self.keychain = keychain
-        self.idBridge = idBridge
         noiseService = NoiseEncryptionService(keychain: keychain)
         self.identityManager = identityManager
         super.init()
@@ -1208,16 +1205,9 @@ final class BLEService: NSObject {
     
     func sendFavoriteNotification(to peerID: PeerID, isFavorite: Bool) {
         SecureLogger.debug("🔔 sendFavoriteNotification called - peerID: \(peerID), isFavorite: \(isFavorite)", category: .session)
-        
-        // Include Nostr public key in the notification
-        var content = isFavorite ? "[FAVORITED]" : "[UNFAVORITED]"
-        
-        // Add our Nostr public key if available
-        if let myNostrIdentity = try? idBridge.getCurrentNostrIdentity() {
-            content += ":" + myNostrIdentity.npub
-            SecureLogger.debug("📝 Sending favorite notification with Nostr npub: \(myNostrIdentity.npub)", category: .session)
-        }
-        
+
+        let content = isFavorite ? "[FAVORITED]" : "[UNFAVORITED]"
+
         SecureLogger.debug("📤 Sending favorite notification to \(peerID): \(content)", category: .session)
         sendPrivateMessage(content, to: peerID, messageID: UUID().uuidString)
     }

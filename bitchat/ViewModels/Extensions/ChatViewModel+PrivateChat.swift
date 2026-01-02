@@ -35,13 +35,7 @@ extension ChatViewModel {
             )
             return
         }
-        
-        // Geohash DM routing: conversation keys start with "nostr_"
-        if peerID.isGeoDM {
-            sendGeohashDM(content, to: peerID)
-            return
-        }
-        
+
         // Determine routing method and recipient nickname
         guard let noiseKey = Data(hexString: peerID.id) else { return }
         let isConnected = meshService.isPeerConnected(peerID)
@@ -109,198 +103,6 @@ extension ChatViewModel {
         }
     }
     
-    func sendGeohashDM(_ content: String, to peerID: PeerID) {
-        guard case .location(let ch) = activeChannel else {
-            addSystemMessage(
-                String(localized: "system.location.not_in_channel", comment: "System message when attempting to send without being in a location channel")
-            )
-            return
-        }
-        let messageID = UUID().uuidString
-        
-        // Local echo in the DM thread
-        let message = BitchatMessage(
-            id: messageID,
-            sender: nickname,
-            content: content,
-            timestamp: Date(),
-            isRelay: false,
-            isPrivate: true,
-            recipientNickname: nickname,
-            senderPeerID: meshService.myPeerID,
-            deliveryStatus: .sending
-        )
-        
-        if privateChats[peerID] == nil {
-            privateChats[peerID] = []
-        }
-        
-        privateChats[peerID]?.append(message)
-        objectWillChange.send()
-
-        // Resolve recipient hex from mapping
-        guard let recipientHex = nostrKeyMapping[peerID] else {
-            if let msgIdx = privateChats[peerID]?.firstIndex(where: { $0.id == messageID }) {
-                privateChats[peerID]?[msgIdx].deliveryStatus = .failed(
-                    reason: String(localized: "content.delivery.reason.unknown_recipient", comment: "Failure reason when the recipient is unknown")
-                )
-            }
-            return
-        }
-        
-        // Respect geohash blocks
-        if identityManager.isNostrBlocked(pubkeyHexLowercased: recipientHex) {
-            if let msgIdx = privateChats[peerID]?.firstIndex(where: { $0.id == messageID }) {
-                privateChats[peerID]?[msgIdx].deliveryStatus = .failed(
-                    reason: String(localized: "content.delivery.reason.blocked", comment: "Failure reason when the user is blocked")
-                )
-            }
-            addSystemMessage(
-                String(localized: "system.dm.blocked_generic", comment: "System message when sending fails because user is blocked")
-            )
-            return
-        }
-        
-        // Send via Nostr using per-geohash identity
-        do {
-            let id = try idBridge.deriveIdentity(forGeohash: ch.geohash)
-            // Prevent messaging ourselves
-            if recipientHex.lowercased() == id.publicKeyHex.lowercased() {
-                if let idx = privateChats[peerID]?.firstIndex(where: { $0.id == messageID }) {
-                privateChats[peerID]?[idx].deliveryStatus = .failed(
-                    reason: String(localized: "content.delivery.reason.self", comment: "Failure reason when attempting to message yourself")
-                )
-            }
-                return
-            }
-            SecureLogger.debug("GeoDM: local send mid=\(messageID.prefix(8))… to=\(recipientHex.prefix(8))… conv=\(peerID)", category: .session)
-            let nostrTransport = NostrTransport(keychain: keychain, idBridge: idBridge)
-            nostrTransport.senderPeerID = meshService.myPeerID
-            nostrTransport.sendPrivateMessageGeohash(content: content, toRecipientHex: recipientHex, from: id, messageID: messageID)
-            if let msgIdx = privateChats[peerID]?.firstIndex(where: { $0.id == messageID }) {
-                privateChats[peerID]?[msgIdx].deliveryStatus = .sent
-            }
-        } catch {
-            if let idx = privateChats[peerID]?.firstIndex(where: { $0.id == messageID }) {
-                privateChats[peerID]?[idx].deliveryStatus = .failed(
-                    reason: String(localized: "content.delivery.reason.send_error", comment: "Failure reason for a generic send error")
-                )
-            }
-        }
-    }
-
-    // MARK: - Private Chat Handling (Geohash/Ephemeral)
-
-    func handlePrivateMessage(
-        _ payload: NoisePayload,
-        senderPubkey: String,
-        convKey: PeerID,
-        id: NostrIdentity,
-        messageTimestamp: Date
-    ) {
-        guard let pm = PrivateMessagePacket.decode(from: payload.data) else { return }
-        let messageId = pm.messageID
-        
-        SecureLogger.info("GeoDM: recv PM <- sender=\(senderPubkey.prefix(8))… mid=\(messageId.prefix(8))…", category: .session)
-
-        sendDeliveryAckIfNeeded(to: messageId, senderPubKey: senderPubkey, from: id)
-
-        // Respect geohash blocks
-        if identityManager.isNostrBlocked(pubkeyHexLowercased: senderPubkey) {
-            return
-        }
-
-        // Duplicate check
-        if privateChats[convKey]?.contains(where: { $0.id == messageId }) == true { return }
-        for (_, arr) in privateChats {
-            if arr.contains(where: { $0.id == messageId }) {
-                return
-            }
-        }
-        
-        let senderName = displayNameForNostrPubkey(senderPubkey)
-        let msg = BitchatMessage(
-            id: messageId,
-            sender: senderName,
-            content: pm.content,
-            timestamp: messageTimestamp,
-            isRelay: false,
-            isPrivate: true,
-            recipientNickname: nickname,
-            senderPeerID: convKey,
-            deliveryStatus: .delivered(to: nickname, at: Date())
-        )
-        
-        if privateChats[convKey] == nil {
-            privateChats[convKey] = []
-        }
-        privateChats[convKey]?.append(msg)
-        
-        let isViewing = selectedPrivateChatPeer == convKey
-        let wasReadBefore = sentReadReceipts.contains(messageId)
-        let isRecentMessage = Date().timeIntervalSince(messageTimestamp) < 30
-        let shouldMarkUnread = !wasReadBefore && !isViewing && isRecentMessage
-        if shouldMarkUnread {
-            unreadPrivateMessages.insert(convKey)
-        }
-        
-        // Send READ if viewing this conversation
-        if isViewing {
-            sendReadReceiptIfNeeded(to: messageId, senderPubKey: senderPubkey, from: id)
-        }
-        
-        // Notify for truly unread and recent messages when not viewing
-        if !isViewing && shouldMarkUnread {
-            NotificationService.shared.sendPrivateMessageNotification(
-                from: senderName,
-                message: pm.content,
-                peerID: convKey
-            )
-        }
-        
-        objectWillChange.send()
-    }
-    
-    func handleDelivered(_ payload: NoisePayload, senderPubkey: String, convKey: PeerID) {
-        guard let messageID = String(data: payload.data, encoding: .utf8) else { return }
-        
-        if let idx = privateChats[convKey]?.firstIndex(where: { $0.id == messageID }) {
-            privateChats[convKey]?[idx].deliveryStatus = .delivered(to: displayNameForNostrPubkey(senderPubkey), at: Date())
-            objectWillChange.send()
-            SecureLogger.info("GeoDM: recv DELIVERED for mid=\(messageID.prefix(8))… from=\(senderPubkey.prefix(8))…", category: .session)
-        } else {
-            SecureLogger.warning("GeoDM: delivered ack for unknown mid=\(messageID.prefix(8))… conv=\(convKey)", category: .session)
-        }
-    }
-    
-    func handleReadReceipt(_ payload: NoisePayload, senderPubkey: String, convKey: PeerID) {
-        guard let messageID = String(data: payload.data, encoding: .utf8) else { return }
-        
-        if let idx = privateChats[convKey]?.firstIndex(where: { $0.id == messageID }) {
-            privateChats[convKey]?[idx].deliveryStatus = .read(by: displayNameForNostrPubkey(senderPubkey), at: Date())
-            objectWillChange.send()
-            SecureLogger.info("GeoDM: recv READ for mid=\(messageID.prefix(8))… from=\(senderPubkey.prefix(8))…", category: .session)
-        } else {
-            SecureLogger.warning("GeoDM: read ack for unknown mid=\(messageID.prefix(8))… conv=\(convKey)", category: .session)
-        }
-    }
-
-    func sendDeliveryAckIfNeeded(to messageId: String, senderPubKey: String, from id: NostrIdentity) {
-        guard !sentGeoDeliveryAcks.contains(messageId) else { return }
-        let nt = NostrTransport(keychain: keychain, idBridge: idBridge)
-        nt.senderPeerID = meshService.myPeerID
-        nt.sendDeliveryAckGeohash(for: messageId, toRecipientHex: senderPubKey, from: id)
-        sentGeoDeliveryAcks.insert(messageId)
-    }
-    
-    func sendReadReceiptIfNeeded(to messageId: String, senderPubKey: String, from id: NostrIdentity) {
-        guard !sentReadReceipts.contains(messageId) else { return }
-        let nt = NostrTransport(keychain: keychain, idBridge: idBridge)
-        nt.senderPeerID = meshService.myPeerID
-        nt.sendReadReceiptGeohash(messageId, toRecipientHex: senderPubKey, from: id)
-        sentReadReceipts.insert(messageId)
-    }
-
     // MARK: - Media Transfers
 
     private enum MediaSendError: Error {
@@ -454,8 +256,8 @@ extension ChatViewModel {
                 senderPeerID: senderPeerID,
                 deliveryStatus: .sending
             )
-            timelineStore.append(message, to: activeChannel)
-            messages = timelineStore.messages(for: activeChannel)
+            timelineStore.append(message, to: .mesh)
+            messages = timelineStore.messages(for: .mesh)
             trimMessagesIfNeeded()
         }
 
@@ -629,20 +431,6 @@ extension ChatViewModel {
         
         addMessageToPrivateChatsIfNeeded(message, targetPeerID: targetPeerID)
         mirrorToEphemeralIfNeeded(message, targetPeerID: targetPeerID, key: actualSenderNoiseKey)
-
-        // Using simplified internal helper in this file (or make the main one internal)
-        // sendDeliveryAckViaNostrEmbedded is in ChatViewModel+Nostr.swift and is internal.
-        // However, it was missing in ChatViewModel+Nostr.swift in previous step check?
-        // Wait, I added `sendDeliveryAckViaNostrEmbedded` to `ChatViewModel+Nostr.swift` in Step 19?
-        // Let's re-check `ChatViewModel+Nostr.swift` content in my mind.
-        // I see `sendDeliveryAckViaNostrEmbedded` in `ChatViewModel+Nostr.swift` in the output of step 33.
-        // So I can call it.
-        sendDeliveryAckViaNostrEmbedded(
-            message,
-            wasReadBefore: wasReadBefore,
-            senderPubkey: senderPubkey,
-            key: actualSenderNoiseKey
-        )
 
         if wasReadBefore {
             // do nothing
@@ -819,12 +607,6 @@ extension ChatViewModel {
                 SecureLogger.debug("Viewing chat; sending READ ack for \(message.id.prefix(8))… via router", category: .session)
                 messageRouter.sendReadReceipt(receipt, to: PeerID(hexData: key))
                 sentReadReceipts.insert(message.id)
-            } else if let id = try? idBridge.getCurrentNostrIdentity() {
-                let nt = NostrTransport(keychain: keychain, idBridge: idBridge)
-                nt.senderPeerID = meshService.myPeerID
-                nt.sendReadReceiptGeohash(message.id, toRecipientHex: senderPubkey, from: id)
-                sentReadReceipts.insert(message.id)
-                SecureLogger.debug("Viewing chat; sent READ ack directly to Nostr pub=\(senderPubkey.prefix(8))… for mid=\(message.id.prefix(8))…", category: .session)
             }
         }
     }
@@ -1049,15 +831,7 @@ extension ChatViewModel {
     @MainActor
     func isMessageBlocked(_ message: BitchatMessage) -> Bool {
         if let peerID = message.senderPeerID ?? getPeerIDForNickname(message.sender) {
-            // Check mesh/known peers first
-            if isPeerBlocked(peerID) { return true }
-            // Check geohash (Nostr) blocks using mapping to full pubkey
-            if peerID.isGeoChat || peerID.isGeoDM {
-                if let full = nostrKeyMapping[peerID]?.lowercased() {
-                    if identityManager.isNostrBlocked(pubkeyHexLowercased: full) { return true }
-                }
-            }
-            return false
+            return isPeerBlocked(peerID)
         }
         return false
     }

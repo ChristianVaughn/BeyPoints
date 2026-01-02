@@ -33,8 +33,6 @@ struct ContentView: View {
     // MARK: - Properties
     
     @EnvironmentObject var viewModel: ChatViewModel
-    @ObservedObject private var locationManager = LocationChannelManager.shared
-    @ObservedObject private var bookmarks = GeohashBookmarksStore.shared
     @State private var messageText = ""
     @FocusState private var isTextFieldFocused: Bool
     @Environment(\.colorScheme) var colorScheme
@@ -52,12 +50,8 @@ struct ContentView: View {
     @State private var lastScrollTime: Date = .distantPast
     @State private var scrollThrottleTimer: Timer?
     @State private var autocompleteDebounceTimer: Timer?
-    @State private var showLocationChannelsSheet = false
     @State private var showVerifySheet = false
     @State private var expandedMessageIDs: Set<String> = []
-    @State private var showLocationNotes = false
-    @State private var notesGeohash: String? = nil
-    @State private var sheetNotesCount: Int = 0
     @State private var imagePreviewURL: URL? = nil
     @State private var recordingAlertMessage: String = ""
     @State private var showRecordingAlert = false
@@ -75,7 +69,6 @@ struct ContentView: View {
     @ScaledMetric(relativeTo: .body) private var headerHeight: CGFloat = 44
     @ScaledMetric(relativeTo: .subheadline) private var headerPeerIconSize: CGFloat = 11
     @ScaledMetric(relativeTo: .subheadline) private var headerPeerCountFontSize: CGFloat = 12
-    // Timer-based refresh removed; use LocationChannelManager live updates instead
     // Window sizes for rendering (infinite scroll up)
     @State private var windowCountPublic: Int = 300
     @State private var windowCountPrivate: [PeerID: Int] = [:]
@@ -103,21 +96,11 @@ struct ContentView: View {
     }
 
     private var peopleSheetSubtitle: String? {
-        switch locationManager.selectedChannel {
-        case .mesh:
-            return "#mesh"
-        case .location(let channel):
-            return "#\(channel.geohash.lowercased())"
-        }
+        return "#mesh"
     }
 
     private var peopleSheetActiveCount: Int {
-        switch locationManager.selectedChannel {
-        case .mesh:
-            return viewModel.allPeers.filter { $0.peerID != viewModel.meshService.myPeerID }.count
-        case .location:
-            return viewModel.visibleGeohashPeople().count
-        }
+        return viewModel.allPeers.filter { $0.peerID != viewModel.meshService.myPeerID }.count
     }
     
     
@@ -288,13 +271,7 @@ struct ContentView: View {
 
             Button("content.actions.direct_message") {
                 if let peerID = selectedMessageSenderID {
-                    if peerID.isGeoChat {
-                        if let full = viewModel.fullNostrHex(forSenderPeerID: peerID) {
-                            viewModel.startGeohashDM(withPubkeyHex: full)
-                        }
-                    } else {
-                        viewModel.startPrivateChat(with: peerID)
-                    }
+                    viewModel.startPrivateChat(with: peerID)
                     withAnimation(.easeInOut(duration: TransportConfig.uiAnimationMediumSeconds)) {
                         showSidebar = true
                     }
@@ -314,12 +291,7 @@ struct ContentView: View {
             }
 
             Button("content.actions.block", role: .destructive) {
-                // Prefer direct geohash block when we have a Nostr sender ID
-                if let peerID = selectedMessageSenderID, peerID.isGeoChat,
-                   let full = viewModel.fullNostrHex(forSenderPeerID: peerID),
-                   let sender = selectedMessageSender {
-                    viewModel.blockGeohashUser(pubkeyHexLowercased: full, displayName: sender)
-                } else if let sender = selectedMessageSender {
+                if let sender = selectedMessageSender {
                     viewModel.sendMessage("/block \(sender)")
                 }
             }
@@ -366,10 +338,7 @@ struct ContentView: View {
 
         let contextKey: String = {
             if let peer = privatePeer { return "dm:\(peer)" }
-            switch locationManager.selectedChannel {
-            case .mesh: return "mesh"
-            case .location(let ch): return "geo:\(ch.geohash)"
-            }
+            return "mesh"
         }()
 
         let messageItems: [MessageDisplayItem] = windowedMessages.compactMap { message in
@@ -456,14 +425,8 @@ struct ContentView: View {
                     if now.timeIntervalSince(lastScrollTime) > TransportConfig.uiScrollThrottleSeconds {
                         // Immediate scroll if enough time has passed
                         lastScrollTime = now
-                        let contextKey: String = {
-                            switch locationManager.selectedChannel {
-                            case .mesh: return "mesh"
-                            case .location(let ch): return "geo:\(ch.geohash)"
-                            }
-                        }()
                         let count = windowCountPublic
-                        let target = viewModel.messages.suffix(count).last.map { "\(contextKey)|\($0.id)" }
+                        let target = viewModel.messages.suffix(count).last.map { "mesh|\($0.id)" }
                         DispatchQueue.main.async {
                             if let target = target { proxy.scrollTo(target, anchor: .bottom) }
                         }
@@ -473,14 +436,8 @@ struct ContentView: View {
                         scrollThrottleTimer = Timer.scheduledTimer(withTimeInterval: TransportConfig.uiScrollThrottleSeconds, repeats: false) { [weak viewModel] _ in
                             Task { @MainActor in
                                 lastScrollTime = Date()
-                                let contextKey: String = {
-                                    switch locationManager.selectedChannel {
-                                    case .mesh: return "mesh"
-                                    case .location(let ch): return "geo:\(ch.geohash)"
-                                    }
-                                }()
                                 let count = windowCountPublic
-                                let target = viewModel?.messages.suffix(count).last.map { "\(contextKey)|\($0.id)" }
+                                let target = viewModel?.messages.suffix(count).last.map { "mesh|\($0.id)" }
                                 if let target = target { proxy.scrollTo(target, anchor: .bottom) }
                             }
                         }
@@ -521,24 +478,6 @@ struct ContentView: View {
                                 if let target = target { proxy.scrollTo(target, anchor: .bottom) }
                             }
                         }
-                    }
-                }
-            }
-            .onChange(of: locationManager.selectedChannel) { newChannel in
-                // When switching to a new geohash channel, scroll to the bottom
-                guard privatePeer == nil else { return }
-                switch newChannel {
-                case .mesh:
-                    break
-                case .location(let ch):
-                    // Reset window size
-                    windowCountPublic = TransportConfig.uiWindowInitialCountPublic
-                    let contextKey = "geo:\(ch.geohash)"
-                    let last = viewModel.messages.suffix(windowCountPublic).last?.id
-                    let target = last.map { "\(contextKey)|\($0)" }
-                    isAtBottom.wrappedValue = true
-                    DispatchQueue.main.async {
-                        if let target = target { proxy.scrollTo(target, anchor: .bottom) }
                     }
                 }
             }
@@ -679,9 +618,7 @@ struct ContentView: View {
             let peerID = PeerID(str: id.removingPercentEncoding ?? id)
             selectedMessageSenderID = peerID
 
-            if peerID.isGeoDM || peerID.isGeoChat {
-                selectedMessageSender = viewModel.geohashDisplayName(for: peerID)
-            } else if let name = viewModel.meshService.peerNickname(peerID: peerID) {
+            if let name = viewModel.meshService.peerNickname(peerID: peerID) {
                 selectedMessageSender = name
             } else {
                 selectedMessageSender = viewModel.messages.last(where: { $0.senderPeerID == peerID && $0.sender != "system" })?.sender
@@ -693,31 +630,6 @@ struct ContentView: View {
             } else {
                 showMessageActions = true
             }
-
-        case "geohash":
-            let gh = url.path.trimmingCharacters(in: CharacterSet(charactersIn: "/")).lowercased()
-            let allowed = Set("0123456789bcdefghjkmnpqrstuvwxyz")
-            guard (2...12).contains(gh.count), gh.allSatisfy({ allowed.contains($0) }) else { return }
-
-            func levelForLength(_ len: Int) -> GeohashChannelLevel {
-                switch len {
-                case 0...2: return .region
-                case 3...4: return .province
-                case 5: return .city
-                case 6: return .neighborhood
-                case 7: return .block
-                default: return .block
-                }
-            }
-
-            let level = levelForLength(gh.count)
-            let channel = GeohashChannel(level: level, geohash: gh)
-
-            let inRegional = LocationChannelManager.shared.availableChannels.contains { $0.geohash == gh }
-            if !inRegional && !LocationChannelManager.shared.availableChannels.isEmpty {
-                LocationChannelManager.shared.markTeleported(for: gh, true)
-            }
-            LocationChannelManager.shared.select(ChannelID.location(channel))
 
         default:
             return
@@ -732,14 +644,8 @@ struct ContentView: View {
                let last = viewModel.getPrivateChatMessages(for: peer).suffix(300).last?.id {
                 return "dm:\(peer)|\(last)"
             }
-            let contextKey: String = {
-                switch locationManager.selectedChannel {
-                case .mesh: return "mesh"
-                case .location(let ch): return "geo:\(ch.geohash)"
-                }
-            }()
             if let last = viewModel.messages.suffix(300).last?.id {
-                return "\(contextKey)|\(last)"
+                return "mesh|\(last)"
             }
             return nil
         }()
@@ -758,14 +664,8 @@ struct ContentView: View {
                    let last = viewModel.getPrivateChatMessages(for: peer).suffix(300).last?.id {
                     return "dm:\(peer)|\(last)"
                 }
-                let contextKey: String = {
-                    switch locationManager.selectedChannel {
-                    case .mesh: return "mesh"
-                    case .location(let ch): return "geo:\(ch.geohash)"
-                    }
-                }()
                 if let last = viewModel.messages.suffix(300).last?.id {
-                    return "\(contextKey)|\(last)"
+                    return "mesh|\(last)"
                 }
                 return nil
             }()
@@ -866,16 +766,14 @@ struct ContentView: View {
                         .font(.bitchatSystem(size: 18, design: .monospaced))
                         .foregroundColor(textColor)
                     Spacer()
-                    if case .mesh = locationManager.selectedChannel {
-                        Button(action: { showVerifySheet = true }) {
-                            Image(systemName: "qrcode")
-                                .font(.bitchatSystem(size: 14))
-                        }
-                        .buttonStyle(.plain)
-                        .help(
-                            String(localized: "content.help.verification", comment: "Help text for verification button")
-                        )
+                    Button(action: { showVerifySheet = true }) {
+                        Image(systemName: "qrcode")
+                            .font(.bitchatSystem(size: 14))
                     }
+                    .buttonStyle(.plain)
+                    .help(
+                        String(localized: "content.help.verification", comment: "Help text for verification button")
+                    )
                     Button(action: {
                         withAnimation(.easeInOut(duration: TransportConfig.uiAnimationMediumSeconds)) {
                             dismiss()
@@ -897,17 +795,9 @@ struct ContentView: View {
                 )
 
                 if let subtitle = peopleSheetSubtitle {
-                    let subtitleColor: Color = {
-                        switch locationManager.selectedChannel {
-                        case .mesh:
-                            return Color.blue
-                        case .location:
-                            return Color.green
-                        }
-                    }()
                     HStack(spacing: 6) {
                         Text(subtitle)
-                            .foregroundColor(subtitleColor)
+                            .foregroundColor(.blue)
                         Text(activeText)
                             .foregroundColor(.secondary)
                     }
@@ -925,23 +815,13 @@ struct ContentView: View {
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 6) {
-                    if case .location = locationManager.selectedChannel {
-                        GeohashPeopleList(
-                            viewModel: viewModel,
-                            textColor: textColor,
-                            secondaryTextColor: secondaryTextColor,
-                            onTapPerson: {
-                                showSidebar = true
-                            }
-                        )
-                    } else {
-                        MeshPeerList(
-                            viewModel: viewModel,
-                            textColor: textColor,
-                            secondaryTextColor: secondaryTextColor,
-                            onTapPeer: { peerID in
-                                viewModel.startPrivateChat(with: peerID)
-                                showSidebar = true
+                    MeshPeerList(
+                        viewModel: viewModel,
+                        textColor: textColor,
+                        secondaryTextColor: secondaryTextColor,
+                        onTapPeer: { peerID in
+                            viewModel.startPrivateChat(with: peerID)
+                            showSidebar = true
                             },
                             onToggleFavorite: { peerID in
                                 viewModel.toggleFavorite(peerID: peerID)
@@ -950,7 +830,6 @@ struct ContentView: View {
                                 viewModel.showFingerprint(for: peerID)
                             }
                         )
-                    }
                 }
                 .padding(.top, 4)
                 .id(viewModel.allPeers.map { "\($0.peerID)-\($0.isConnected)" }.joined())
@@ -988,21 +867,19 @@ struct ContentView: View {
                         privateHeaderInfo(context: headerContext, privatePeerID: privatePeerID)
                         let isFavorite = viewModel.isFavorite(peerID: headerContext.headerPeerID)
 
-                        if !privatePeerID.isGeoDM {
-                            Button(action: {
-                                viewModel.toggleFavorite(peerID: headerContext.headerPeerID)
-                            }) {
-                                Image(systemName: isFavorite ? "star.fill" : "star")
-                                    .font(.bitchatSystem(size: 14))
-                                    .foregroundColor(isFavorite ? Color.yellow : textColor)
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel(
-                                isFavorite
-                                ? String(localized: "content.accessibility.remove_favorite", comment: "Accessibility label to remove a favorite")
-                                : String(localized: "content.accessibility.add_favorite", comment: "Accessibility label to add a favorite")
-                            )
+                        Button(action: {
+                            viewModel.toggleFavorite(peerID: headerContext.headerPeerID)
+                        }) {
+                            Image(systemName: isFavorite ? "star.fill" : "star")
+                                .font(.bitchatSystem(size: 14))
+                                .foregroundColor(isFavorite ? Color.yellow : textColor)
                         }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(
+                            isFavorite
+                            ? String(localized: "content.accessibility.remove_favorite", comment: "Accessibility label to remove a favorite")
+                            : String(localized: "content.accessibility.add_favorite", comment: "Accessibility label to add a favorite")
+                        )
                     }
                     .frame(maxWidth: .infinity)
 
@@ -1097,23 +974,21 @@ struct ContentView: View {
                     .font(.bitchatSystem(size: 16, weight: .medium, design: .monospaced))
                     .foregroundColor(textColor)
 
-                if !privatePeerID.isGeoDM {
-                    let statusPeerID = viewModel.getShortIDForNoiseKey(privatePeerID)
-                    let encryptionStatus = viewModel.getEncryptionStatus(for: statusPeerID)
-                    if let icon = encryptionStatus.icon {
-                        Image(systemName: icon)
-                            .font(.bitchatSystem(size: 14))
-                            .foregroundColor(encryptionStatus == .noiseVerified ? textColor :
-                                             encryptionStatus == .noiseSecured ? textColor :
-                                             Color.red)
-                            .accessibilityLabel(
-                                String(
-                                    format: String(localized: "content.accessibility.encryption_status", comment: "Accessibility label announcing encryption status"),
-                                    locale: .current,
-                                    encryptionStatus.accessibilityDescription
-                                )
+                let statusPeerID = viewModel.getShortIDForNoiseKey(privatePeerID)
+                let encryptionStatus = viewModel.getEncryptionStatus(for: statusPeerID)
+                if let icon = encryptionStatus.icon {
+                    Image(systemName: icon)
+                        .font(.bitchatSystem(size: 14))
+                        .foregroundColor(encryptionStatus == .noiseVerified ? textColor :
+                                         encryptionStatus == .noiseSecured ? textColor :
+                                         Color.red)
+                        .accessibilityLabel(
+                            String(
+                                format: String(localized: "content.accessibility.encryption_status", comment: "Accessibility label announcing encryption status"),
+                                locale: .current,
+                                encryptionStatus.accessibilityDescription
                             )
-                    }
+                        )
                 }
             }
         }
@@ -1136,10 +1011,6 @@ struct ContentView: View {
         let peer = viewModel.getPeer(byID: headerPeerID)
 
         let displayName: String = {
-            if privatePeerID.isGeoDM, case .location(let ch) = locationManager.selectedChannel {
-                let disp = viewModel.geohashDisplayName(for: privatePeerID)
-                return "#\(ch.geohash)/@\(disp)"
-            }
             if let name = peer?.displayName { return name }
             if let name = viewModel.meshService.peerNickname(peerID: headerPeerID) { return name }
             if let fav = FavoritesPersistenceService.shared.getFavoriteStatus(for: Data(hexString: headerPeerID.id) ?? Data()),
@@ -1194,23 +1065,16 @@ struct ContentView: View {
         return (name, "")
     }
     
-    // Compute channel-aware people count and color for toolbar (cross-platform)
+    // Compute people count and color for toolbar (mesh only)
     private func channelPeopleCountAndColor() -> (Int, Color) {
-        switch locationManager.selectedChannel {
-        case .location:
-            let n = viewModel.geohashPeople.count
-            let standardGreen = (colorScheme == .dark) ? Color.green : Color(red: 0, green: 0.5, blue: 0)
-            return (n, n > 0 ? standardGreen : Color.secondary)
-        case .mesh:
-            let counts = viewModel.allPeers.reduce(into: (others: 0, mesh: 0)) { counts, peer in
-                guard peer.peerID != viewModel.meshService.myPeerID else { return }
-                if peer.isConnected { counts.mesh += 1; counts.others += 1 }
-                else if peer.isReachable { counts.others += 1 }
-            }
-            let meshBlue = Color(hue: 0.60, saturation: 0.85, brightness: 0.82)
-            let color: Color = counts.mesh > 0 ? meshBlue : Color.secondary
-            return (counts.others, color)
+        let counts = viewModel.allPeers.reduce(into: (others: 0, mesh: 0)) { counts, peer in
+            guard peer.peerID != viewModel.meshService.myPeerID else { return }
+            if peer.isConnected { counts.mesh += 1; counts.others += 1 }
+            else if peer.isReachable { counts.others += 1 }
         }
+        let meshBlue = Color(hue: 0.60, saturation: 0.85, brightness: 0.82)
+        let color: Color = counts.mesh > 0 ? meshBlue : Color.secondary
+        return (counts.others, color)
     }
 
     
@@ -1260,12 +1124,7 @@ struct ContentView: View {
             // Precompute header count and color outside the ViewBuilder expressions
             let cc = channelPeopleCountAndColor()
             let headerCountColor: Color = cc.1
-            let headerOtherPeersCount: Int = {
-                if case .location = locationManager.selectedChannel {
-                    return viewModel.visibleGeohashPeople().count
-                }
-                return cc.0
-            }()
+            let headerOtherPeersCount: Int = cc.0
 
             HStack(spacing: 10) {
                 // Unread icon immediately to the left of the channel badge (independent from channel button)
@@ -1282,75 +1141,15 @@ struct ContentView: View {
                         String(localized: "content.accessibility.open_unread_private_chat", comment: "Accessibility label for the unread private chat button")
                     )
                 }
-                // Notes icon (mesh only and when location is authorized), to the left of #mesh
-                if case .mesh = locationManager.selectedChannel, locationManager.permissionState == .authorized {
-                    Button(action: {
-                        // Kick a one-shot refresh and show the sheet immediately.
-                        LocationChannelManager.shared.enableLocationChannels()
-                        LocationChannelManager.shared.refreshChannels()
-                        // If we already have a block geohash, pass it; otherwise wait in the sheet.
-                        notesGeohash = LocationChannelManager.shared.availableChannels.first(where: { $0.level == .building })?.geohash
-                        showLocationNotes = true
-                    }) {
-                        HStack(alignment: .center, spacing: 4) {
-                            Image(systemName: "note.text")
-                                .font(.bitchatSystem(size: 12))
-                                .foregroundColor(Color.orange.opacity(0.8))
-                                .padding(.top, 1)
-                        }
-                        .fixedSize(horizontal: true, vertical: false)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(
-                        String(localized: "content.accessibility.location_notes", comment: "Accessibility label for location notes button")
-                    )
-                }
-
-                // Bookmark toggle (geochats): to the left of #geohash
-                if case .location(let ch) = locationManager.selectedChannel {
-                    Button(action: { GeohashBookmarksStore.shared.toggle(ch.geohash) }) {
-                        Image(systemName: GeohashBookmarksStore.shared.isBookmarked(ch.geohash) ? "bookmark.fill" : "bookmark")
-                            .font(.bitchatSystem(size: 12))
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(
-                        String(
-                            format: String(localized: "content.accessibility.toggle_bookmark", comment: "Accessibility label for toggling a geohash bookmark"),
-                            locale: .current,
-                            ch.geohash
-                        )
-                    )
-                }
-
-                // Location channels button '#'
-                Button(action: { showLocationChannelsSheet = true }) {
-                    let badgeText: String = {
-                        switch locationManager.selectedChannel {
-                        case .mesh: return "#mesh"
-                        case .location(let ch): return "#\(ch.geohash)"
-                        }
-                    }()
-                    let badgeColor: Color = {
-                        switch locationManager.selectedChannel {
-                        case .mesh:
-                            return Color(hue: 0.60, saturation: 0.85, brightness: 0.82)
-                        case .location:
-                            return (colorScheme == .dark) ? Color.green : Color(red: 0, green: 0.5, blue: 0)
-                        }
-                    }()
-                    Text(badgeText)
-                        .font(.bitchatSystem(size: 14, design: .monospaced))
-                        .foregroundColor(badgeColor)
-                        .lineLimit(headerLineLimit)
-                        .fixedSize(horizontal: true, vertical: false)
-                        .layoutPriority(2)
-                        .accessibilityLabel(
-                            String(localized: "content.accessibility.location_channels", comment: "Accessibility label for the location channels button")
-                        )
-                }
-                .buttonStyle(.plain)
-                .padding(.leading, 4)
-                .padding(.trailing, 2)
+                // Channel badge
+                Text("#mesh")
+                    .font(.bitchatSystem(size: 14, weight: .medium, design: .monospaced))
+                    .foregroundColor(Color(hue: 0.60, saturation: 0.85, brightness: 0.82))
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
+                    .layoutPriority(2)
+                    .padding(.leading, 4)
+                    .padding(.trailing, 2)
 
                 HStack(spacing: 4) {
                     // People icon with count
@@ -1387,94 +1186,6 @@ struct ContentView: View {
         }
         .frame(height: headerHeight)
         .padding(.horizontal, 12)
-        .sheet(isPresented: $showLocationChannelsSheet) {
-            LocationChannelsSheet(isPresented: $showLocationChannelsSheet)
-                .environmentObject(viewModel)
-                .onAppear { viewModel.isLocationChannelsSheetPresented = true }
-                .onDisappear { viewModel.isLocationChannelsSheetPresented = false }
-        }
-        .sheet(isPresented: $showLocationNotes, onDismiss: {
-            notesGeohash = nil
-        }) {
-            Group {
-                if let gh = notesGeohash ?? LocationChannelManager.shared.availableChannels.first(where: { $0.level == .building })?.geohash {
-                    LocationNotesView(geohash: gh)
-                        .environmentObject(viewModel)
-                } else {
-                    VStack(spacing: 12) {
-                        HStack {
-                            Text("content.notes.title")
-                                .font(.bitchatSystem(size: 16, weight: .bold, design: .monospaced))
-                            Spacer()
-                            Button(action: { showLocationNotes = false }) {
-                                Image(systemName: "xmark")
-                                    .font(.bitchatSystem(size: 13, weight: .semibold, design: .monospaced))
-                                    .foregroundColor(textColor)
-                                    .frame(width: 32, height: 32)
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel(String(localized: "common.close", comment: "Accessibility label for close buttons"))
-                        }
-                        .frame(height: headerHeight)
-                        .padding(.horizontal, 12)
-                        .background(backgroundColor.opacity(0.95))
-                        Text("content.notes.location_unavailable")
-                            .font(.bitchatSystem(size: 14, design: .monospaced))
-                            .foregroundColor(secondaryTextColor)
-                        Button("content.location.enable") {
-                            LocationChannelManager.shared.enableLocationChannels()
-                            LocationChannelManager.shared.refreshChannels()
-                        }
-                        .buttonStyle(.bordered)
-                        Spacer()
-                    }
-                    .background(backgroundColor)
-                    .foregroundColor(textColor)
-                    // per-sheet global onChange added below
-                }
-            }
-            .onAppear {
-                // Ensure we are authorized and start live location updates (distance-filtered)
-                LocationChannelManager.shared.enableLocationChannels()
-                LocationChannelManager.shared.beginLiveRefresh()
-            }
-            .onDisappear {
-                LocationChannelManager.shared.endLiveRefresh()
-            }
-            .onChange(of: locationManager.availableChannels) { channels in
-                if let current = channels.first(where: { $0.level == .building })?.geohash,
-                    notesGeohash != current {
-                    notesGeohash = current
-                    #if os(iOS)
-                    // Light taptic when geohash changes while the sheet is open
-                    let generator = UIImpactFeedbackGenerator(style: .light)
-                    generator.prepare()
-                    generator.impactOccurred()
-                    #endif
-                }
-            }
-        }
-        .onAppear {
-            if case .mesh = locationManager.selectedChannel,
-               locationManager.permissionState == .authorized,
-               LocationChannelManager.shared.availableChannels.isEmpty {
-                LocationChannelManager.shared.refreshChannels()
-            }
-        }
-        .onChange(of: locationManager.selectedChannel) { _ in
-            if case .mesh = locationManager.selectedChannel,
-               locationManager.permissionState == .authorized,
-               LocationChannelManager.shared.availableChannels.isEmpty {
-                LocationChannelManager.shared.refreshChannels()
-            }
-        }
-        .onChange(of: locationManager.permissionState) { _ in
-            if case .mesh = locationManager.selectedChannel,
-               locationManager.permissionState == .authorized,
-               LocationChannelManager.shared.availableChannels.isEmpty {
-                LocationChannelManager.shared.refreshChannels()
-            }
-        }
         .alert("content.alert.screenshot.title", isPresented: $viewModel.showScreenshotPrivacyWarning) {
             Button("common.ok", role: .cancel) {}
         } message: {
@@ -1688,10 +1399,7 @@ private extension ContentView {
         let step = TransportConfig.uiWindowStepCount
         let contextKey: String = {
             if let peer = privatePeer { return "dm:\(peer)" }
-            switch locationManager.selectedChannel {
-            case .mesh: return "mesh"
-            case .location(let ch): return "geo:\(ch.geohash)"
-            }
+            return "mesh"
         }()
         let preserveID = "\(contextKey)|\(message.id)"
 
@@ -1743,27 +1451,13 @@ private extension ContentView {
     }
 
     private var shouldShowMediaControls: Bool {
-        if let peer = viewModel.selectedPrivateChatPeer, !(peer.isGeoDM || peer.isGeoChat) {
-            return true
-        }
-        switch locationManager.selectedChannel {
-        case .mesh:
-            return true
-        case .location:
-            return false
-        }
+        // Always show for mesh-only chat
+        return true
     }
 
     private var shouldShowVoiceControl: Bool {
-        if let peer = viewModel.selectedPrivateChatPeer, !(peer.isGeoDM || peer.isGeoChat) {
-            return true
-        }
-        switch locationManager.selectedChannel {
-        case .mesh:
-            return true
-        case .location:
-            return false
-        }
+        // Always show for mesh-only chat
+        return true
     }
 
     private var composerAccentColor: Color {

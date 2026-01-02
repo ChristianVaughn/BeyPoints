@@ -48,11 +48,7 @@ enum CommandInfo: String, Identifiable {
         }
     }
     
-    static func all(isGeoPublic: Bool, isGeoDM: Bool) -> [CommandInfo] {
-        let baseCommands: [CommandInfo] = [.block, .unblock, .clear, .hug, .message, .slap, .who]
-        if isGeoPublic || isGeoDM {
-            return baseCommands + [.favorite, .unfavorite]
-        }
-        return baseCommands
+    static var all: [CommandInfo] {
+        [.block, .unblock, .clear, .hug, .message, .slap, .who, .favorite, .unfavorite]
     }
 }
