@@ -44,7 +44,6 @@ struct ContentView: View {
     @State private var showMessageActions = false
     @State private var selectedMessageSender: String?
     @State private var selectedMessageSenderID: PeerID?
-    @FocusState private var isNicknameFieldFocused: Bool
     @State private var isAtBottomPublic: Bool = true
     @State private var isAtBottomPrivate: Bool = true
     @State private var lastScrollTime: Date = .distantPast
@@ -1080,6 +1079,15 @@ struct ContentView: View {
     
     private var mainHeaderView: some View {
         HStack(spacing: 0) {
+            // Back button to return to landing page
+            Button(action: { dismiss() }) {
+                Image(systemName: "chevron.left")
+                    .font(.bitchatSystem(size: 14))
+                    .foregroundColor(textColor)
+            }
+            .buttonStyle(.plain)
+            .padding(.trailing, 8)
+
             Text(verbatim: "bitchat/")
                 .font(.bitchatSystem(size: 18, weight: .medium, design: .monospaced))
                 .foregroundColor(textColor)
@@ -1091,33 +1099,7 @@ struct ContentView: View {
                     // Single tap for app info
                     showAppInfo = true
                 }
-            
-            HStack(spacing: 0) {
-                Text(verbatim: "@")
-                    .font(.bitchatSystem(size: 14, design: .monospaced))
-                    .foregroundColor(secondaryTextColor)
-                
-                TextField("content.input.nickname_placeholder", text: $viewModel.nickname)
-                    .textFieldStyle(.plain)
-                    .font(.bitchatSystem(size: 14, design: .monospaced))
-                    .frame(maxWidth: 80)
-                    .foregroundColor(textColor)
-                    .focused($isNicknameFieldFocused)
-                    .autocorrectionDisabled(true)
-                    #if os(iOS)
-                    .textInputAutocapitalization(.never)
-                    #endif
-                    .onChange(of: isNicknameFieldFocused) { isFocused in
-                        if !isFocused {
-                            // Only validate when losing focus
-                            viewModel.validateAndSaveNickname()
-                        }
-                    }
-                    .onSubmit {
-                        viewModel.validateAndSaveNickname()
-                    }
-            }
-            
+
             Spacer()
             
             // Channel badge + dynamic spacing + people counter

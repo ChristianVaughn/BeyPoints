@@ -4,6 +4,9 @@
     "-" : {
 
     },
+    "@" : {
+
+    },
     "#" : {
 
     },
@@ -6397,6 +6400,9 @@
     "Beyblade tournament scoring system with bracket management and multi-device support." : {
 
     },
+    "beypoints" : {
+
+    },
     "BeyScore" : {
 
     },
@@ -6410,6 +6416,9 @@
 
     },
     "Change your role in the tournament system" : {
+
+    },
+    "Chat" : {
 
     },
     "Choose an image" : {
@@ -31531,6 +31540,9 @@
     "Practice Match" : {
 
     },
+    "Profile" : {
+
+    },
     "Pts" : {
 
     },
@@ -36732,6 +36744,9 @@
 
     },
     "Warning issued" : {
+
+    },
+    "WBO Beyblade Tournament Scoring" : {
 
     },
     "Win Condition:" : {
