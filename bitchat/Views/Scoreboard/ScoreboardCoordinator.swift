@@ -33,7 +33,7 @@ struct ScoreboardCoordinator: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Group {
                 switch currentScreen {
                 case .idle:

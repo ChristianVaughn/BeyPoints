@@ -9,6 +9,7 @@
 import Foundation
 import SwiftUI
 import Combine
+import UIKit
 
 /// Manages the current tournament state for Master mode.
 @MainActor
@@ -159,6 +160,10 @@ final class TournamentManager: ObservableObject {
         // Add to pending submissions
         if !pendingSubmissions.contains(where: { $0.matchId == submission.matchId }) {
             pendingSubmissions.append(submission)
+
+            // Haptic feedback to alert master that a score needs approval
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.warning)
         }
 
         saveTournament()

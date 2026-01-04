@@ -19,193 +19,198 @@ struct GameResultsOverlay: View {
     var onSubmitScore: (() -> Void)?
 
     var body: some View {
-        ZStack {
-            // Dimmed background
-            Color.black.opacity(0.6)
-                .ignoresSafeArea()
-                .onTapGesture {
-                    if !gameState.matchEnded {
-                        onDismiss()
-                    }
-                }
-
-            // Results card
-            VStack(spacing: 24) {
-                // Winner announcement
-                VStack(spacing: 8) {
-                    if gameState.matchEnded {
-                        Image(systemName: "trophy.fill")
-                            .font(.system(size: 48))
-                            .foregroundColor(.yellow)
-
-                        Text("Match Winner!")
-                            .font(.title2)
-                            .foregroundColor(.secondary)
-                    } else {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 48))
-                            .foregroundColor(.green)
-
-                        Text("Set \(gameState.currentGameNumber) Complete")
-                            .font(.title2)
-                            .foregroundColor(.secondary)
-                    }
-
-                    if let winner = gameState.matchWinner {
-                        Text(gameState.name(for: winner))
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                    }
-                }
-
-                // Score summary
-                VStack(spacing: 12) {
-                    // Final score - show set wins for best-of match end, otherwise points
-                    HStack(spacing: 24) {
-                        VStack {
-                            Text(gameState.player1Name)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            if gameState.bestOf != .none && gameState.matchEnded {
-                                Text("\(gameState.player1SetWins)")
-                                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                                    .foregroundColor(.blue)
-                            } else {
-                                Text("\(gameState.player1Score)")
-                                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                                    .foregroundColor(.blue)
-                            }
-                        }
-
-                        Text("-")
-                            .font(.title)
-                            .foregroundColor(.secondary)
-
-                        VStack {
-                            Text(gameState.player2Name)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            if gameState.bestOf != .none && gameState.matchEnded {
-                                Text("\(gameState.player2SetWins)")
-                                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                                    .foregroundColor(.red)
-                            } else {
-                                Text("\(gameState.player2Score)")
-                                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                                    .foregroundColor(.red)
-                            }
+        GeometryReader { geometry in
+            ZStack {
+                // Dimmed background
+                Color.black.opacity(0.6)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        if !gameState.matchEnded {
+                            onDismiss()
                         }
                     }
 
-                    // Set wins - only show for set-complete (not match end)
-                    if gameState.bestOf != .none && !gameState.matchEnded {
-                        HStack(spacing: 24) {
-                            VStack {
-                                Text("Sets")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                                Text("\(gameState.player1SetWins)")
+                // Results card - scrollable for smaller screens
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 24) {
+                        // Winner announcement
+                        VStack(spacing: 8) {
+                            if gameState.matchEnded {
+                                Image(systemName: "trophy.fill")
+                                    .font(.system(size: 48))
+                                    .foregroundColor(.yellow)
+
+                                Text("Match Winner!")
                                     .font(.title2)
-                                    .fontWeight(.semibold)
+                                    .foregroundColor(.secondary)
+                            } else {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.system(size: 48))
+                                    .foregroundColor(.green)
+
+                                Text("Set \(gameState.currentGameNumber) Complete")
+                                    .font(.title2)
+                                    .foregroundColor(.secondary)
                             }
 
-                            Text("-")
-                                .foregroundColor(.secondary)
-
-                            VStack {
-                                Text("Sets")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                                Text("\(gameState.player2SetWins)")
-                                    .font(.title2)
-                                    .fontWeight(.semibold)
+                            if let winner = gameState.matchWinner {
+                                Text(gameState.name(for: winner))
+                                    .font(.largeTitle)
+                                    .fontWeight(.bold)
                             }
                         }
-                    }
-                }
-                .padding()
-                .background(Color(.tertiarySystemBackground))
-                .cornerRadius(12)
 
-                // Statistics
-                GameStatistics(history: gameState.matchHistory, generation: gameState.generation)
-
-                // Action buttons
-                VStack(spacing: 12) {
-                    if gameState.matchEnded {
-                        // Match is over
-                        if let onSubmit = onSubmitScore {
-                            Button(action: onSubmit) {
-                                HStack {
-                                    Image(systemName: "paperplane.fill")
-                                    Text("Submit Score")
+                        // Score summary
+                        VStack(spacing: 12) {
+                            // Final score - show set wins for best-of match end, otherwise points
+                            HStack(spacing: 24) {
+                                VStack {
+                                    Text(gameState.player1Name)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    if gameState.bestOf != .none && gameState.matchEnded {
+                                        Text("\(gameState.player1SetWins)")
+                                            .font(.system(size: 36, weight: .bold, design: .rounded))
+                                            .foregroundColor(.blue)
+                                    } else {
+                                        Text("\(gameState.player1Score)")
+                                            .font(.system(size: 36, weight: .bold, design: .rounded))
+                                            .foregroundColor(.blue)
+                                    }
                                 }
-                                .font(.headline)
+
+                                Text("-")
+                                    .font(.title)
+                                    .foregroundColor(.secondary)
+
+                                VStack {
+                                    Text(gameState.player2Name)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    if gameState.bestOf != .none && gameState.matchEnded {
+                                        Text("\(gameState.player2SetWins)")
+                                            .font(.system(size: 36, weight: .bold, design: .rounded))
+                                            .foregroundColor(.red)
+                                    } else {
+                                        Text("\(gameState.player2Score)")
+                                            .font(.system(size: 36, weight: .bold, design: .rounded))
+                                            .foregroundColor(.red)
+                                    }
+                                }
+                            }
+
+                            // Set wins - only show for set-complete (not match end)
+                            if gameState.bestOf != .none && !gameState.matchEnded {
+                                HStack(spacing: 24) {
+                                    VStack {
+                                        Text("Sets")
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                        Text("\(gameState.player1SetWins)")
+                                            .font(.title2)
+                                            .fontWeight(.semibold)
+                                    }
+
+                                    Text("-")
+                                        .foregroundColor(.secondary)
+
+                                    VStack {
+                                        Text("Sets")
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                        Text("\(gameState.player2SetWins)")
+                                            .font(.title2)
+                                            .fontWeight(.semibold)
+                                    }
+                                }
+                            }
+                        }
+                        .padding()
+                        .background(Color(.tertiarySystemBackground))
+                        .cornerRadius(12)
+
+                        // Statistics
+                        GameStatistics(history: gameState.matchHistory, generation: gameState.generation)
+
+                        // Action buttons
+                        VStack(spacing: 12) {
+                            if gameState.matchEnded {
+                                // Match is over
+                                if let onSubmit = onSubmitScore {
+                                    Button(action: onSubmit) {
+                                        HStack {
+                                            Image(systemName: "paperplane.fill")
+                                            Text("Submit Score")
+                                        }
+                                        .font(.headline)
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(Color.green)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(12)
+                                    }
+                                }
+
+                                Button(action: onNewGame) {
+                                    HStack {
+                                        Image(systemName: "arrow.clockwise")
+                                        Text("New Match")
+                                    }
+                                    .font(.headline)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(12)
+                                }
+                            } else if gameState.bestOf != .none {
+                                // Game over but match continues
+                                Button(action: { onNextGame?() }) {
+                                    HStack {
+                                        Image(systemName: "arrow.right.circle.fill")
+                                        Text("Next Game")
+                                    }
+                                    .font(.headline)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(12)
+                                }
+                            }
+
+                            // View history button
+                            Button(action: onViewHistory) {
+                                HStack {
+                                    Image(systemName: "list.bullet")
+                                    Text("View History")
+                                }
+                                .font(.subheadline)
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(Color.green)
-                                .foregroundColor(.white)
+                                .background(Color(.secondarySystemBackground))
+                                .foregroundColor(.primary)
                                 .cornerRadius(12)
                             }
-                        }
 
-                        Button(action: onNewGame) {
-                            HStack {
-                                Image(systemName: "arrow.clockwise")
-                                Text("New Match")
+                            // Close button (if not match end)
+                            if !gameState.matchEnded {
+                                Button(action: onDismiss) {
+                                    Text("Close")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                }
                             }
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(12)
-                        }
-                    } else if gameState.bestOf != .none {
-                        // Game over but match continues
-                        Button(action: { onNextGame?() }) {
-                            HStack {
-                                Image(systemName: "arrow.right.circle.fill")
-                                Text("Next Game")
-                            }
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(12)
                         }
                     }
-
-                    // View history button
-                    Button(action: onViewHistory) {
-                        HStack {
-                            Image(systemName: "list.bullet")
-                            Text("View History")
-                        }
-                        .font(.subheadline)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color(.secondarySystemBackground))
-                        .foregroundColor(.primary)
-                        .cornerRadius(12)
-                    }
-
-                    // Close button (if not match end)
-                    if !gameState.matchEnded {
-                        Button(action: onDismiss) {
-                            Text("Close")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                        }
-                    }
+                    .padding(24)
+                    .background(Color(.systemBackground))
+                    .cornerRadius(20)
+                    .shadow(radius: 20)
+                    .frame(maxWidth: min(geometry.size.width - 48, 500))
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .padding(24)
-            .background(Color(.systemBackground))
-            .cornerRadius(20)
-            .shadow(radius: 20)
-            .padding(32)
         }
     }
 }

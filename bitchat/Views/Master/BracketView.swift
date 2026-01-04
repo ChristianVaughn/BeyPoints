@@ -62,6 +62,7 @@ struct SingleEliminationBracketView: View {
     let onMatchSelected: ((TournamentMatch) -> Void)?
 
     @State private var selectedMatchId: UUID?
+    @State private var sheetMatch: TournamentMatch?
 
     var body: some View {
         ScrollView([.horizontal, .vertical], showsIndicators: true) {
@@ -73,11 +74,18 @@ struct SingleEliminationBracketView: View {
                         totalRounds: tournament.numberOfRounds,
                         bestOf: tournament.bestOf,
                         selectedMatchId: $selectedMatchId,
-                        onMatchSelected: onMatchSelected
+                        onMatchTap: { match in
+                            selectedMatchId = match.id
+                            sheetMatch = match
+                            onMatchSelected?(match)
+                        }
                     )
                 }
             }
             .padding()
+        }
+        .sheet(item: $sheetMatch) { match in
+            MatchDetailSheet(match: match, tournament: tournament)
         }
     }
 }
@@ -90,7 +98,7 @@ struct BracketRoundColumn: View {
     let totalRounds: Int
     let bestOf: BestOf
     @Binding var selectedMatchId: UUID?
-    let onMatchSelected: ((TournamentMatch) -> Void)?
+    let onMatchTap: ((TournamentMatch) -> Void)?
 
     private var roundName: String {
         if round == totalRounds {
@@ -120,14 +128,13 @@ struct BracketRoundColumn: View {
                         bestOf: bestOf,
                         isSelected: selectedMatchId == match.id,
                         onTap: {
-                            selectedMatchId = match.id
-                            onMatchSelected?(match)
+                            onMatchTap?(match)
                         }
                     )
                 }
             }
         }
-        .frame(width: 180)
+        .frame(width: DeviceEnvironment.minBracketColumnWidth)
     }
 
     private var matchSpacing: CGFloat {
@@ -180,13 +187,81 @@ struct BracketMatchCard: View {
             onTap()
         }
         .contextMenu {
-            if match.status == .assigned || match.status == .inProgress {
+            // View Details (always available)
+            Button {
+                onTap()
+            } label: {
+                Label("View Details", systemImage: "info.circle")
+            }
+
+            Divider()
+
+            // Status-specific actions
+            switch match.status {
+            case .pending:
+                if match.isReady {
+                    // Quick assign to available scoreboards
+                    let availableDevices = TournamentManager.shared.availableScoreboards.prefix(3)
+                    if !availableDevices.isEmpty {
+                        ForEach(Array(availableDevices)) { device in
+                            Button {
+                                quickAssign(to: device)
+                            } label: {
+                                Label("Assign to \(device.deviceName)", systemImage: "ipad.landscape")
+                            }
+                        }
+                    } else {
+                        Button {} label: {
+                            Label("No Scoreboards Available", systemImage: "ipad.slash")
+                        }
+                        .disabled(true)
+                    }
+                } else {
+                    Button {} label: {
+                        Label("Waiting for Players", systemImage: "hourglass")
+                    }
+                    .disabled(true)
+                }
+
+            case .assigned, .inProgress:
                 Button(role: .destructive) {
                     MatchAssignmentService.shared.cancelAssignment(matchId: match.id)
                 } label: {
                     Label("Unassign Match", systemImage: "xmark.circle")
                 }
+
+            case .awaitingApproval:
+                Button {
+                    TournamentMessageHandler.shared.approveScore(matchId: match.id)
+                } label: {
+                    Label("Approve Score", systemImage: "checkmark.circle")
+                }
+
+                Button(role: .destructive) {
+                    TournamentMessageHandler.shared.rejectScore(matchId: match.id, reason: nil)
+                } label: {
+                    Label("Reject Score", systemImage: "xmark.circle")
+                }
+
+            case .complete:
+                Button {} label: {
+                    Label("Match Complete", systemImage: "trophy.fill")
+                }
+                .disabled(true)
             }
+        }
+    }
+
+    private func quickAssign(to device: ConnectedScoreboard) {
+        TournamentManager.shared.assignMatch(matchId: match.id, to: device.id)
+
+        if let tournament = TournamentManager.shared.currentTournament {
+            let config = tournament.createMatchConfiguration(for: match)
+            TournamentMessageHandler.shared.assignMatchToDevice(
+                match: match,
+                deviceId: device.id,
+                config: config
+            )
         }
     }
 

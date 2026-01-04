@@ -15,6 +15,7 @@ struct RoundRobinView: View {
 
     @State private var selectedTab = 0  // 0=Standings, 1=Matches
     @State private var selectedMatchId: UUID?
+    @State private var sheetMatch: TournamentMatch?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -52,7 +53,10 @@ struct RoundRobinView: View {
                             players: tournament.players,
                             matches: tournament.matches,
                             selectedMatchId: $selectedMatchId,
-                            onMatchSelected: onMatchSelected
+                            onMatchSelected: { match in
+                                sheetMatch = match
+                                onMatchSelected?(match)
+                            }
                         )
                         .padding(.horizontal)
 
@@ -60,13 +64,19 @@ struct RoundRobinView: View {
                         RoundRobinMatchList(
                             matches: tournament.matches,
                             selectedMatchId: $selectedMatchId,
-                            onMatchSelected: onMatchSelected
+                            onMatchSelected: { match in
+                                sheetMatch = match
+                                onMatchSelected?(match)
+                            }
                         )
                         .padding(.horizontal)
                     }
                     .padding(.vertical)
                 }
             }
+        }
+        .sheet(item: $sheetMatch) { match in
+            MatchDetailSheet(match: match, tournament: tournament)
         }
     }
 
@@ -85,16 +95,16 @@ struct RoundRobinStandingsView: View {
             // Header row
             HStack(spacing: 0) {
                 Text("#")
-                    .frame(width: 30, alignment: .center)
+                    .frame(width: DeviceEnvironment.standingsRankWidth, alignment: .center)
                 Text("Player")
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 8)
                 Text("W")
-                    .frame(width: 30, alignment: .center)
+                    .frame(width: DeviceEnvironment.standingsStatWidth, alignment: .center)
                 Text("L")
-                    .frame(width: 30, alignment: .center)
+                    .frame(width: DeviceEnvironment.standingsStatWidth, alignment: .center)
                 Text("+/-")
-                    .frame(width: 45, alignment: .center)
+                    .frame(width: DeviceEnvironment.standingsPointsWidth, alignment: .center)
             }
             .font(.caption.bold())
             .padding(.horizontal, 12)
@@ -105,7 +115,7 @@ struct RoundRobinStandingsView: View {
             ForEach(Array(sortedStandings.enumerated()), id: \.element.id) { index, standing in
                 HStack(spacing: 0) {
                     Text("\(index + 1)")
-                        .frame(width: 30, alignment: .center)
+                        .frame(width: DeviceEnvironment.standingsRankWidth, alignment: .center)
                         .font(.subheadline)
                         .fontWeight(index < 3 ? .semibold : .regular)
                         .foregroundColor(rankColor(for: index))
@@ -117,17 +127,17 @@ struct RoundRobinStandingsView: View {
                         .lineLimit(1)
 
                     Text("\(standing.wins)")
-                        .frame(width: 30, alignment: .center)
+                        .frame(width: DeviceEnvironment.standingsStatWidth, alignment: .center)
                         .font(.subheadline)
                         .foregroundColor(.green)
 
                     Text("\(standing.losses)")
-                        .frame(width: 30, alignment: .center)
+                        .frame(width: DeviceEnvironment.standingsStatWidth, alignment: .center)
                         .font(.subheadline)
                         .foregroundColor(.red)
 
                     Text(standing.pointDifferential >= 0 ? "+\(standing.pointDifferential)" : "\(standing.pointDifferential)")
-                        .frame(width: 45, alignment: .center)
+                        .frame(width: DeviceEnvironment.standingsPointsWidth, alignment: .center)
                         .font(.subheadline)
                         .foregroundColor(standing.pointDifferential >= 0 ? .green : .red)
                 }
@@ -165,6 +175,9 @@ struct RoundRobinGrid: View {
     @Binding var selectedMatchId: UUID?
     let onMatchSelected: ((TournamentMatch) -> Void)?
 
+    private var cellSize: CGFloat { DeviceEnvironment.roundRobinCellSize }
+    private var headerWidth: CGFloat { DeviceEnvironment.roundRobinHeaderWidth }
+
     var body: some View {
         ScrollView(.horizontal, showsIndicators: true) {
             VStack(spacing: 0) {
@@ -172,12 +185,12 @@ struct RoundRobinGrid: View {
                 HStack(spacing: 0) {
                     // Empty corner cell
                     Color.clear
-                        .frame(width: 80, height: 40)
+                        .frame(width: headerWidth, height: cellSize)
 
                     ForEach(players, id: \.self) { player in
                         Text(String(player.prefix(3)).uppercased())
                             .font(.caption2.bold())
-                            .frame(width: 40, height: 40)
+                            .frame(width: cellSize, height: cellSize)
                             .rotationEffect(.degrees(-45))
                     }
                 }
@@ -189,7 +202,7 @@ struct RoundRobinGrid: View {
                         Text(player1)
                             .font(.caption)
                             .lineLimit(1)
-                            .frame(width: 80, alignment: .leading)
+                            .frame(width: headerWidth, alignment: .leading)
                             .padding(.leading, 4)
 
                         // Cells
@@ -224,6 +237,8 @@ struct GridCell: View {
 
     @Environment(\.colorScheme) private var colorScheme
 
+    private var cellSize: CGFloat { DeviceEnvironment.roundRobinCellSize }
+
     private var match: TournamentMatch? {
         matches.first { m in
             (m.player1Name == player1 && m.player2Name == player2) ||
@@ -237,7 +252,7 @@ struct GridCell: View {
                 // Diagonal - can't play yourself
                 Rectangle()
                     .fill(Color(.systemGray4))
-                    .frame(width: 40, height: 40)
+                    .frame(width: cellSize, height: cellSize)
             } else if let match = match {
                 Button {
                     selectedMatchId = match.id
@@ -250,7 +265,7 @@ struct GridCell: View {
                 // No match found
                 Rectangle()
                     .fill(Color(.systemGray6))
-                    .frame(width: 40, height: 40)
+                    .frame(width: cellSize, height: cellSize)
             }
         }
     }
@@ -260,7 +275,7 @@ struct GridCell: View {
         ZStack {
             Rectangle()
                 .fill(cellBackground(for: match))
-                .frame(width: 40, height: 40)
+                .frame(width: cellSize, height: cellSize)
 
             if match.status == .complete {
                 // Show result
@@ -387,9 +402,84 @@ struct RoundRobinMatchRow: View {
                 .stroke(isSelected ? Color.primaryBlue(for: colorScheme) : Color.clear, lineWidth: 2)
         )
         .onTapGesture {
-            if match.isReady && match.status == .pending {
+            onTap()
+        }
+        .contextMenu {
+            // View Details (always available)
+            Button {
                 onTap()
+            } label: {
+                Label("View Details", systemImage: "info.circle")
             }
+
+            Divider()
+
+            // Status-specific actions
+            switch match.status {
+            case .pending:
+                if match.isReady {
+                    // Quick assign to available scoreboards
+                    let availableDevices = TournamentManager.shared.availableScoreboards.prefix(3)
+                    if !availableDevices.isEmpty {
+                        ForEach(Array(availableDevices)) { device in
+                            Button {
+                                quickAssign(to: device)
+                            } label: {
+                                Label("Assign to \(device.deviceName)", systemImage: "ipad.landscape")
+                            }
+                        }
+                    } else {
+                        Button {} label: {
+                            Label("No Scoreboards Available", systemImage: "ipad.slash")
+                        }
+                        .disabled(true)
+                    }
+                } else {
+                    Button {} label: {
+                        Label("Waiting for Players", systemImage: "hourglass")
+                    }
+                    .disabled(true)
+                }
+
+            case .assigned, .inProgress:
+                Button(role: .destructive) {
+                    MatchAssignmentService.shared.cancelAssignment(matchId: match.id)
+                } label: {
+                    Label("Unassign Match", systemImage: "xmark.circle")
+                }
+
+            case .awaitingApproval:
+                Button {
+                    TournamentMessageHandler.shared.approveScore(matchId: match.id)
+                } label: {
+                    Label("Approve Score", systemImage: "checkmark.circle")
+                }
+
+                Button(role: .destructive) {
+                    TournamentMessageHandler.shared.rejectScore(matchId: match.id, reason: nil)
+                } label: {
+                    Label("Reject Score", systemImage: "xmark.circle")
+                }
+
+            case .complete:
+                Button {} label: {
+                    Label("Match Complete", systemImage: "trophy.fill")
+                }
+                .disabled(true)
+            }
+        }
+    }
+
+    private func quickAssign(to device: ConnectedScoreboard) {
+        TournamentManager.shared.assignMatch(matchId: match.id, to: device.id)
+
+        if let tournament = TournamentManager.shared.currentTournament {
+            let config = tournament.createMatchConfiguration(for: match)
+            TournamentMessageHandler.shared.assignMatchToDevice(
+                match: match,
+                deviceId: device.id,
+                config: config
+            )
         }
     }
 }
@@ -401,6 +491,7 @@ struct GroupRoundRobinView: View {
     let onMatchSelected: ((TournamentMatch) -> Void)?
 
     @State private var selectedTab = 0
+    @State private var sheetMatch: TournamentMatch?
 
     var body: some View {
         if tournament.currentStage == .finals {
@@ -424,7 +515,10 @@ struct GroupRoundRobinView: View {
                         players: tournament.group1Players,
                         matches: tournament.matches.filter { $0.stage == .group1 },
                         standings: tournament.groupStandings(for: .group1),
-                        onMatchSelected: onMatchSelected
+                        onMatchSelected: { match in
+                            sheetMatch = match
+                            onMatchSelected?(match)
+                        }
                     )
                     .tag(0)
 
@@ -433,11 +527,17 @@ struct GroupRoundRobinView: View {
                         players: tournament.group2Players,
                         matches: tournament.matches.filter { $0.stage == .group2 },
                         standings: tournament.groupStandings(for: .group2),
-                        onMatchSelected: onMatchSelected
+                        onMatchSelected: { match in
+                            sheetMatch = match
+                            onMatchSelected?(match)
+                        }
                     )
                     .tag(1)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
+            }
+            .sheet(item: $sheetMatch) { match in
+                MatchDetailSheet(match: match, tournament: tournament)
             }
         }
     }

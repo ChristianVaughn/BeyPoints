@@ -33,6 +33,10 @@ struct ScoreCard: View {
         playerColor.opacity(0.05)
     }
 
+    private var scoreFontSize: CGFloat { DeviceEnvironment.scoreFontSize }
+    private var cardPadding: CGFloat { DeviceEnvironment.cardPadding }
+    private var chipSpacing: CGFloat { DeviceEnvironment.chipSpacing }
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -49,7 +53,7 @@ struct ScoreCard: View {
 
                 // Centered score
                 Text("\(score)")
-                    .font(.system(size: 96, weight: .bold, design: .rounded))
+                    .font(.system(size: scoreFontSize, weight: .bold, design: .rounded))
                     .foregroundColor(playerColor)
                     .contentTransition(.numericText())
                     .animation(.spring(response: 0.3), value: score)
@@ -63,7 +67,7 @@ struct ScoreCard: View {
     private func player1Layout(size: CGSize) -> some View {
         ZStack {
             // Top-left: Player name + warning
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: chipSpacing) {
                 PlayerNameRow(
                     playerName: playerName,
                     player: player,
@@ -78,10 +82,10 @@ struct ScoreCard: View {
                 Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .padding(20)
+            .padding(cardPadding)
 
             // Top-right: ERR and OWF stacked
-            VStack(spacing: 12) {
+            VStack(spacing: chipSpacing) {
                 ErrorChip(
                     player: player,
                     showWarning: showWarning,
@@ -100,7 +104,7 @@ struct ScoreCard: View {
                 Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-            .padding(20)
+            .padding(cardPadding)
 
             // Bottom: Scoring chips
             scoringChipsPlayer1(size: size)
@@ -116,7 +120,7 @@ struct ScoreCard: View {
             scoringChipsPlayer2(size: size)
 
             // Bottom-left: Player name + warning
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: chipSpacing) {
                 Spacer()
 
                 if showWarning {
@@ -131,10 +135,10 @@ struct ScoreCard: View {
                 )
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
-            .padding(20)
+            .padding(cardPadding)
 
             // Bottom-right: ERR and OWF stacked
-            VStack(spacing: 12) {
+            VStack(spacing: chipSpacing) {
                 Spacer()
 
                 if canUseOwnFinish {
@@ -153,7 +157,7 @@ struct ScoreCard: View {
                 )
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-            .padding(20)
+            .padding(cardPadding)
         }
     }
 
@@ -164,20 +168,20 @@ struct ScoreCard: View {
 
         return HStack {
             // Bottom-left stack
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: chipSpacing) {
                 Spacer()
                 leftColumnChips(conditions: conditions)
             }
-            .padding(20)
+            .padding(cardPadding)
 
             Spacer()
 
             // Bottom-right stack
-            VStack(alignment: .trailing, spacing: 12) {
+            VStack(alignment: .trailing, spacing: chipSpacing) {
                 Spacer()
                 rightColumnChips(conditions: conditions)
             }
-            .padding(20)
+            .padding(cardPadding)
         }
     }
 
@@ -186,20 +190,20 @@ struct ScoreCard: View {
 
         return HStack {
             // Top-left stack
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: chipSpacing) {
                 leftColumnChipsReversed(conditions: conditions)
                 Spacer()
             }
-            .padding(20)
+            .padding(cardPadding)
 
             Spacer()
 
             // Top-right stack
-            VStack(alignment: .trailing, spacing: 12) {
+            VStack(alignment: .trailing, spacing: chipSpacing) {
                 rightColumnChipsReversed(conditions: conditions)
                 Spacer()
             }
-            .padding(20)
+            .padding(cardPadding)
         }
     }
 
@@ -207,7 +211,7 @@ struct ScoreCard: View {
 
     /// Left column chips for P1 (bottom) - XTR on top, OVR on bottom for X gen
     private func leftColumnChips(conditions: [WinCondition]) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: chipSpacing) {
             if conditions.contains(.xtreme) {
                 chipButton(for: .xtreme)
             }
@@ -219,7 +223,7 @@ struct ScoreCard: View {
 
     /// Right column chips for P1 (bottom) - BST on top, SPF on bottom for X gen
     private func rightColumnChips(conditions: [WinCondition]) -> some View {
-        VStack(alignment: .trailing, spacing: 12) {
+        VStack(alignment: .trailing, spacing: chipSpacing) {
             if conditions.contains(.burst) {
                 chipButton(for: .burst)
             }
@@ -231,7 +235,7 @@ struct ScoreCard: View {
 
     /// Left column chips for P2 (top) - OVR on top, XTR on bottom for X gen
     private func leftColumnChipsReversed(conditions: [WinCondition]) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: chipSpacing) {
             if conditions.contains(.over) {
                 chipButton(for: .over)
             }
@@ -243,7 +247,7 @@ struct ScoreCard: View {
 
     /// Right column chips for P2 (top) - SPF on top, BST on bottom for X gen
     private func rightColumnChipsReversed(conditions: [WinCondition]) -> some View {
-        VStack(alignment: .trailing, spacing: 12) {
+        VStack(alignment: .trailing, spacing: chipSpacing) {
             if conditions.contains(.spin) {
                 chipButton(for: .spin)
             }
@@ -339,6 +343,10 @@ struct CompactScoreCard: View {
         playerColor.opacity(0.05)
     }
 
+    private var compactScoreFontSize: CGFloat { DeviceEnvironment.compactScoreFontSize }
+    private var compactPadding: CGFloat { DeviceEnvironment.isIPad ? 20 : 16 }
+    private var compactChipSpacing: CGFloat { DeviceEnvironment.isIPad ? 12 : 8 }
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -355,7 +363,7 @@ struct CompactScoreCard: View {
 
                 // Centered score
                 Text("\(score)")
-                    .font(.system(size: 72, weight: .bold, design: .rounded))
+                    .font(.system(size: compactScoreFontSize, weight: .bold, design: .rounded))
                     .foregroundColor(playerColor)
                     .contentTransition(.numericText())
                     .animation(.spring(response: 0.3), value: score)
@@ -370,7 +378,7 @@ struct CompactScoreCard: View {
 
         return ZStack {
             // Top-left: Player name
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: compactChipSpacing) {
                 PlayerNameRow(
                     playerName: playerName,
                     player: player,
@@ -385,10 +393,10 @@ struct CompactScoreCard: View {
                 Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .padding(16)
+            .padding(compactPadding)
 
             // Top-right: ERR/OWF stacked
-            VStack(spacing: 8) {
+            VStack(spacing: compactChipSpacing) {
                 ErrorChip(
                     player: player,
                     showWarning: showWarning,
@@ -407,10 +415,10 @@ struct CompactScoreCard: View {
                 Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-            .padding(16)
+            .padding(compactPadding)
 
             // Bottom-left: Scoring chips stacked
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: compactChipSpacing) {
                 Spacer()
                 ForEach(conditions, id: \.self) { condition in
                     ScoringChip(
@@ -424,7 +432,7 @@ struct CompactScoreCard: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
-            .padding(16)
+            .padding(compactPadding)
         }
     }
 
@@ -435,7 +443,7 @@ struct CompactScoreCard: View {
 
         return ZStack {
             // Top-right: Scoring chips stacked
-            VStack(alignment: .trailing, spacing: 8) {
+            VStack(alignment: .trailing, spacing: compactChipSpacing) {
                 ForEach(conditions, id: \.self) { condition in
                     ScoringChip(
                         condition: condition,
@@ -449,10 +457,10 @@ struct CompactScoreCard: View {
                 Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-            .padding(16)
+            .padding(compactPadding)
 
             // Bottom-left: ERR/OWF stacked
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: compactChipSpacing) {
                 Spacer()
 
                 if canUseOwnFinish {
@@ -471,10 +479,10 @@ struct CompactScoreCard: View {
                 )
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
-            .padding(16)
+            .padding(compactPadding)
 
             // Bottom-right: Player name + warning
-            VStack(alignment: .trailing, spacing: 8) {
+            VStack(alignment: .trailing, spacing: compactChipSpacing) {
                 Spacer()
 
                 if showWarning {
@@ -489,7 +497,7 @@ struct CompactScoreCard: View {
                 )
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-            .padding(16)
+            .padding(compactPadding)
         }
     }
 }

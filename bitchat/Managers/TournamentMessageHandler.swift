@@ -216,6 +216,10 @@ final class TournamentMessageHandler: ObservableObject {
         )
 
         tournamentManager.receiveScoreSubmission(submission)
+
+        // Send local notification if app is backgrounded
+        let matchName = tournamentManager.currentTournament?.match(byId: matchId)?.displayName ?? "Match"
+        NotificationService.shared.notifyScoreSubmitted(matchName: matchName, winner: message.winner)
     }
 
     // MARK: - Scoreboard Mode Handlers
@@ -230,6 +234,12 @@ final class TournamentMessageHandler: ObservableObject {
     /// Handles match assignment (Scoreboard mode).
     private func handleAssignMatch(_ message: AssignMatchMessage) {
         guard roomManager.deviceMode == .scoreboard else { return }
+
+        // Send local notification if app is backgrounded
+        NotificationService.shared.notifyMatchAssigned(
+            player1: message.player1Name,
+            player2: message.player2Name
+        )
 
         // Notify UI of assignment
         onMatchAssigned?(message)

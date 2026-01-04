@@ -14,6 +14,7 @@ struct DoubleEliminationView: View {
     let onMatchSelected: ((TournamentMatch) -> Void)?
 
     @State private var selectedMatchId: UUID?
+    @State private var sheetMatch: TournamentMatch?
 
     var body: some View {
         ScrollView([.horizontal, .vertical], showsIndicators: true) {
@@ -32,7 +33,11 @@ struct DoubleEliminationView: View {
                         matches: winnersBracketMatches,
                         bestOf: tournament.bestOf,
                         selectedMatchId: $selectedMatchId,
-                        onMatchSelected: onMatchSelected
+                        onMatchTap: { match in
+                            selectedMatchId = match.id
+                            sheetMatch = match
+                            onMatchSelected?(match)
+                        }
                     )
                 }
 
@@ -53,7 +58,11 @@ struct DoubleEliminationView: View {
                         matches: losersBracketMatches,
                         bestOf: tournament.bestOf,
                         selectedMatchId: $selectedMatchId,
-                        onMatchSelected: onMatchSelected
+                        onMatchTap: { match in
+                            selectedMatchId = match.id
+                            sheetMatch = match
+                            onMatchSelected?(match)
+                        }
                     )
                 }
 
@@ -75,11 +84,18 @@ struct DoubleEliminationView: View {
                         grandFinalReset: grandFinalReset,
                         bestOf: tournament.bestOf,
                         selectedMatchId: $selectedMatchId,
-                        onMatchSelected: onMatchSelected
+                        onMatchTap: { match in
+                            selectedMatchId = match.id
+                            sheetMatch = match
+                            onMatchSelected?(match)
+                        }
                     )
                 }
             }
             .padding()
+        }
+        .sheet(item: $sheetMatch) { match in
+            MatchDetailSheet(match: match, tournament: tournament)
         }
     }
 
@@ -108,7 +124,7 @@ struct EliminationBracketSection: View {
     let matches: [TournamentMatch]
     let bestOf: BestOf
     @Binding var selectedMatchId: UUID?
-    let onMatchSelected: ((TournamentMatch) -> Void)?
+    let onMatchTap: ((TournamentMatch) -> Void)?
 
     private var rounds: [Int] {
         Array(Set(matches.map { $0.roundNumber })).sorted()
@@ -127,7 +143,7 @@ struct EliminationBracketSection: View {
                         totalRounds: rounds.count,
                         bestOf: bestOf,
                         selectedMatchId: $selectedMatchId,
-                        onMatchSelected: onMatchSelected
+                        onMatchTap: onMatchTap
                     )
                 }
             }
@@ -143,7 +159,7 @@ struct GrandFinalsSection: View {
     let grandFinalReset: TournamentMatch?
     let bestOf: BestOf
     @Binding var selectedMatchId: UUID?
-    let onMatchSelected: ((TournamentMatch) -> Void)?
+    let onMatchTap: ((TournamentMatch) -> Void)?
 
     @Environment(\.colorScheme) private var colorScheme
 
@@ -161,8 +177,7 @@ struct GrandFinalsSection: View {
                         bestOf: bestOf,
                         isSelected: selectedMatchId == gf.id,
                         onTap: {
-                            selectedMatchId = gf.id
-                            onMatchSelected?(gf)
+                            onMatchTap?(gf)
                         }
                     )
                 }
@@ -202,9 +217,8 @@ struct GrandFinalsSection: View {
                         bestOf: bestOf,
                         isSelected: selectedMatchId == reset.id,
                         onTap: {
-                            if needsReset {
-                                selectedMatchId = reset.id
-                                onMatchSelected?(reset)
+                            if needsReset || reset.status == .complete {
+                                onMatchTap?(reset)
                             }
                         }
                     )

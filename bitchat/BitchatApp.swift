@@ -53,12 +53,14 @@ struct BitchatApp: App {
                     switch newPhase {
                     case .background:
                         // Keep BLE mesh running in background; BLEService adapts scanning automatically
-                        break
+                        NotificationService.shared.appDidEnterBackground()
                     case .active:
                         // Restart BLE services when becoming active
                         bleService.startServices()
+                        NotificationService.shared.appDidBecomeActive()
                     case .inactive:
-                        break
+                        // Treat inactive as background for notification purposes
+                        NotificationService.shared.appDidEnterBackground()
                     @unknown default:
                         break
                     }
@@ -78,6 +80,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     static var orientationLock = UIInterfaceOrientationMask.portrait
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        // Request notification permissions for tournament alerts
+        NotificationService.shared.requestPermissions()
         return true
     }
 

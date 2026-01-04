@@ -23,14 +23,25 @@ struct ScoringView: View {
     var body: some View {
         GeometryReader { geometry in
             let isLandscape = geometry.size.width > geometry.size.height
+            // Use wide layout only on larger iPads (not iPad Mini which has ~744pt height in landscape)
+            let isWideScreen = geometry.size.width > 900 && geometry.size.height > 500
 
             ZStack {
                 // Background
                 Color(.systemBackground)
                     .ignoresSafeArea()
 
-                // Main content
-                if isLandscape {
+                // Main content with iPad-specific layouts
+                if DeviceEnvironment.isIPad {
+                    if isWideScreen {
+                        iPadWideLayout(size: geometry.size)
+                    } else if isLandscape {
+                        // iPad Mini landscape or narrow Split View
+                        landscapeLayout(size: geometry.size)
+                    } else {
+                        iPadPortraitLayout(size: geometry.size)
+                    }
+                } else if isLandscape {
                     landscapeLayout(size: geometry.size)
                 } else {
                     portraitLayout(size: geometry.size)
@@ -159,9 +170,9 @@ struct ScoringView: View {
     }
 
     private func landscapeLayout(size: CGSize) -> some View {
-        let cardHeight = size.height - 24  // Full height minus padding (12 * 2)
-
-        return HStack(spacing: 12) {
+        // Don't use geometry.size for width - it's unreliable on iPad
+        // Let SwiftUI's natural layout split the space equally
+        HStack(spacing: 12) {
             // Player 1 card
             CompactScoreCard(
                 player: .player1,
@@ -183,8 +194,6 @@ struct ScoringView: View {
                     scoringManager.applyOwnFinish(to: .player1)
                 }
             )
-            .frame(height: cardHeight)
-            .frame(maxWidth: .infinity)
 
             // Player 2 card
             CompactScoreCard(
@@ -207,11 +216,126 @@ struct ScoringView: View {
                     scoringManager.applyOwnFinish(to: .player2)
                 }
             )
-            .frame(height: cardHeight)
-            .frame(maxWidth: .infinity)
+        }
+        .padding(12)
+    }
+
+    // MARK: - iPad Layouts
+
+    private func iPadWideLayout(size: CGSize) -> some View {
+        let cardHeight = size.height - 48  // Full height minus padding
+        let maxCardWidth = min((size.width - 80) / 2, 600)  // Cap max card width
+
+        return HStack(spacing: 40) {
+            Spacer()
+
+            // Player 1 card
+            ScoreCard(
+                player: .player1,
+                playerName: scoringManager.gameState.player1Name,
+                score: scoringManager.gameState.player1Score,
+                setWins: scoringManager.gameState.player1SetWins,
+                showWarning: scoringManager.gameState.player1ShowWarning,
+                generation: scoringManager.gameState.generation,
+                bestOf: scoringManager.gameState.bestOf,
+                canUseOwnFinish: scoringManager.gameState.canUseOwnFinish,
+                isDisabled: scoringManager.isScoreInputDisabled,
+                onChipTap: { condition in
+                    scoringManager.awardPoints(condition: condition, to: .player1)
+                },
+                onErrorTap: {
+                    scoringManager.handleErrorTap(for: .player1)
+                },
+                onOwnFinishTap: {
+                    scoringManager.applyOwnFinish(to: .player1)
+                }
+            )
+            .frame(width: maxCardWidth, height: cardHeight)
+
+            // Player 2 card
+            ScoreCard(
+                player: .player2,
+                playerName: scoringManager.gameState.player2Name,
+                score: scoringManager.gameState.player2Score,
+                setWins: scoringManager.gameState.player2SetWins,
+                showWarning: scoringManager.gameState.player2ShowWarning,
+                generation: scoringManager.gameState.generation,
+                bestOf: scoringManager.gameState.bestOf,
+                canUseOwnFinish: scoringManager.gameState.canUseOwnFinish,
+                isDisabled: scoringManager.isScoreInputDisabled,
+                onChipTap: { condition in
+                    scoringManager.awardPoints(condition: condition, to: .player2)
+                },
+                onErrorTap: {
+                    scoringManager.handleErrorTap(for: .player2)
+                },
+                onOwnFinishTap: {
+                    scoringManager.applyOwnFinish(to: .player2)
+                }
+            )
+            .frame(width: maxCardWidth, height: cardHeight)
+
+            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(12)
+        .padding(24)
+    }
+
+    private func iPadPortraitLayout(size: CGSize) -> some View {
+        let cardHeight = (size.height - 80) / 2  // Height for each card with extra spacing
+        let maxCardWidth = min(size.width - 80, 700)  // Cap max width
+
+        return VStack(spacing: 32) {
+            // Player 1 card
+            ScoreCard(
+                player: .player1,
+                playerName: scoringManager.gameState.player1Name,
+                score: scoringManager.gameState.player1Score,
+                setWins: scoringManager.gameState.player1SetWins,
+                showWarning: scoringManager.gameState.player1ShowWarning,
+                generation: scoringManager.gameState.generation,
+                bestOf: scoringManager.gameState.bestOf,
+                canUseOwnFinish: scoringManager.gameState.canUseOwnFinish,
+                isDisabled: scoringManager.isScoreInputDisabled,
+                onChipTap: { condition in
+                    scoringManager.awardPoints(condition: condition, to: .player1)
+                },
+                onErrorTap: {
+                    scoringManager.handleErrorTap(for: .player1)
+                },
+                onOwnFinishTap: {
+                    scoringManager.applyOwnFinish(to: .player1)
+                }
+            )
+            .frame(maxWidth: maxCardWidth)
+            .frame(height: cardHeight)
+
+            // Player 2 card
+            ScoreCard(
+                player: .player2,
+                playerName: scoringManager.gameState.player2Name,
+                score: scoringManager.gameState.player2Score,
+                setWins: scoringManager.gameState.player2SetWins,
+                showWarning: scoringManager.gameState.player2ShowWarning,
+                generation: scoringManager.gameState.generation,
+                bestOf: scoringManager.gameState.bestOf,
+                canUseOwnFinish: scoringManager.gameState.canUseOwnFinish,
+                isDisabled: scoringManager.isScoreInputDisabled,
+                onChipTap: { condition in
+                    scoringManager.awardPoints(condition: condition, to: .player2)
+                },
+                onErrorTap: {
+                    scoringManager.handleErrorTap(for: .player2)
+                },
+                onOwnFinishTap: {
+                    scoringManager.applyOwnFinish(to: .player2)
+                }
+            )
+            .frame(maxWidth: maxCardWidth)
+            .frame(height: cardHeight)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(28)
     }
 
     // MARK: - Actions

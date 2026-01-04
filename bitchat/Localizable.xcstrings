@@ -6380,16 +6380,13 @@
     "Appearance" : {
 
     },
-    "Approvals" : {
-
-    },
-    "Approvals (%@)" : {
-
-    },
     "Are you sure you want to leave the tournament room?" : {
 
     },
     "Are you the tournament organizer?" : {
+
+    },
+    "Assign to Scoreboard" : {
 
     },
     "Assign to:" : {
@@ -21161,6 +21158,9 @@
     "Enter the 6-digit room code from the tournament master" : {
 
     },
+    "Final Score" : {
+
+    },
     "fingerprint.action.mark_verified" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -32011,6 +32011,9 @@
     "Submit Score" : {
 
     },
+    "Submitted Score" : {
+
+    },
     "Switch to %@" : {
 
     },
@@ -34699,6 +34702,9 @@
         }
       }
     },
+    "Tap to assign" : {
+
+    },
     "The scoreboard will be notified and can re-score the match." : {
 
     },
@@ -34706,6 +34712,9 @@
 
     },
     "The tournament master rejected your score. Please re-score the match." : {
+
+    },
+    "This match is waiting for previous matches to complete before players are determined." : {
 
     },
     "Top %@ players from %@ advance to %@ finals." : {
@@ -36733,6 +36742,9 @@
 
     },
     "Waiting for match assignment..." : {
+
+    },
+    "Waiting for Players" : {
 
     },
     "Waiting for tournament master approval..." : {

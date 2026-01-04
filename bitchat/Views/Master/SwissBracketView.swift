@@ -16,6 +16,7 @@ struct SwissBracketView: View {
     @State private var selectedTab = 0  // 0=Standings, 1=Rounds
     @State private var selectedRound: Int
     @State private var selectedMatchId: UUID?
+    @State private var sheetMatch: TournamentMatch?
 
     @Environment(\.colorScheme) private var colorScheme
 
@@ -108,6 +109,7 @@ struct SwissBracketView: View {
                                     isSelected: selectedMatchId == match.id,
                                     onTap: {
                                         selectedMatchId = match.id
+                                        sheetMatch = match
                                         onMatchSelected?(match)
                                     }
                                 )
@@ -132,6 +134,9 @@ struct SwissBracketView: View {
                     }
                 }
             }
+        }
+        .sheet(item: $sheetMatch) { match in
+            MatchDetailSheet(match: match, tournament: tournament)
         }
     }
 
@@ -210,16 +215,16 @@ struct StandingsTableView: View {
             // Header row
             HStack(spacing: 0) {
                 Text("#")
-                    .frame(width: 30, alignment: .center)
+                    .frame(width: DeviceEnvironment.standingsRankWidth, alignment: .center)
                 Text("Player")
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 8)
                 Text("W")
-                    .frame(width: 30, alignment: .center)
+                    .frame(width: DeviceEnvironment.standingsStatWidth, alignment: .center)
                 Text("L")
-                    .frame(width: 30, alignment: .center)
+                    .frame(width: DeviceEnvironment.standingsStatWidth, alignment: .center)
                 Text("Pts")
-                    .frame(width: 45, alignment: .center)
+                    .frame(width: DeviceEnvironment.standingsPointsWidth, alignment: .center)
             }
             .font(.caption.bold())
             .padding(.horizontal, 12)
@@ -230,7 +235,7 @@ struct StandingsTableView: View {
             ForEach(Array(sortedStandings.enumerated()), id: \.element.id) { index, standing in
                 HStack(spacing: 0) {
                     Text("\(index + 1)")
-                        .frame(width: 30, alignment: .center)
+                        .frame(width: DeviceEnvironment.standingsRankWidth, alignment: .center)
                         .font(.subheadline)
                         .fontWeight(index < 3 ? .semibold : .regular)
                         .foregroundColor(rankColor(for: index))
@@ -242,17 +247,17 @@ struct StandingsTableView: View {
                         .lineLimit(1)
 
                     Text("\(standing.wins)")
-                        .frame(width: 30, alignment: .center)
+                        .frame(width: DeviceEnvironment.standingsStatWidth, alignment: .center)
                         .font(.subheadline)
                         .foregroundColor(.green)
 
                     Text("\(standing.losses)")
-                        .frame(width: 30, alignment: .center)
+                        .frame(width: DeviceEnvironment.standingsStatWidth, alignment: .center)
                         .font(.subheadline)
                         .foregroundColor(.red)
 
                     Text(String(format: "%.1f", standing.points))
-                        .frame(width: 45, alignment: .center)
+                        .frame(width: DeviceEnvironment.standingsPointsWidth, alignment: .center)
                         .font(.subheadline)
                         .fontWeight(.medium)
                 }
@@ -320,9 +325,89 @@ struct SwissMatchCard: View {
                 .stroke(borderColor, lineWidth: isSelected ? 2 : 1)
         )
         .onTapGesture {
-            if match.isReady && match.status == .pending {
+            onTap()
+        }
+        .contextMenu {
+            // View Details (always available)
+            Button {
                 onTap()
+            } label: {
+                Label("View Details", systemImage: "info.circle")
             }
+
+            Divider()
+
+            // Status-specific actions
+            switch match.status {
+            case .pending:
+                if match.isReady && !match.isBye {
+                    // Quick assign to available scoreboards
+                    let availableDevices = TournamentManager.shared.availableScoreboards.prefix(3)
+                    if !availableDevices.isEmpty {
+                        ForEach(Array(availableDevices)) { device in
+                            Button {
+                                quickAssign(to: device)
+                            } label: {
+                                Label("Assign to \(device.deviceName)", systemImage: "ipad.landscape")
+                            }
+                        }
+                    } else {
+                        Button {} label: {
+                            Label("No Scoreboards Available", systemImage: "ipad.slash")
+                        }
+                        .disabled(true)
+                    }
+                } else if match.isBye {
+                    Button {} label: {
+                        Label("Bye Match", systemImage: "person.slash")
+                    }
+                    .disabled(true)
+                } else {
+                    Button {} label: {
+                        Label("Waiting for Round", systemImage: "hourglass")
+                    }
+                    .disabled(true)
+                }
+
+            case .assigned, .inProgress:
+                Button(role: .destructive) {
+                    MatchAssignmentService.shared.cancelAssignment(matchId: match.id)
+                } label: {
+                    Label("Unassign Match", systemImage: "xmark.circle")
+                }
+
+            case .awaitingApproval:
+                Button {
+                    TournamentMessageHandler.shared.approveScore(matchId: match.id)
+                } label: {
+                    Label("Approve Score", systemImage: "checkmark.circle")
+                }
+
+                Button(role: .destructive) {
+                    TournamentMessageHandler.shared.rejectScore(matchId: match.id, reason: nil)
+                } label: {
+                    Label("Reject Score", systemImage: "xmark.circle")
+                }
+
+            case .complete:
+                Button {} label: {
+                    Label("Match Complete", systemImage: "trophy.fill")
+                }
+                .disabled(true)
+            }
+        }
+    }
+
+    private func quickAssign(to device: ConnectedScoreboard) {
+        TournamentManager.shared.assignMatch(matchId: match.id, to: device.id)
+
+        if let tournament = TournamentManager.shared.currentTournament {
+            let config = tournament.createMatchConfiguration(for: match)
+            TournamentMessageHandler.shared.assignMatchToDevice(
+                match: match,
+                deviceId: device.id,
+                config: config
+            )
         }
     }
 
