@@ -18,41 +18,33 @@ struct ChallongeImportView: View {
     var body: some View {
         NavigationStack {
             Form {
-                // Credentials Section
+                // No credentials - prompt to go to Settings
                 if !viewModel.hasCredentials {
-                    credentialsSection
-                }
+                    noCredentialsSection
+                } else {
+                    // Tournament URL Section
+                    tournamentUrlSection
 
-                // Tournament URL Section
-                tournamentUrlSection
-
-                // Preview Section (after fetch)
-                if let preview = viewModel.tournamentPreview {
-                    previewSection(preview)
-                    // Only show stage picker if NOT auto-detected as multi-stage
-                    if !viewModel.isMultiStageDetected {
-                        stageTypeSection
+                    // Preview Section (after fetch)
+                    if let preview = viewModel.tournamentPreview {
+                        previewSection(preview)
+                        // Only show stage picker if NOT auto-detected as multi-stage
+                        if !viewModel.isMultiStageDetected {
+                            stageTypeSection
+                        }
+                        formatSelectionSection
+                        generationSection
+                        matchSettingsSection
+                        if viewModel.isMultiStage {
+                            finalsMatchSettingsSection
+                        }
+                        confirmSection
                     }
-                    formatSelectionSection
-                    generationSection
-                    matchSettingsSection
-                    if viewModel.isMultiStage {
-                        finalsMatchSettingsSection
+
+                    // Error Display
+                    if let error = viewModel.error {
+                        errorSection(error)
                     }
-                    confirmSection
-                }
-
-                // Error Display
-                if let error = viewModel.error {
-                    errorSection(error)
-                }
-
-                // API Usage Info
-                apiUsageSection
-
-                // Manage Credentials
-                if viewModel.hasCredentials {
-                    manageCredentialsSection
                 }
             }
             .navigationTitle("Import from Challonge")
@@ -71,35 +63,27 @@ struct ChallongeImportView: View {
         }
     }
 
-    // MARK: - Credentials Section
+    // MARK: - No Credentials Section
 
-    private var credentialsSection: some View {
+    private var noCredentialsSection: some View {
         Section {
-            TextField("Challonge Username", text: $viewModel.username)
-                .textContentType(.username)
-                .autocapitalization(.none)
-                .autocorrectionDisabled()
+            VStack(spacing: 16) {
+                Image(systemName: "key.fill")
+                    .font(.largeTitle)
+                    .foregroundColor(.secondary)
 
-            SecureField("API Key", text: $viewModel.apiKey)
+                Text("Challonge Credentials Required")
+                    .font(.headline)
 
-            Button {
-                Task { await viewModel.saveCredentials() }
-            } label: {
-                if viewModel.isValidatingCredentials {
-                    HStack {
-                        ProgressView()
-                            .scaleEffect(0.8)
-                        Text("Validating...")
-                    }
-                } else {
-                    Text("Save Credentials")
-                }
+                Text("Configure your Challonge API credentials in Settings to import tournaments.")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
             }
-            .disabled(!viewModel.canSaveCredentials || viewModel.isValidatingCredentials)
-        } header: {
-            Text("Challonge Credentials")
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 20)
         } footer: {
-            Text("Find your API key at challonge.com/settings/developer")
+            Text("Go to Settings > Challonge to enter your username and API key")
         }
     }
 
@@ -337,39 +321,6 @@ struct ChallongeImportView: View {
         Section {
             Label(error, systemImage: "exclamationmark.triangle")
                 .foregroundColor(.red)
-        }
-    }
-
-    // MARK: - API Usage Section
-
-    private var apiUsageSection: some View {
-        Section {
-            HStack {
-                Text("API Calls Remaining")
-                Spacer()
-                Text("\(viewModel.remainingApiCalls) / 500")
-                    .foregroundColor(viewModel.isApproachingLimit ? .orange : .secondary)
-            }
-
-            if viewModel.isApproachingLimit {
-                Label("Approaching monthly limit", systemImage: "exclamationmark.triangle")
-                    .foregroundColor(.orange)
-                    .font(.caption)
-            }
-        } header: {
-            Text("API Usage")
-        } footer: {
-            Text("Challonge allows 500 free API calls per month")
-        }
-    }
-
-    // MARK: - Manage Credentials Section
-
-    private var manageCredentialsSection: some View {
-        Section {
-            Button("Clear Saved Credentials", role: .destructive) {
-                viewModel.clearCredentials()
-            }
         }
     }
 }

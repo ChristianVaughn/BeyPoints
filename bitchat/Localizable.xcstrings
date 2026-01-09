@@ -6427,7 +6427,7 @@
     "Challonge allows 500 free API calls per month" : {
 
     },
-    "Challonge Credentials" : {
+    "Challonge Credentials Required" : {
 
     },
     "Change your role in the tournament system" : {
@@ -8053,6 +8053,9 @@
 
     },
     "Configure the tournament format below" : {
+
+    },
+    "Configure your Challonge API credentials in Settings to import tournaments." : {
 
     },
     "Connecting..." : {
@@ -23904,6 +23907,9 @@
           }
         }
       }
+    },
+    "Go to Settings > Challonge to enter your username and API key" : {
+
     },
     "Grand Final" : {
 

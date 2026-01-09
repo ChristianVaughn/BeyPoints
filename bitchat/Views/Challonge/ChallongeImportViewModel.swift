@@ -13,12 +13,6 @@ import SwiftUI
 @MainActor
 final class ChallongeImportViewModel: ObservableObject {
 
-    // MARK: - Credentials
-
-    @Published var username = ""
-    @Published var apiKey = ""
-    @Published var isValidatingCredentials = false
-
     // MARK: - Tournament Import
 
     @Published var tournamentUrl = ""
@@ -65,25 +59,12 @@ final class ChallongeImportViewModel: ObservableObject {
         challongeService.hasStoredCredentials
     }
 
-    var canSaveCredentials: Bool {
-        !username.trimmingCharacters(in: .whitespaces).isEmpty &&
-        !apiKey.trimmingCharacters(in: .whitespaces).isEmpty
-    }
-
     var canFetchPreview: Bool {
         hasCredentials && !tournamentUrl.trimmingCharacters(in: .whitespaces).isEmpty && !isLoading
     }
 
     var canImport: Bool {
         hasCredentials && tournamentPreview != nil && !isLoading
-    }
-
-    var remainingApiCalls: Int {
-        syncManager.remainingApiCalls
-    }
-
-    var isApproachingLimit: Bool {
-        syncManager.isApproachingLimit
     }
 
     /// Whether API indicates this is a multi-stage tournament (auto-detected)
@@ -97,46 +78,6 @@ final class ChallongeImportViewModel: ObservableObject {
     }
 
     // MARK: - Actions
-
-    /// Saves credentials to Keychain
-    func saveCredentials() async {
-        isValidatingCredentials = true
-        error = nil
-
-        let credentials = ChallongeCredentials(
-            username: username.trimmingCharacters(in: .whitespaces),
-            apiKey: apiKey.trimmingCharacters(in: .whitespaces)
-        )
-
-        guard challongeService.storeCredentials(credentials) else {
-            error = "Failed to save credentials"
-            isValidatingCredentials = false
-            return
-        }
-
-        // Validate credentials
-        do {
-            _ = try await challongeService.validateCredentials()
-            // Clear input fields after successful save
-            username = ""
-            apiKey = ""
-        } catch {
-            // Clear stored credentials if validation failed
-            challongeService.clearCredentials()
-            self.error = "Invalid credentials: \(error.localizedDescription)"
-        }
-
-        isValidatingCredentials = false
-    }
-
-    /// Clears stored credentials
-    func clearCredentials() {
-        challongeService.clearCredentials()
-        username = ""
-        apiKey = ""
-        tournamentPreview = nil
-        error = nil
-    }
 
     /// Fetches tournament preview from Challonge
     func fetchPreview() async {

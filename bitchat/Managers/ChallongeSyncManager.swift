@@ -31,6 +31,10 @@ final class ChallongeSyncManager: ObservableObject {
     /// Minimum refresh interval (5 minutes) to conserve API calls
     static let minimumRefreshInterval: TimeInterval = 300
 
+    /// Delay before fetching new matches after score submission
+    /// Gives Challonge time to process the score and generate new rounds
+    static let postSubmitFetchDelay: TimeInterval = 5.0
+
     /// Default to manual refresh (no auto-polling)
     var autoRefreshEnabled = false
     var refreshInterval: TimeInterval = 300  // 5 minutes
@@ -818,6 +822,12 @@ final class ChallongeSyncManager: ObservableObject {
 
         debugLog("SUCCESS: Match \(mapping.challongeMatchId) updated - \(winner) won \(scoresCsv)")
         print("[Challonge] Successfully submitted score for match \(matchId): \(winner) won \(scoresCsv)")
+
+        // Fetch new matches after a delay (in background, don't block)
+        // This allows Challonge to generate new rounds after processing the score
+        Task {
+            await fetchNewMatchesAfterDelay()
+        }
     }
 
     /// Formats scores for Challonge CSV format
@@ -909,5 +919,26 @@ final class ChallongeSyncManager: ObservableObject {
         currentSyncState.lastSyncedAt = Date()
         syncState = currentSyncState
         saveSyncState()
+    }
+
+    /// Fetches new matches after a delay to allow Challonge to process scores and generate new rounds
+    /// - Parameter delay: Time to wait before fetching (defaults to postSubmitFetchDelay)
+    func fetchNewMatchesAfterDelay(_ delay: TimeInterval? = nil) async {
+        let waitTime = delay ?? Self.postSubmitFetchDelay
+        debugLog("Waiting \(waitTime)s before fetching new matches...")
+
+        try? await Task.sleep(nanoseconds: UInt64(waitTime * 1_000_000_000))
+
+        debugLog("Fetching new matches from Challonge...")
+        do {
+            try await fetchNewMatches()
+            if newMatchCount > 0 {
+                debugLog("Found \(newMatchCount) new match(es)")
+            } else {
+                debugLog("No new matches available yet")
+            }
+        } catch {
+            debugLog("Failed to fetch new matches: \(error.localizedDescription)")
+        }
     }
 }
