@@ -8,15 +8,16 @@
 
 import SwiftUI
 
-// MARK: - Reference Colors
+// MARK: - Local Color Aliases and Border Colors
 
-extension Color {
-    static let player1Blue = Color(red: 16/255, green: 136/255, blue: 201/255)  // #1088C9
-    static let player2Red = Color(red: 255/255, green: 85/255, blue: 85/255)    // #FF5555
-    static let warningOrange = Color(red: 245/255, green: 158/255, blue: 11/255) // #F59E0B
-    static let warningOrangeDark = Color(red: 217/255, green: 119/255, blue: 6/255) // #D97706 (border)
-    static let player1BlueDark = Color(red: 13/255, green: 100/255, blue: 151/255) // #0D6497 (border)
-    static let player2RedDark = Color(red: 229/255, green: 29/255, blue: 29/255)  // #E51D1D (border)
+private extension Color {
+    // Border colors (darker variants for accessibility)
+    static let player1BlueDark = Color(red: 13/255, green: 100/255, blue: 151/255) // #0D6497
+    static let player2RedDark = Color(red: 229/255, green: 29/255, blue: 29/255)  // #E51D1D
+    static let warningOrangeDark = Color(red: 217/255, green: 119/255, blue: 6/255) // #D97706
+
+    // Alias for scoring warning (uses Color.scoringWarning from Color+Theme.swift)
+    static let warningOrange = Color.scoringWarning
 }
 
 /// A tappable chip button for scoring a win condition.
@@ -77,6 +78,8 @@ struct ScoringChip: View {
         }
         .disabled(isDisabled)
         .opacity(isDisabled ? 0.6 : 1.0)
+        .accessibilityLabel("\(condition.chipLabel), \(condition.points(for: generation)) points for \(player == .player1 ? "Player 1" : "Player 2")")
+        .accessibilityHint(isDisabled ? "Scoring disabled" : "Double tap to score")
     }
 }
 
@@ -135,6 +138,8 @@ struct ErrorChip: View {
         }
         .disabled(isDisabled)
         .opacity(isDisabled ? 0.6 : 1.0)
+        .accessibilityLabel(showWarning ? "Penalty, 1 point for opponent" : "Error warning for \(player == .player1 ? "Player 1" : "Player 2")")
+        .accessibilityHint(isDisabled ? "Scoring disabled" : showWarning ? "Double tap to apply penalty" : "Double tap to issue warning")
     }
 }
 
@@ -186,6 +191,8 @@ struct OwnFinishChip: View {
         }
         .disabled(isDisabled)
         .opacity(isDisabled ? 0.6 : 1.0)
+        .accessibilityLabel("Own Finish, 1 point for opponent of \(player == .player1 ? "Player 1" : "Player 2")")
+        .accessibilityHint(isDisabled ? "Scoring disabled" : "Double tap to score own finish")
     }
 }
 
@@ -208,6 +215,7 @@ struct WarningIndicatorChip: View {
         .background(Color.white)
         .clipShape(Capsule())
         .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
+        .accessibilityLabel("Warning active")
     }
 }
 

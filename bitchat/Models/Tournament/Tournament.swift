@@ -108,8 +108,10 @@ struct Tournament: Codable, Identifiable, Equatable {
             // n-1 rounds for n players (or n for odd)
             return players.count % 2 == 0 ? players.count - 1 : players.count
         case .groupRoundRobin:
-            let groupSize = players.count / 2
-            return groupSize % 2 == 0 ? groupSize - 1 : groupSize
+            // With odd total players, group2 gets the extra player
+            // Use the larger group size (ceiling of half) to determine rounds
+            let largerGroupSize = (players.count + 1) / 2  // Ceiling division
+            return RoundRobinGenerator.numberOfRounds(for: largerGroupSize)
         }
     }
 
@@ -140,8 +142,10 @@ struct Tournament: Codable, Identifiable, Equatable {
             // n-1 rounds for n players (or n for odd)
             return players.count % 2 == 0 ? players.count - 1 : players.count
         case .groupRoundRobin:
-            let groupSize = players.count / 2
-            return groupSize % 2 == 0 ? groupSize - 1 : groupSize
+            // With odd total players, group2 gets the extra player
+            // Use the larger group size (ceiling of half) to determine rounds
+            let largerGroupSize = (players.count + 1) / 2
+            return RoundRobinGenerator.numberOfRounds(for: largerGroupSize)
         default:
             return 0
         }

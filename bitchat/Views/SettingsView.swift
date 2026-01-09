@@ -25,7 +25,7 @@ struct SettingsView: View {
     private let syncManager = ChallongeSyncManager.shared
 
     private var textColor: Color {
-        colorScheme == .dark ? .green : Color(red: 0, green: 0.5, blue: 0)
+        Color.primaryGreen(for: colorScheme)
     }
 
     private var hasCredentials: Bool {

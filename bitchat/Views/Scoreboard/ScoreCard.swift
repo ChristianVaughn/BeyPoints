@@ -57,8 +57,11 @@ struct ScoreCard: View {
                     .foregroundColor(playerColor)
                     .contentTransition(.numericText())
                     .animation(.spring(response: 0.3), value: score)
+                    .accessibilityLabel("\(player == .player1 ? "Player 1" : "Player 2") score: \(score)")
             }
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("\(playerName), \(player == .player1 ? "Player 1" : "Player 2"), Score: \(score)\(showWarning ? ", has warning" : "")")
     }
 
     // MARK: - Player 1 Layout
@@ -283,6 +286,7 @@ struct PlayerNameRow: View {
                 .font(.system(size: 16, weight: .bold))
                 .foregroundColor(.primary)
                 .lineLimit(1)
+                .truncationMode(.tail)
 
             if bestOf != .none {
                 SetWinIndicator(

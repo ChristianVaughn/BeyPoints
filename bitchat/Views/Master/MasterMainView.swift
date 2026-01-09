@@ -135,6 +135,7 @@ struct MasterMainView: View {
                 onCreateTournament: { showingCreateTournament = true }
             )
             .navigationTitle("Tournament")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: { dismiss() }) {
@@ -194,6 +195,7 @@ struct MasterMainView: View {
                     }
                 }
                 .navigationTitle(tournament.name)
+                .navigationBarTitleDisplayMode(.inline)
                 .onAppear {
                     // Set default tab on appear
                     if !iPadTabs.contains(iPadSelectedTab) {

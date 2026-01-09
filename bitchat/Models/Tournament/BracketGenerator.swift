@@ -17,7 +17,10 @@ enum BracketGenerator {
     ///   - shuffle: Whether to shuffle players before seeding (default: false)
     /// - Returns: Array of matches forming the bracket
     static func generateBracket(players: [String], shuffle: Bool = false) -> [TournamentMatch] {
-        guard players.count >= 2 else { return [] }
+        guard players.count >= 2 else {
+            assertionFailure("BracketGenerator.generateBracket called with \(players.count) players - minimum 2 required")
+            return []
+        }
 
         let playerList = shuffle ? players.shuffled() : players
 
@@ -196,7 +199,10 @@ extension Tournament {
     /// Generates the bracket for this tournament based on tournament type.
     mutating func generateBracket(shuffle: Bool = false) {
         guard status == .notStarted else { return }
-        guard players.count >= 2 else { return }
+        guard players.count >= 2 else {
+            assertionFailure("Tournament.generateBracket called with \(players.count) players - minimum 2 required")
+            return
+        }
 
         switch tournamentType {
         case .singleElimination:

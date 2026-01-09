@@ -273,6 +273,7 @@ struct CompactDeviceList: View {
                         Text(device.deviceName)
                             .font(.caption)
                             .lineLimit(1)
+                            .truncationMode(.tail)
 
                         Spacer()
 

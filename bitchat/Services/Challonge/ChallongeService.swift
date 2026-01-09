@@ -66,12 +66,17 @@ final class ChallongeService {
     func storeCredentials(_ credentials: ChallongeCredentials) -> Bool {
         guard credentials.isValid else { return false }
 
+        guard let usernameData = credentials.username.data(using: .utf8),
+              let apiKeyData = credentials.apiKey.data(using: .utf8) else {
+            return false
+        }
+
         let usernameResult = keychainManager.saveIdentityKey(
-            credentials.username.data(using: .utf8)!,
+            usernameData,
             forKey: usernameKey
         )
         let apiKeyResult = keychainManager.saveIdentityKey(
-            credentials.apiKey.data(using: .utf8)!,
+            apiKeyData,
             forKey: apiKeyKey
         )
         return usernameResult && apiKeyResult

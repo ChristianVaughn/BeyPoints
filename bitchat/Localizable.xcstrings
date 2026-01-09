@@ -6409,9 +6409,6 @@
     "Beyblade Generation" : {
 
     },
-    "beypoints" : {
-
-    },
     "BeyScore" : {
 
     },
@@ -31857,6 +31854,9 @@
     "Round Robin" : {
 
     },
+    "Run tournament" : {
+
+    },
     "save" : {
       "comment" : "Button to save media to device",
       "extractionState" : "stale",
@@ -32038,6 +32038,9 @@
       }
     },
     "Save Credentials" : {
+
+    },
+    "Score matches" : {
 
     },
     "Score Submitted" : {
@@ -34890,6 +34893,9 @@
 
     },
     "Update Challonge manually after resolving" : {
+
+    },
+    "v1.0 beta" : {
 
     },
     "Validating..." : {

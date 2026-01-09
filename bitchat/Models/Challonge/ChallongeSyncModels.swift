@@ -79,6 +79,11 @@ struct ChallongeSyncState: Codable, Equatable {
         apiCallsThisMonth >= 400
     }
 
+    /// Whether we've hit the soft limit and should block API calls (at 450)
+    var isAtLimit: Bool {
+        apiCallsThisMonth >= 450
+    }
+
     /// Remaining API calls this month
     var remainingCalls: Int {
         max(0, 500 - apiCallsThisMonth)

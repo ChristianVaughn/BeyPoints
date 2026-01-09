@@ -87,7 +87,7 @@ final class OfflineScoreCache: ObservableObject {
     }
 
     /// Manually triggers a sync of pending submissions.
-    func forcSync() async {
+    func forceSync() async {
         await syncPendingSubmissions()
     }
 

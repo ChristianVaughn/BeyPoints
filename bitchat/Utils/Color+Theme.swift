@@ -103,4 +103,63 @@ extension Color {
             ? Color(red: 0.45, green: 0.65, blue: 1.0)
             : Color.blue
     }
+
+    /// Primary green color (adjusted for dark mode visibility)
+    static func primaryGreen(for colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark
+            ? Color(red: 0.35, green: 0.75, blue: 0.45)
+            : Color(red: 0, green: 0.5, blue: 0)
+    }
+
+    // MARK: - Scoring Colors
+
+    /// Player 1 scoring color (blue)
+    static let player1Blue = Color(red: 16/255, green: 136/255, blue: 201/255)
+
+    /// Player 2 scoring color (red)
+    static let player2Red = Color(red: 255/255, green: 85/255, blue: 85/255)
+
+    /// Warning/caution scoring color (orange)
+    static let scoringWarning = Color(red: 245/255, green: 158/255, blue: 11/255)
+
+    // MARK: - Status Colors
+
+    /// Success/positive status color
+    static func statusSuccess(for colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark
+            ? Color(red: 0.35, green: 0.75, blue: 0.45)
+            : Color.green
+    }
+
+    /// Error/negative status color
+    static func statusError(for colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark
+            ? Color(red: 1.0, green: 0.4, blue: 0.4)
+            : Color.red
+    }
+
+    /// Warning/caution status color
+    static func statusWarning(for colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark
+            ? Color(red: 1.0, green: 0.65, blue: 0.25)
+            : Color.orange
+    }
+
+    // MARK: - Text Colors
+
+    /// Secondary text color
+    static func secondaryText(for colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark
+            ? Color.gray
+            : Color(white: 0.4)
+    }
+
+    // MARK: - Landing Screen Colors
+
+    /// Landing screen background (cream in light mode, black in dark mode)
+    static func landingBackground(for colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark
+            ? Color.black
+            : Color(red: 0.98, green: 0.96, blue: 0.94)
+    }
 }

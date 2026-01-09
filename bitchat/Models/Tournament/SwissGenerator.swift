@@ -106,11 +106,17 @@ enum SwissGenerator {
 
         // Handle odd player getting a bye
         if sorted.count % 2 == 1 {
-            let byePlayer = sorted.first { !paired.contains($0.playerName) }
-            if let player = byePlayer {
-                // Check if player already had a bye
-                let hadBye = !player.opponentsPlayed.contains("BYE") && player.opponentsPlayed.count < roundNumber - 1
+            // Get all unpaired players
+            let unpairedPlayers = sorted.filter { !paired.contains($0.playerName) }
 
+            // Prefer player who hasn't had a bye yet (from lowest standings)
+            // Sort by points ascending so lowest-ranked unpaired player gets the bye
+            let byeCandidate = unpairedPlayers
+                .sorted { $0.points < $1.points }
+                .first { !$0.opponentsPlayed.contains("BYE") }
+                ?? unpairedPlayers.last  // Fallback: if all had byes, give to lowest ranked
+
+            if let player = byeCandidate {
                 var byeMatch = TournamentMatch(
                     roundNumber: roundNumber,
                     matchNumber: matches.count,

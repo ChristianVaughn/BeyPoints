@@ -106,7 +106,7 @@ struct GameSetupView: View {
                     }
                 }
             }
-            .navigationTitle("Game Setup")
+            .navigationTitle("Match Setup")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

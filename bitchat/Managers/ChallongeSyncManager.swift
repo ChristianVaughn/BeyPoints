@@ -71,6 +71,11 @@ final class ChallongeSyncManager: ObservableObject {
 
     /// Fetches tournament preview without creating local tournament
     func fetchPreview(from urlOrId: String) async throws -> ChallongeImportPreview {
+        // Block if at API limit
+        guard !isAtLimit else {
+            throw ChallongeError.rateLimited
+        }
+
         isSyncing = true
         lastError = nil
 
@@ -105,6 +110,11 @@ final class ChallongeSyncManager: ObservableObject {
         ownFinishEnabled: Bool,
         finalsSettings: (MatchType, BestOf, Bool)?
     ) async throws -> Tournament {
+        // Block if at API limit
+        guard !isAtLimit else {
+            throw ChallongeError.rateLimited
+        }
+
         isSyncing = true
         lastError = nil
 
@@ -312,6 +322,11 @@ final class ChallongeSyncManager: ObservableObject {
 
     /// Performs a sync with Challonge, detecting new matches and conflicts
     func refresh() async throws {
+        // Block if at API limit
+        guard !isAtLimit else {
+            throw ChallongeError.rateLimited
+        }
+
         guard var currentSyncState = syncState else {
             throw ChallongeError.notAuthenticated
         }
@@ -713,6 +728,11 @@ final class ChallongeSyncManager: ObservableObject {
         syncState?.isApproachingLimit ?? false
     }
 
+    /// Whether at API limit (450+ calls) - blocks further API calls
+    var isAtLimit: Bool {
+        syncState?.isAtLimit ?? false
+    }
+
     // MARK: - Score Submission to Challonge
 
     /// Submits an approved match score to Challonge
@@ -733,6 +753,12 @@ final class ChallongeSyncManager: ObservableObject {
         player2SetWins: Int,
         isBestOf: Bool
     ) async throws {
+        // Block if at API limit
+        guard !isAtLimit else {
+            debugLog("BLOCKED: API limit reached")
+            throw ChallongeError.rateLimited
+        }
+
         debugLog("submitScoreToChallonge called:")
         debugLog("  - matchId: \(matchId)")
         debugLog("  - winner: \(winner)")
@@ -853,6 +879,11 @@ final class ChallongeSyncManager: ObservableObject {
 
     /// Fetches only new/open matches from Challonge (called when round completes)
     func fetchNewMatches() async throws {
+        // Block if at API limit
+        guard !isAtLimit else {
+            throw ChallongeError.rateLimited
+        }
+
         guard var currentSyncState = syncState else { return }
 
         // Fetch only open matches (ready to play)
@@ -922,23 +953,47 @@ final class ChallongeSyncManager: ObservableObject {
     }
 
     /// Fetches new matches after a delay to allow Challonge to process scores and generate new rounds
-    /// - Parameter delay: Time to wait before fetching (defaults to postSubmitFetchDelay)
-    func fetchNewMatchesAfterDelay(_ delay: TimeInterval? = nil) async {
+    /// - Parameters:
+    ///   - delay: Time to wait before fetching (defaults to postSubmitFetchDelay)
+    ///   - retries: Number of retry attempts (defaults to 2)
+    func fetchNewMatchesAfterDelay(_ delay: TimeInterval? = nil, retries: Int = 2) async {
         let waitTime = delay ?? Self.postSubmitFetchDelay
         debugLog("Waiting \(waitTime)s before fetching new matches...")
 
         try? await Task.sleep(nanoseconds: UInt64(waitTime * 1_000_000_000))
 
-        debugLog("Fetching new matches from Challonge...")
-        do {
-            try await fetchNewMatches()
-            if newMatchCount > 0 {
-                debugLog("Found \(newMatchCount) new match(es)")
-            } else {
-                debugLog("No new matches available yet")
+        var attempts = 0
+        let maxAttempts = retries + 1
+
+        while attempts < maxAttempts {
+            attempts += 1
+            debugLog("Fetching new matches from Challonge (attempt \(attempts)/\(maxAttempts))...")
+
+            do {
+                try await fetchNewMatches()
+                if newMatchCount > 0 {
+                    debugLog("Found \(newMatchCount) new match(es)")
+                    return  // Success - exit
+                } else {
+                    debugLog("No new matches available yet")
+                    // If no matches found and we have retries left, wait and try again
+                    if attempts < maxAttempts {
+                        let retryDelay = waitTime / 2  // Shorter retry delay
+                        debugLog("Retrying in \(retryDelay)s...")
+                        try? await Task.sleep(nanoseconds: UInt64(retryDelay * 1_000_000_000))
+                    }
+                }
+            } catch {
+                debugLog("Failed to fetch new matches: \(error.localizedDescription)")
+                // On network error, retry with backoff
+                if attempts < maxAttempts {
+                    let retryDelay = waitTime * Double(attempts)  // Exponential backoff
+                    debugLog("Retrying in \(retryDelay)s after error...")
+                    try? await Task.sleep(nanoseconds: UInt64(retryDelay * 1_000_000_000))
+                }
             }
-        } catch {
-            debugLog("Failed to fetch new matches: \(error.localizedDescription)")
         }
+
+        debugLog("All fetch attempts completed")
     }
 }

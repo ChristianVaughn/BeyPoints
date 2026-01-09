@@ -21,16 +21,18 @@ struct BeyScoreLandingView: View {
     @State private var showScoreboardWarning = false
     @State private var showMatchInProgressError = false
 
+    // Animation state
+    @State private var logoOpacity: Double = 0
+    @State private var scoreboardButtonOpacity: Double = 0
+    @State private var masterButtonOpacity: Double = 0
+    @State private var versionOpacity: Double = 0
+
     // Manager references for state checking
     @StateObject private var roomManager = TournamentRoomManager.shared
     @StateObject private var tournamentManager = TournamentManager.shared
 
     private var backgroundColor: Color {
-        colorScheme == .dark ? Color.black : Color.white
-    }
-
-    private var textColor: Color {
-        colorScheme == .dark ? Color.green : Color(red: 0, green: 0.5, blue: 0)
+        Color.landingBackground(for: colorScheme)
     }
 
     var body: some View {
@@ -43,7 +45,7 @@ struct BeyScoreLandingView: View {
                     Spacer()
                     Button(action: { showSettings = true }) {
                         Image(systemName: "gearshape")
-                            .font(.bitchatSystem(size: 20))
+                            .font(.bitchatSystem(size: 22))
                             .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
@@ -52,56 +54,83 @@ struct BeyScoreLandingView: View {
 
                 Spacer()
 
-                // Title section
-                VStack(spacing: 12) {
-                    Text("beypoints")
-                        .font(.bitchatSystem(size: 36, weight: .bold, design: .monospaced))
-                        .foregroundColor(.orange)
+                // Logo and tagline section
+                VStack(spacing: 16) {
+                    Image("BPLogo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 140, height: 140)
+                        .opacity(logoOpacity)
 
                     Text("WBO Beyblade Tournament Scoring")
                         .font(.bitchatSystem(size: 14, design: .monospaced))
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
+                        .opacity(logoOpacity)
                 }
 
                 Spacer()
 
-                // Main action buttons
-                VStack(spacing: 16) {
-                    // Scoreboard button
+                // Main action cards - side by side
+                HStack(spacing: 16) {
+                    // Scoreboard card
                     Button(action: handleScoreboardTap) {
-                        HStack {
+                        VStack(spacing: 12) {
                             Image(systemName: "rectangle.split.2x1.fill")
-                            Text("Scoreboard")
-                        }
-                        .font(.bitchatSystem(size: 16, weight: .medium, design: .monospaced))
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
-                    }
-                    .buttonStyle(.plain)
+                                .font(.system(size: 32))
 
-                    // Master button
-                    Button(action: handleMasterTap) {
-                        HStack {
-                            Image(systemName: "crown.fill")
-                            Text("Master")
+                            Text("Scoreboard")
+                                .font(.bitchatSystem(size: 16, weight: .semibold, design: .monospaced))
+
+                            Text("Score matches")
+                                .font(.bitchatSystem(size: 12, design: .monospaced))
+                                .opacity(0.8)
                         }
-                        .font(.bitchatSystem(size: 16, weight: .medium, design: .monospaced))
                         .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.orange)
+                        .padding(.vertical, 24)
+                        .background(Color.primaryBlue(for: colorScheme))
                         .foregroundColor(.white)
-                        .cornerRadius(12)
+                        .cornerRadius(16)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PressableButtonStyle())
+                    .opacity(scoreboardButtonOpacity)
+
+                    // Master card
+                    Button(action: handleMasterTap) {
+                        VStack(spacing: 12) {
+                            Image(systemName: "crown.fill")
+                                .font(.system(size: 32))
+
+                            Text("Master")
+                                .font(.bitchatSystem(size: 16, weight: .semibold, design: .monospaced))
+
+                            Text("Run tournament")
+                                .font(.bitchatSystem(size: 12, design: .monospaced))
+                                .opacity(0.8)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 24)
+                        .background(Color.primaryOrange(for: colorScheme))
+                        .foregroundColor(.white)
+                        .cornerRadius(16)
+                    }
+                    .buttonStyle(PressableButtonStyle())
+                    .opacity(masterButtonOpacity)
                 }
-                .padding(.horizontal, 40)
+                .padding(.horizontal, 24)
 
                 Spacer()
+
+                // Version badge
+                Text("v1.0 beta")
+                    .font(.bitchatSystem(size: 12, design: .monospaced))
+                    .foregroundColor(.secondary.opacity(0.6))
+                    .padding(.bottom, 16)
+                    .opacity(versionOpacity)
             }
+        }
+        .onAppear {
+            animateEntrance()
         }
         // Full screen covers for each mode
         #if os(iOS)
@@ -198,6 +227,37 @@ struct BeyScoreLandingView: View {
 
         // Open Master mode
         showMaster = true
+    }
+
+    // MARK: - Entrance Animation
+
+    private func animateEntrance() {
+        // Logo fades in first
+        withAnimation(.easeOut(duration: 0.3)) {
+            logoOpacity = 1
+        }
+
+        // Cards fade in together
+        withAnimation(.easeOut(duration: 0.3).delay(0.15)) {
+            scoreboardButtonOpacity = 1
+            masterButtonOpacity = 1
+        }
+
+        // Version badge last
+        withAnimation(.easeOut(duration: 0.3).delay(0.3)) {
+            versionOpacity = 1
+        }
+    }
+}
+
+// MARK: - Pressable Button Style
+
+/// A button style that scales down slightly when pressed for tactile feedback.
+struct PressableButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 

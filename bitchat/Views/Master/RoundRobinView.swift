@@ -125,6 +125,7 @@ struct RoundRobinStandingsView: View {
                         .padding(.leading, 8)
                         .font(.subheadline)
                         .lineLimit(1)
+                        .truncationMode(.tail)
 
                     Text("\(standing.wins)")
                         .frame(width: DeviceEnvironment.standingsStatWidth, alignment: .center)
@@ -202,6 +203,7 @@ struct RoundRobinGrid: View {
                         Text(player1)
                             .font(.caption)
                             .lineLimit(1)
+                            .truncationMode(.tail)
                             .frame(width: headerWidth, alignment: .leading)
                             .padding(.leading, 4)
 

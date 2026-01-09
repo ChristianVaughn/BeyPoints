@@ -274,7 +274,7 @@ enum ChallongeError: Error, LocalizedError {
         case .tournamentNotFound:
             return "Tournament not found on Challonge"
         case .rateLimited:
-            return "Challonge API rate limit exceeded. Try again later."
+            return "Challonge API limit reached (450/500 calls). Features disabled until next month."
         case .networkError(let error):
             return "Network error: \(error.localizedDescription)"
         case .apiError(let code, let message):

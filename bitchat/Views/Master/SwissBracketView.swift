@@ -269,6 +269,7 @@ struct StandingsTableView: View {
                         .padding(.leading, 8)
                         .font(.subheadline)
                         .lineLimit(1)
+                        .truncationMode(.tail)
 
                     Text("\(standing.wins)")
                         .frame(width: DeviceEnvironment.standingsStatWidth, alignment: .center)
@@ -709,6 +710,7 @@ struct BracketPlayerRow: View {
                 .fontWeight(isWinner ? .semibold : .regular)
                 .foregroundColor(name == "TBD" || name == "BYE" ? .secondary : .primary)
                 .lineLimit(1)
+                .truncationMode(.tail)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             if status == .complete || status == .inProgress || status == .awaitingApproval {

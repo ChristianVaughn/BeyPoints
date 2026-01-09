@@ -572,6 +572,93 @@ struct RejectScoreMessage: TournamentMessage {
     }
 }
 
+// MARK: - Tournament Update Message
+
+/// Sent by master to broadcast the current tournament state to all devices.
+struct TournamentUpdateMessage: TournamentMessage {
+    let messageType = TournamentMessageType.tournamentUpdate
+    let tournamentJson: String  // JSON-encoded Tournament struct
+
+    func encode() -> Data {
+        var data = Data()
+        data.append(messageType.rawValue)
+
+        // Tournament JSON (2-byte length prefix for large payload)
+        let jsonData = Data(tournamentJson.utf8)
+        let jsonLength = UInt16(min(jsonData.count, 65535))
+        data.append(UInt8(jsonLength >> 8))
+        data.append(UInt8(jsonLength & 0xFF))
+        data.append(jsonData.prefix(Int(jsonLength)))
+
+        return data
+    }
+
+    static func decode(from data: Data) -> TournamentUpdateMessage? {
+        guard data.count >= 3,
+              data[0] == TournamentMessageType.tournamentUpdate.rawValue else {
+            return nil
+        }
+
+        let jsonLength = Int(data[1]) << 8 | Int(data[2])
+        guard data.count >= 3 + jsonLength else { return nil }
+        let tournamentJson = String(data: data[3..<3+jsonLength], encoding: .utf8) ?? "{}"
+
+        return TournamentUpdateMessage(tournamentJson: tournamentJson)
+    }
+
+    /// Convenience initializer that encodes a Tournament directly
+    init(tournament: Tournament) {
+        if let jsonData = try? JSONEncoder().encode(tournament),
+           let jsonString = String(data: jsonData, encoding: .utf8) {
+            self.tournamentJson = jsonString
+        } else {
+            self.tournamentJson = "{}"
+        }
+    }
+
+    init(tournamentJson: String) {
+        self.tournamentJson = tournamentJson
+    }
+
+    /// Decodes the tournament JSON back into a Tournament struct
+    func decodeTournament() -> Tournament? {
+        guard let jsonData = tournamentJson.data(using: .utf8) else { return nil }
+        return try? JSONDecoder().decode(Tournament.self, from: jsonData)
+    }
+}
+
+// MARK: - Request State Message
+
+/// Sent by a device to request the current tournament state from the master.
+struct RequestStateMessage: TournamentMessage {
+    let messageType = TournamentMessageType.requestState
+    let deviceId: String
+
+    func encode() -> Data {
+        var data = Data()
+        data.append(messageType.rawValue)
+
+        let deviceIdData = Data(deviceId.utf8)
+        data.append(UInt8(deviceIdData.count))
+        data.append(deviceIdData)
+
+        return data
+    }
+
+    static func decode(from data: Data) -> RequestStateMessage? {
+        guard data.count >= 2,
+              data[0] == TournamentMessageType.requestState.rawValue else {
+            return nil
+        }
+
+        let deviceIdLength = Int(data[1])
+        guard data.count >= 2 + deviceIdLength else { return nil }
+        let deviceId = String(data: data[2..<2+deviceIdLength], encoding: .utf8) ?? ""
+
+        return RequestStateMessage(deviceId: deviceId)
+    }
+}
+
 // MARK: - Room Closed Message
 
 /// Sent by master to notify scoreboards that the room/tournament has been closed.
@@ -646,9 +733,9 @@ enum TournamentMessageFactory {
         case .rejectScore:
             return RejectScoreMessage.decode(from: data)
         case .tournamentUpdate:
-            return nil // TODO: Implement when tournament models are ready
+            return TournamentUpdateMessage.decode(from: data)
         case .requestState:
-            return nil // TODO: Implement
+            return RequestStateMessage.decode(from: data)
         }
     }
 }
