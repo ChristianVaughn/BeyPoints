@@ -207,16 +207,6 @@
     "%@ / 500" : {
 
     },
-    "%@ %@ - %@ %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ %2$@ - %3$@ %4$@"
-          }
-        }
-      }
-    },
     "%@ active" : {
       "comment" : "A label at the bottom of the people list sheet showing the number of active users.",
       "extractionState" : "stale",
@@ -6413,9 +6403,6 @@
     "Assign to Scoreboard" : {
 
     },
-    "Assign to:" : {
-
-    },
     "Back" : {
 
     },
@@ -6441,9 +6428,6 @@
 
     },
     "Challonge Credentials" : {
-
-    },
-    "Change" : {
 
     },
     "Change your role in the tournament system" : {
@@ -19386,9 +19370,6 @@
     "Current" : {
 
     },
-    "Current Mode" : {
-
-    },
     "Devices" : {
 
     },
@@ -31375,11 +31356,18 @@
     "Match Settings" : {
 
     },
-    "Match to Reject" : {
-
-    },
     "Match Winner!" : {
 
+    },
+    "Match: %@ vs %@\nWinner: %@\nScore: %@\n\nThis will update the result on Challonge." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Match: %1$@ vs %2$@\nWinner: %3$@\nScore: %4$@\n\nThis will update the result on Challonge."
+          }
+        }
+      }
     },
     "Matches" : {
 
@@ -31602,9 +31590,6 @@
     "No matches available" : {
 
     },
-    "No Pending Approvals" : {
-
-    },
     "No scoreboards available" : {
 
     },
@@ -31615,9 +31600,6 @@
 
     },
     "Options" : {
-
-    },
-    "Or start a practice match" : {
 
     },
     "OWF" : {
@@ -31639,9 +31621,6 @@
 
     },
     "Players (%@)" : {
-
-    },
-    "Practice Match" : {
 
     },
     "Preliminary Stage" : {
@@ -31841,9 +31820,6 @@
           }
         }
       }
-    },
-    "Rejection Reason" : {
-
     },
     "Required" : {
 
@@ -32056,9 +32032,6 @@
       }
     },
     "Save Credentials" : {
-
-    },
-    "Score submissions from scoreboards will appear here for your review." : {
 
     },
     "Score Submitted" : {
@@ -34834,9 +34807,6 @@
     "Tap to assign" : {
 
     },
-    "The scoreboard will be notified and can re-score the match." : {
-
-    },
     "The tournament master rejected your score: %@" : {
 
     },
@@ -34853,6 +34823,15 @@
 
     },
     "This match is waiting for previous matches to complete before players are determined." : {
+
+    },
+    "This will end the tournament and disconnect all connected scoreboards. This action cannot be undone." : {
+
+    },
+    "This will unassign the match from its current scoreboard." : {
+
+    },
+    "This will update the match result on Challonge." : {
 
     },
     "Top %@ players advance from %@ to %@ finals." : {
@@ -36700,9 +36679,6 @@
         }
       }
     },
-    "View all (%@)" : {
-
-    },
     "View History" : {
 
     },
@@ -36910,9 +36886,6 @@
 
     },
     "Win Condition:" : {
-
-    },
-    "Winner: %@" : {
 
     },
     "Winners Bracket" : {

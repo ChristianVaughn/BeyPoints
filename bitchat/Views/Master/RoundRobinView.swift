@@ -357,6 +357,7 @@ struct RoundRobinMatchRow: View {
     let onTap: () -> Void
 
     @Environment(\.colorScheme) private var colorScheme
+    @State private var showUnassignConfirmation = false
 
     var body: some View {
         HStack {
@@ -443,7 +444,7 @@ struct RoundRobinMatchRow: View {
 
             case .assigned, .inProgress:
                 Button(role: .destructive) {
-                    MatchAssignmentService.shared.cancelAssignment(matchId: match.id)
+                    showUnassignConfirmation = true
                 } label: {
                     Label("Unassign Match", systemImage: "xmark.circle")
                 }
@@ -467,6 +468,14 @@ struct RoundRobinMatchRow: View {
                 }
                 .disabled(true)
             }
+        }
+        .alert("Unassign Match?", isPresented: $showUnassignConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Unassign", role: .destructive) {
+                MatchAssignmentService.shared.cancelAssignment(matchId: match.id)
+            }
+        } message: {
+            Text("This will unassign the match from its current scoreboard.")
         }
     }
 

@@ -14,8 +14,12 @@ struct MatchDetailSheet: View {
     let tournament: Tournament
     @ObservedObject var tournamentManager: TournamentManager
     @ObservedObject var messageHandler: TournamentMessageHandler
+    @ObservedObject var syncManager = ChallongeSyncManager.shared
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
+    @State private var showUnassignConfirmation = false
+    @State private var showChallongeConfirmation = false
+    @State private var challongeSubmitError: String?
 
     init(
         match: TournamentMatch,
@@ -66,6 +70,37 @@ struct MatchDetailSheet: View {
         }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
+        .alert("Unassign Match?", isPresented: $showUnassignConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Unassign", role: .destructive) {
+                unassignMatch()
+                dismiss()
+            }
+        } message: {
+            Text("This will unassign the match from its current scoreboard.")
+        }
+        .alert("Submit to Challonge?", isPresented: $showChallongeConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Submit") {
+                approveAndSubmitToChallonge()
+            }
+        } message: {
+            if let submission = pendingSubmission {
+                Text("Match: \(match.player1Name ?? "P1") vs \(match.player2Name ?? "P2")\nWinner: \(submission.winner)\nScore: \(formatScoreForDisplay(submission))\n\nThis will update the result on Challonge.")
+            } else {
+                Text("This will update the match result on Challonge.")
+            }
+        }
+        .alert("Challonge Sync Error", isPresented: .init(
+            get: { challongeSubmitError != nil },
+            set: { if !$0 { challongeSubmitError = nil } }
+        )) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            if let error = challongeSubmitError {
+                Text(error)
+            }
+        }
     }
 
     // MARK: - Status Badge
@@ -327,8 +362,7 @@ struct MatchDetailSheet: View {
 
                 // Unassign button
                 Button(role: .destructive) {
-                    unassignMatch()
-                    dismiss()
+                    showUnassignConfirmation = true
                 } label: {
                     Label("Unassign Match", systemImage: "xmark.circle")
                         .frame(maxWidth: .infinity)
@@ -398,11 +432,17 @@ struct MatchDetailSheet: View {
                     .buttonStyle(.bordered)
 
                     Button {
-                        messageHandler.approveScore(matchId: match.id)
-                        dismiss()
+                        handleApprove()
                     } label: {
-                        Label("Approve", systemImage: "checkmark.circle")
-                            .frame(maxWidth: .infinity)
+                        HStack(spacing: 6) {
+                            Image(systemName: "checkmark.circle")
+                            Text(syncManager.isLinked ? "Approve & Sync" : "Approve")
+                            if syncManager.isLinked {
+                                Image(systemName: "arrow.triangle.2.circlepath")
+                                    .font(.caption)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
                 }
@@ -548,6 +588,56 @@ struct MatchDetailSheet: View {
 
     private func unassignMatch() {
         MatchAssignmentService.shared.cancelAssignment(matchId: match.id)
+    }
+
+    private func handleApprove() {
+        if syncManager.isLinked {
+            showChallongeConfirmation = true
+        } else {
+            messageHandler.approveScore(matchId: match.id)
+            dismiss()
+        }
+    }
+
+    private func approveAndSubmitToChallonge() {
+        guard let submission = pendingSubmission else {
+            messageHandler.approveScore(matchId: match.id)
+            dismiss()
+            return
+        }
+
+        // Approve locally first
+        messageHandler.approveScore(matchId: match.id)
+
+        // Determine if this is a Best Of match
+        let isBestOf = submission.player1SetWins > 0 || submission.player2SetWins > 0
+
+        // Submit to Challonge in background
+        Task {
+            do {
+                try await syncManager.submitScoreToChallonge(
+                    matchId: submission.matchId,
+                    winner: submission.winner,
+                    player1Score: submission.player1FinalScore,
+                    player2Score: submission.player2FinalScore,
+                    player1SetWins: submission.player1SetWins,
+                    player2SetWins: submission.player2SetWins,
+                    isBestOf: isBestOf
+                )
+            } catch {
+                challongeSubmitError = "Score approved locally but failed to sync to Challonge after 3 attempts. Please update the match manually on Challonge."
+            }
+        }
+
+        dismiss()
+    }
+
+    private func formatScoreForDisplay(_ submission: PendingScoreSubmission) -> String {
+        if submission.player1SetWins > 0 || submission.player2SetWins > 0 {
+            return "\(submission.player1SetWins)-\(submission.player2SetWins)"
+        } else {
+            return "\(submission.player1FinalScore)-\(submission.player2FinalScore)"
+        }
     }
 }
 

@@ -319,6 +319,7 @@ struct SwissMatchCard: View {
     let onTap: () -> Void
 
     @Environment(\.colorScheme) private var colorScheme
+    @State private var showUnassignConfirmation = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -395,7 +396,7 @@ struct SwissMatchCard: View {
 
             case .assigned, .inProgress:
                 Button(role: .destructive) {
-                    MatchAssignmentService.shared.cancelAssignment(matchId: match.id)
+                    showUnassignConfirmation = true
                 } label: {
                     Label("Unassign Match", systemImage: "xmark.circle")
                 }
@@ -419,6 +420,14 @@ struct SwissMatchCard: View {
                 }
                 .disabled(true)
             }
+        }
+        .alert("Unassign Match?", isPresented: $showUnassignConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Unassign", role: .destructive) {
+                MatchAssignmentService.shared.cancelAssignment(matchId: match.id)
+            }
+        } message: {
+            Text("This will unassign the match from its current scoreboard.")
         }
     }
 
@@ -498,39 +507,6 @@ struct SwissPlayerRow: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
         .background(isWinner && status == .complete ? Color.winnerHighlight(for: colorScheme) : Color.clear)
-    }
-}
-
-// MARK: - Compact Match Row
-
-struct SwissCompactMatchRow: View {
-    let match: TournamentMatch
-
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(match.player1Name ?? "TBD")
-                    .font(.caption)
-                    .fontWeight(match.winner == match.player1Name ? .semibold : .regular)
-                Text(match.player2Name ?? "TBD")
-                    .font(.caption)
-                    .fontWeight(match.winner == match.player2Name ? .semibold : .regular)
-            }
-
-            Spacer()
-
-            if match.status == .complete {
-                Text("\(match.player1Score) - \(match.player2Score)")
-                    .font(.caption)
-                    .fontWeight(.medium)
-            } else {
-                MatchStatusBadge(status: match.status)
-            }
-        }
-        .padding(.vertical, 4)
-        .padding(.horizontal, 8)
-        .background(Color(.systemGray6).opacity(0.5))
-        .cornerRadius(6)
     }
 }
 

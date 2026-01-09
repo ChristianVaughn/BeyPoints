@@ -163,47 +163,6 @@ struct ModeCard: View {
     }
 }
 
-// MARK: - Mode Switch Button (for settings)
-
-/// Button for switching modes in settings.
-struct ModeSwitchButton: View {
-    @StateObject private var appState = AppState.shared
-    @State private var showModeSelection = false
-
-    var body: some View {
-        Button(action: { showModeSelection = true }) {
-            HStack {
-                if let mode = appState.currentMode {
-                    Image(systemName: mode.iconName)
-                        .foregroundColor(mode == .master ? .orange : .blue)
-
-                    VStack(alignment: .leading) {
-                        Text("Current Mode")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Text(mode.displayName)
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                    }
-
-                    Spacer()
-
-                    Text("Change")
-                        .font(.caption)
-                        .foregroundColor(.blue)
-                }
-            }
-            .padding()
-            .background(Color(.secondarySystemBackground))
-            .cornerRadius(10)
-        }
-        .buttonStyle(PlainButtonStyle())
-        .sheet(isPresented: $showModeSelection) {
-            ModeSelectionSheet()
-        }
-    }
-}
-
 // MARK: - Mode Selection Sheet
 
 /// Sheet version of mode selection for changing modes.

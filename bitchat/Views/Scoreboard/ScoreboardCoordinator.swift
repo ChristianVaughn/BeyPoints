@@ -25,6 +25,7 @@ struct ScoreboardCoordinator: View {
     @State private var roomClosedReason: String?
     @State private var showMatchUnassignedAlert = false
     @State private var matchUnassignedReason: String?
+    @State private var showLeaveRoomConfirmation = false
 
     enum ScoreboardScreen {
         case idle           // Waiting for match assignment or manual start
@@ -70,7 +71,9 @@ struct ScoreboardCoordinator: View {
                 if roomManager.isInRoom {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Menu {
-                            Button(role: .destructive, action: { roomManager.leaveRoom() }) {
+                            Button(role: .destructive) {
+                                showLeaveRoomConfirmation = true
+                            } label: {
                                 Label("Leave Room", systemImage: "rectangle.portrait.and.arrow.right")
                             }
                         } label: {
@@ -79,6 +82,14 @@ struct ScoreboardCoordinator: View {
                     }
                 }
             }
+        }
+        .alert("Leave Room?", isPresented: $showLeaveRoomConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Leave", role: .destructive) {
+                roomManager.leaveRoom()
+            }
+        } message: {
+            Text("Are you sure you want to leave the tournament room?")
         }
         .sheet(isPresented: $showSetup) {
             GameSetupView { config in
@@ -272,23 +283,6 @@ struct ScoreboardCoordinator: View {
                     Text("Waiting for match assignment...")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
-
-                    // Manual start option
-                    VStack(spacing: 12) {
-                        Text("Or start a practice match")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-
-                        Button(action: { showSetup = true }) {
-                            HStack {
-                                Image(systemName: "play.fill")
-                                Text("Practice Match")
-                            }
-                            .padding()
-                            .background(Color(.secondarySystemBackground))
-                            .cornerRadius(10)
-                        }
-                    }
                 }
             } else {
                 // Not in room

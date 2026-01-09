@@ -236,64 +236,6 @@ struct GrandFinalsSection: View {
     }
 }
 
-// MARK: - Double Elimination Compact View
-
-struct DoubleEliminationCompactView: View {
-    let tournament: Tournament
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Progress
-            ProgressView(value: Double(completedMatches), total: Double(tournament.matches.count))
-                .progressViewStyle(.linear)
-                .tint(.green)
-
-            HStack {
-                Text("\(completedMatches)/\(tournament.matches.count) matches")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                Spacer()
-                Text(currentPhase)
-                    .font(.caption)
-                    .fontWeight(.medium)
-            }
-
-            // Current matches
-            VStack(spacing: 4) {
-                ForEach(pendingMatches.prefix(3)) { match in
-                    CompactMatchRow(match: match)
-                }
-            }
-
-            if pendingMatches.count > 3 {
-                Text("+ \(pendingMatches.count - 3) more")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-        }
-    }
-
-    private var completedMatches: Int {
-        tournament.matches.filter { $0.status == .complete }.count
-    }
-
-    private var pendingMatches: [TournamentMatch] {
-        tournament.matches.filter {
-            $0.status != .complete && $0.isReady
-        }
-    }
-
-    private var currentPhase: String {
-        if tournament.matches.contains(where: { $0.isGrandFinal && $0.status != .complete && $0.isReady }) {
-            return "Grand Finals"
-        } else if tournament.matches.filter({ $0.bracketType == .winners }).allSatisfy({ $0.status == .complete }) {
-            return "Losers Bracket"
-        } else {
-            return "Winners Bracket"
-        }
-    }
-}
-
 #Preview {
     // Create a sample Double Elimination tournament
     let tournament = Tournament.create(

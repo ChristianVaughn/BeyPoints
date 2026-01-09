@@ -61,30 +61,6 @@ struct RoomStatusView: View {
     }
 }
 
-// MARK: - Compact Room Badge
-
-/// A compact badge showing room status for use in navigation bars.
-struct RoomStatusBadge: View {
-    @StateObject private var roomManager = TournamentRoomManager.shared
-
-    var body: some View {
-        if roomManager.isInRoom, let roomCode = roomManager.currentRoomCode {
-            HStack(spacing: 4) {
-                Circle()
-                    .fill(Color.green)
-                    .frame(width: 6, height: 6)
-
-                Text(RoomCode.formatForDisplay(roomCode.code))
-                    .font(.system(.caption, design: .monospaced))
-            }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(Color(.tertiarySystemBackground))
-            .cornerRadius(6)
-        }
-    }
-}
-
 // MARK: - Room Code Display
 
 /// Large display of room code for sharing with participants.

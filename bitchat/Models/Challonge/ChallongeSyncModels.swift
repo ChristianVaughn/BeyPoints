@@ -123,15 +123,24 @@ struct ChallongeMatchMapping: Codable, Equatable, Identifiable {
     var id: UUID { localMatchId }
     let localMatchId: UUID
     let challongeMatchId: Int
+    let challongePlayer1Id: Int?  // Challonge's player ID for this match (may differ from main participant ID)
+    let challongePlayer2Id: Int?  // Challonge's player ID for this match (may differ from main participant ID)
     var lastChallongeState: String
     var lastLocalStatus: String
     var hasConflict: Bool
     var conflictDetails: MatchConflict?
     var lastSyncedAt: Date
 
-    init(localMatchId: UUID, challongeMatchId: Int) {
+    init(
+        localMatchId: UUID,
+        challongeMatchId: Int,
+        challongePlayer1Id: Int? = nil,
+        challongePlayer2Id: Int? = nil
+    ) {
         self.localMatchId = localMatchId
         self.challongeMatchId = challongeMatchId
+        self.challongePlayer1Id = challongePlayer1Id
+        self.challongePlayer2Id = challongePlayer2Id
         self.lastChallongeState = "pending"
         self.lastLocalStatus = "pending"
         self.hasConflict = false

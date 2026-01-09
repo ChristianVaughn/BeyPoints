@@ -39,6 +39,20 @@ final class ChallongeSyncManager: ObservableObject {
     private let challongeService = ChallongeService.shared
     private let tournamentManager = TournamentManager.shared
 
+    // MARK: - Debug Logging
+
+    #if DEBUG
+    private static let isDebugLogging = true
+    #else
+    private static let isDebugLogging = false
+    #endif
+
+    private func debugLog(_ message: String) {
+        if Self.isDebugLogging {
+            print("[Challonge DEBUG] \(message)")
+        }
+    }
+
     // MARK: - Persistence
 
     private let syncStateKey = "beyscore.challongeSyncState"
@@ -151,11 +165,13 @@ final class ChallongeSyncManager: ObservableObject {
             )
             tournament.matches = localMatches
 
-            // Create match mappings
+            // Create match mappings with player IDs
             newSyncState.matchMappings = zip(localMatches, challongeMatches).map { local, wrapper in
                 ChallongeMatchMapping(
                     localMatchId: local.id,
-                    challongeMatchId: wrapper.match.id
+                    challongeMatchId: wrapper.match.id,
+                    challongePlayer1Id: wrapper.match.player1Id,
+                    challongePlayer2Id: wrapper.match.player2Id
                 )
             }
 
@@ -573,10 +589,12 @@ final class ChallongeSyncManager: ObservableObject {
 
             updatedTournament.matches.append(match)
 
-            // Add to mappings
+            // Add to mappings with player IDs
             let mapping = ChallongeMatchMapping(
                 localMatchId: match.id,
-                challongeMatchId: cm.id
+                challongeMatchId: cm.id,
+                challongePlayer1Id: cm.player1Id,
+                challongePlayer2Id: cm.player2Id
             )
             syncState.matchMappings.append(mapping)
         }
@@ -689,5 +707,207 @@ final class ChallongeSyncManager: ObservableObject {
     /// Whether approaching API limit
     var isApproachingLimit: Bool {
         syncState?.isApproachingLimit ?? false
+    }
+
+    // MARK: - Score Submission to Challonge
+
+    /// Submits an approved match score to Challonge
+    /// - Parameters:
+    ///   - matchId: Local match ID
+    ///   - winner: Winner's name
+    ///   - player1Score: Player 1's final score
+    ///   - player2Score: Player 2's final score
+    ///   - player1SetWins: Player 1's set wins (for Best Of matches)
+    ///   - player2SetWins: Player 2's set wins (for Best Of matches)
+    ///   - isBestOf: Whether this is a Best Of match
+    func submitScoreToChallonge(
+        matchId: UUID,
+        winner: String,
+        player1Score: Int,
+        player2Score: Int,
+        player1SetWins: Int,
+        player2SetWins: Int,
+        isBestOf: Bool
+    ) async throws {
+        debugLog("submitScoreToChallonge called:")
+        debugLog("  - matchId: \(matchId)")
+        debugLog("  - winner: \(winner)")
+        debugLog("  - scores: p1=\(player1Score), p2=\(player2Score)")
+        debugLog("  - setWins: p1=\(player1SetWins), p2=\(player2SetWins)")
+        debugLog("  - isBestOf: \(isBestOf)")
+
+        guard var currentSyncState = syncState else {
+            debugLog("FAILED: No sync state (not authenticated)")
+            throw ChallongeError.notAuthenticated
+        }
+
+        // Find the Challonge match ID from our mappings
+        guard let mapping = currentSyncState.matchMappings.first(where: { $0.localMatchId == matchId }) else {
+            debugLog("FAILED: No match mapping found for local match \(matchId)")
+            debugLog("  Available mappings: \(currentSyncState.matchMappings.map { "local=\($0.localMatchId) → challonge=\($0.challongeMatchId)" }.joined(separator: ", "))")
+            throw ChallongeError.matchMappingNotFound(matchId: matchId)
+        }
+        debugLog("Match mapping: local=\(matchId) → challonge=\(mapping.challongeMatchId)")
+        debugLog("  - challongePlayer1Id: \(mapping.challongePlayer1Id.map(String.init) ?? "nil")")
+        debugLog("  - challongePlayer2Id: \(mapping.challongePlayer2Id.map(String.init) ?? "nil")")
+
+        // Find the local match to determine which player won (player1 or player2)
+        guard let localMatch = tournamentManager.currentTournament?.matches.first(where: { $0.id == matchId }) else {
+            debugLog("FAILED: Local match not found for ID: \(matchId)")
+            throw ChallongeError.matchMappingNotFound(matchId: matchId)
+        }
+
+        // Determine winner ID from the match mapping (not participant mapping)
+        // This is critical for group/Swiss stages where player IDs differ from main participant IDs
+        let winnerId: Int
+        if localMatch.player1Name == winner {
+            guard let p1Id = mapping.challongePlayer1Id else {
+                debugLog("FAILED: No challongePlayer1Id in mapping for match")
+                throw ChallongeError.participantMappingNotFound(playerName: winner)
+            }
+            winnerId = p1Id
+            debugLog("Winner is player1: \(winner) → challongePlayer1Id=\(winnerId)")
+        } else if localMatch.player2Name == winner {
+            guard let p2Id = mapping.challongePlayer2Id else {
+                debugLog("FAILED: No challongePlayer2Id in mapping for match")
+                throw ChallongeError.participantMappingNotFound(playerName: winner)
+            }
+            winnerId = p2Id
+            debugLog("Winner is player2: \(winner) → challongePlayer2Id=\(winnerId)")
+        } else {
+            // Fallback: try participant mapping (for backwards compatibility with old data)
+            debugLog("Winner '\(winner)' doesn't match player1='\(localMatch.player1Name ?? "nil")' or player2='\(localMatch.player2Name ?? "nil")'")
+            debugLog("Falling back to participant mapping lookup...")
+            guard let winnerMapping = currentSyncState.participantMappings.first(where: { $0.playerName == winner }) else {
+                debugLog("FAILED: No participant mapping found for winner: \(winner)")
+                debugLog("  Available participants: \(currentSyncState.participantMappings.map { $0.playerName }.joined(separator: ", "))")
+                throw ChallongeError.participantMappingNotFound(playerName: winner)
+            }
+            winnerId = winnerMapping.challongeParticipantId
+            debugLog("Fallback winner mapping: \(winner) → participantId=\(winnerId)")
+        }
+
+        // Format the score for Challonge
+        let scoresCsv = Self.formatScoresForChallonge(
+            player1Score: player1Score,
+            player2Score: player2Score,
+            player1SetWins: player1SetWins,
+            player2SetWins: player2SetWins,
+            isBestOf: isBestOf
+        )
+        debugLog("Formatted score: \(scoresCsv)")
+
+        debugLog("Calling ChallongeService.updateMatch...")
+        debugLog("  - tournamentId: \(currentSyncState.challongeUrl)")
+        debugLog("  - matchId: \(mapping.challongeMatchId)")
+        debugLog("  - winnerId: \(winnerId)")
+        debugLog("  - scoresCsv: \(scoresCsv)")
+
+        // Submit to Challonge (retries 3 times with exponential backoff)
+        _ = try await challongeService.updateMatch(
+            tournamentId: currentSyncState.challongeUrl,
+            matchId: mapping.challongeMatchId,
+            winnerId: winnerId,
+            scoresCsv: scoresCsv
+        )
+
+        // Record API call
+        currentSyncState.recordApiCall()
+        syncState = currentSyncState
+        saveSyncState()
+
+        debugLog("SUCCESS: Match \(mapping.challongeMatchId) updated - \(winner) won \(scoresCsv)")
+        print("[Challonge] Successfully submitted score for match \(matchId): \(winner) won \(scoresCsv)")
+    }
+
+    /// Formats scores for Challonge CSV format
+    /// - Best Of: Report SET WINS only (e.g., "2-1" for Bo3)
+    /// - Single Game: Report point score (e.g., "4-2")
+    static func formatScoresForChallonge(
+        player1Score: Int,
+        player2Score: Int,
+        player1SetWins: Int,
+        player2SetWins: Int,
+        isBestOf: Bool
+    ) -> String {
+        if isBestOf {
+            // Best Of: report set wins only
+            return "\(player1SetWins)-\(player2SetWins)"
+        } else {
+            // Single game: report point score
+            return "\(player1Score)-\(player2Score)"
+        }
+    }
+
+    // MARK: - Auto-Fetch New Matches
+
+    /// Fetches only new/open matches from Challonge (called when round completes)
+    func fetchNewMatches() async throws {
+        guard var currentSyncState = syncState else { return }
+
+        // Fetch only open matches (ready to play)
+        let openMatches = try await challongeService.fetchMatches(
+            tournamentId: currentSyncState.challongeUrl,
+            state: .open
+        )
+
+        // Record API call
+        currentSyncState.recordApiCall()
+
+        // Create participant lookup
+        let participantLookup = createParticipantLookup(from: currentSyncState.participantMappings)
+
+        // Import any matches we don't have locally
+        guard var updatedTournament = tournamentManager.currentTournament else {
+            syncState = currentSyncState
+            saveSyncState()
+            return
+        }
+
+        var addedCount = 0
+
+        for challongeMatch in openMatches {
+            // Check if we already have this match
+            if !currentSyncState.matchMappings.contains(where: { $0.challongeMatchId == challongeMatch.id }) {
+                // Import new match
+                let newMatch = TournamentMatch(
+                    roundNumber: challongeMatch.absoluteRound,
+                    matchNumber: challongeMatch.suggestedPlayOrder ?? updatedTournament.matches.count,
+                    player1Name: challongeMatch.player1Id.flatMap { participantLookup[$0] },
+                    player2Name: challongeMatch.player2Id.flatMap { participantLookup[$0] },
+                    stage: challongeMatch.isGroupStage ? .group1 : .main
+                )
+
+                updatedTournament.matches.append(newMatch)
+
+                // Add mapping with player IDs
+                let mapping = ChallongeMatchMapping(
+                    localMatchId: newMatch.id,
+                    challongeMatchId: challongeMatch.id,
+                    challongePlayer1Id: challongeMatch.player1Id,
+                    challongePlayer2Id: challongeMatch.player2Id
+                )
+                currentSyncState.matchMappings.append(mapping)
+                addedCount += 1
+            }
+        }
+
+        if addedCount > 0 {
+            // Update Swiss round if applicable
+            if updatedTournament.tournamentType == .swiss {
+                let maxRound = openMatches.map { $0.absoluteRound }.max() ?? 0
+                if maxRound > updatedTournament.currentSwissRound {
+                    updatedTournament.currentSwissRound = maxRound
+                }
+            }
+
+            tournamentManager.setTournament(updatedTournament)
+            newMatchCount = addedCount
+            print("[Challonge] Imported \(addedCount) new matches")
+        }
+
+        currentSyncState.lastSyncedAt = Date()
+        syncState = currentSyncState
+        saveSyncState()
     }
 }

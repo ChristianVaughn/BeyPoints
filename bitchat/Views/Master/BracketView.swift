@@ -152,6 +152,7 @@ struct BracketMatchCard: View {
     let onTap: () -> Void
 
     @Environment(\.colorScheme) private var colorScheme
+    @State private var showUnassignConfirmation = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -225,7 +226,7 @@ struct BracketMatchCard: View {
 
             case .assigned, .inProgress:
                 Button(role: .destructive) {
-                    MatchAssignmentService.shared.cancelAssignment(matchId: match.id)
+                    showUnassignConfirmation = true
                 } label: {
                     Label("Unassign Match", systemImage: "xmark.circle")
                 }
@@ -249,6 +250,14 @@ struct BracketMatchCard: View {
                 }
                 .disabled(true)
             }
+        }
+        .alert("Unassign Match?", isPresented: $showUnassignConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Unassign", role: .destructive) {
+                MatchAssignmentService.shared.cancelAssignment(matchId: match.id)
+            }
+        } message: {
+            Text("This will unassign the match from its current scoreboard.")
         }
     }
 
@@ -387,70 +396,6 @@ struct MatchStatusBadge: View {
         case .awaitingApproval: return Color.primaryOrange(for: colorScheme)
         case .complete: return .green
         }
-    }
-}
-
-// MARK: - Compact Bracket View (for dashboard)
-
-struct CompactBracketView: View {
-    let tournament: Tournament
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Progress bar
-            ProgressView(value: Double(tournament.completedMatches), total: Double(tournament.totalMatches))
-                .progressViewStyle(.linear)
-                .tint(.green)
-
-            HStack {
-                Text("\(tournament.completedMatches)/\(tournament.totalMatches) matches")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-
-                Spacer()
-
-                Text("Round \(tournament.currentRound)")
-                    .font(.caption)
-                    .fontWeight(.medium)
-            }
-
-            // Current round matches
-            if tournament.currentRound <= tournament.numberOfRounds {
-                let currentMatches = tournament.matches(inRound: tournament.currentRound)
-                    .filter { $0.status != .complete }
-                    .prefix(3)
-
-                ForEach(Array(currentMatches)) { match in
-                    CompactMatchRow(match: match)
-                }
-
-                if currentMatches.count == 3 {
-                    Text("+ \(tournament.matches(inRound: tournament.currentRound).filter { $0.status != .complete }.count - 3) more")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-        }
-    }
-}
-
-struct CompactMatchRow: View {
-    let match: TournamentMatch
-
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(match.player1Name ?? "TBD")
-                    .font(.caption)
-                Text(match.player2Name ?? "TBD")
-                    .font(.caption)
-            }
-
-            Spacer()
-
-            MatchStatusBadge(status: match.status)
-        }
-        .padding(.vertical, 4)
     }
 }
 

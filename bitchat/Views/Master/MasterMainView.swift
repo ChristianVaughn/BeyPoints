@@ -17,6 +17,7 @@ struct MasterMainView: View {
     @State private var showingCreateTournament = false
     @State private var showingChallongeImport = false
     @State private var selectedTab = 0
+    @State private var showEndTournamentConfirmation = false
 
     // MARK: - Master Menu
 
@@ -34,7 +35,7 @@ struct MasterMainView: View {
             }
 
             Button(role: .destructive) {
-                tournamentManager.clearTournament()
+                showEndTournamentConfirmation = true
             } label: {
                 Label("End Tournament", systemImage: "xmark.circle")
             }
@@ -66,6 +67,14 @@ struct MasterMainView: View {
                 print("[BeyScore] MasterMainView: Tournament imported from Challonge")
                 tournamentManager.setTournament(tournament)
             }
+        }
+        .alert("End Tournament?", isPresented: $showEndTournamentConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("End Tournament", role: .destructive) {
+                tournamentManager.clearTournament()
+            }
+        } message: {
+            Text("This will end the tournament and disconnect all connected scoreboards. This action cannot be undone.")
         }
     }
 
@@ -239,7 +248,7 @@ struct MasterMainView: View {
                             }
 
                             Button(role: .destructive) {
-                                tournamentManager.clearTournament()
+                                showEndTournamentConfirmation = true
                             } label: {
                                 Label("End Tournament", systemImage: "xmark.circle")
                             }
@@ -550,7 +559,13 @@ struct StatBadge: View {
 struct MasterSidebarList: View {
     @ObservedObject var tournamentManager: TournamentManager
     @ObservedObject var messageHandler: TournamentMessageHandler
+    @ObservedObject var syncManager = ChallongeSyncManager.shared
     let onCreateTournament: () -> Void
+
+    // Challonge confirmation state
+    @State private var showChallongeConfirmation = false
+    @State private var submissionToApprove: PendingScoreSubmission?
+    @State private var challongeSubmitError: String?
 
     init(tournamentManager: TournamentManager, messageHandler: TournamentMessageHandler, onCreateTournament: @escaping () -> Void) {
         self.tournamentManager = tournamentManager
@@ -620,20 +635,12 @@ struct MasterSidebarList: View {
                                 submission: submission,
                                 tournament: tournament,
                                 onApprove: {
-                                    messageHandler.approveScore(matchId: submission.matchId)
+                                    handleApprove(submission: submission)
                                 },
                                 onReject: {
                                     messageHandler.rejectScore(matchId: submission.matchId, reason: nil)
                                 }
                             )
-                        }
-
-                        if tournamentManager.pendingSubmissions.count > 5 {
-                            NavigationLink {
-                                ApprovalQueueView()
-                            } label: {
-                                Text("View all (\(tournamentManager.pendingSubmissions.count))")
-                            }
                         }
                     }
                 }
@@ -641,100 +648,78 @@ struct MasterSidebarList: View {
             // Note: No "else" case needed - sidebar only shown when tournament exists
         }
         .listStyle(.insetGrouped)
-    }
-}
-
-// MARK: - iPad Layout (split view - legacy)
-
-struct MasterSplitView: View {
-    @StateObject private var tournamentManager = TournamentManager.shared
-    @State private var selectedMatch: TournamentMatch?
-    @State private var showingCreateTournament = false
-    @State private var showingChallongeImport = false
-
-    var body: some View {
-        NavigationSplitView {
-            // Sidebar - devices and approvals
-            List {
-                if tournamentManager.currentTournament != nil {
-                    Section("Room Code") {
-                        HStack {
-                            Text(tournamentManager.currentTournament?.roomCode ?? "")
-                                .font(.system(.title3, design: .monospaced))
-                                .fontWeight(.semibold)
-
-                            Spacer()
-
-                            Button {
-                                UIPasteboard.general.string = tournamentManager.currentTournament?.roomCode
-                            } label: {
-                                Image(systemName: "doc.on.doc")
-                            }
-                            .buttonStyle(.borderless)
-                        }
-                    }
-
-                    Section("Scoreboards") {
-                        CompactDeviceList(tournamentManager: tournamentManager)
-                    }
-
-                    if tournamentManager.hasPendingSubmissions {
-                        Section("Pending Approvals") {
-                            ForEach(tournamentManager.pendingSubmissions.prefix(3)) { submission in
-                                PendingSubmissionRow(
-                                    submission: submission,
-                                    tournament: tournamentManager.currentTournament
-                                )
-                            }
-
-                            if tournamentManager.pendingSubmissions.count > 3 {
-                                NavigationLink {
-                                    ApprovalQueueView()
-                                } label: {
-                                    Text("View all (\(tournamentManager.pendingSubmissions.count))")
-                                }
-                            }
-                        }
-                    }
+        .alert("Submit to Challonge?", isPresented: $showChallongeConfirmation) {
+            Button("Cancel", role: .cancel) {
+                submissionToApprove = nil
+            }
+            Button("Submit") {
+                if let submission = submissionToApprove {
+                    approveAndSubmitToChallonge(submission: submission)
                 }
             }
-            .navigationTitle("Tournament")
-            .toolbar {
-                if tournamentManager.currentTournament == nil {
-                    ToolbarItem {
-                        Button {
-                            showingCreateTournament = true
-                        } label: {
-                            Image(systemName: "plus")
-                        }
-                    }
-                }
-            }
-        } detail: {
-            if let tournament = tournamentManager.currentTournament {
-                BracketView(
-                    tournament: tournament,
-                    onMatchSelected: { match in
-                        selectedMatch = match
-                    }
-                )
-                .navigationTitle(tournament.name)
+        } message: {
+            if let submission = submissionToApprove,
+               let match = tournamentManager.currentTournament?.match(byId: submission.matchId) {
+                Text("Match: \(match.player1Name ?? "P1") vs \(match.player2Name ?? "P2")\nWinner: \(submission.winner)\nScore: \(formatScoreForDisplay(submission))\n\nThis will update the result on Challonge.")
             } else {
-                NoTournamentView(
-                    onCreateTournament: { showingCreateTournament = true },
-                    onChallongeImport: { showingChallongeImport = true }
+                Text("This will update the match result on Challonge.")
+            }
+        }
+        .alert("Challonge Sync Error", isPresented: .init(
+            get: { challongeSubmitError != nil },
+            set: { if !$0 { challongeSubmitError = nil } }
+        )) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            if let error = challongeSubmitError {
+                Text(error)
+            }
+        }
+    }
+
+    // MARK: - Challonge Helpers
+
+    private func handleApprove(submission: PendingScoreSubmission) {
+        if syncManager.isLinked {
+            submissionToApprove = submission
+            showChallongeConfirmation = true
+        } else {
+            messageHandler.approveScore(matchId: submission.matchId)
+        }
+    }
+
+    private func approveAndSubmitToChallonge(submission: PendingScoreSubmission) {
+        // Approve locally first
+        messageHandler.approveScore(matchId: submission.matchId)
+
+        // Determine if this is a Best Of match
+        let isBestOf = submission.player1SetWins > 0 || submission.player2SetWins > 0
+
+        // Submit to Challonge in background
+        Task {
+            do {
+                try await syncManager.submitScoreToChallonge(
+                    matchId: submission.matchId,
+                    winner: submission.winner,
+                    player1Score: submission.player1FinalScore,
+                    player2Score: submission.player2FinalScore,
+                    player1SetWins: submission.player1SetWins,
+                    player2SetWins: submission.player2SetWins,
+                    isBestOf: isBestOf
                 )
+            } catch {
+                challongeSubmitError = "Score approved locally but failed to sync to Challonge after 3 attempts. Please update the match manually on Challonge."
             }
         }
-        .sheet(isPresented: $showingCreateTournament) {
-            TournamentCreationView { tournament in
-                tournamentManager.setTournament(tournament)
-            }
-        }
-        .sheet(isPresented: $showingChallongeImport) {
-            ChallongeImportView { tournament in
-                tournamentManager.setTournament(tournament)
-            }
+
+        submissionToApprove = nil
+    }
+
+    private func formatScoreForDisplay(_ submission: PendingScoreSubmission) -> String {
+        if submission.player1SetWins > 0 || submission.player2SetWins > 0 {
+            return "\(submission.player1SetWins)-\(submission.player2SetWins)"
+        } else {
+            return "\(submission.player1FinalScore)-\(submission.player2FinalScore)"
         }
     }
 }

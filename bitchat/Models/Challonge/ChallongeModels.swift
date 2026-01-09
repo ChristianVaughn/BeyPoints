@@ -260,6 +260,8 @@ enum ChallongeError: Error, LocalizedError {
     case apiError(statusCode: Int, message: String?)
     case invalidTournamentUrl
     case decodingError(Error)
+    case matchMappingNotFound(matchId: UUID)
+    case participantMappingNotFound(playerName: String)
 
     var errorDescription: String? {
         switch self {
@@ -281,6 +283,10 @@ enum ChallongeError: Error, LocalizedError {
             return "Invalid Challonge tournament URL"
         case .decodingError(let error):
             return "Failed to parse Challonge response: \(error.localizedDescription)"
+        case .matchMappingNotFound(let matchId):
+            return "Match not linked to Challonge (ID: \(matchId.uuidString.prefix(8))...)"
+        case .participantMappingNotFound(let playerName):
+            return "Player '\(playerName)' not found in Challonge tournament"
         }
     }
 }

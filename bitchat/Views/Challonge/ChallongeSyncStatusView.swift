@@ -131,43 +131,6 @@ struct ChallongeSyncStatusView: View {
     }
 }
 
-/// Compact version for toolbar/status bar
-struct ChallongeSyncBadge: View {
-    @ObservedObject var syncManager = ChallongeSyncManager.shared
-
-    var body: some View {
-        if syncManager.isLinked {
-            HStack(spacing: 4) {
-                Image(systemName: iconName)
-                    .font(.caption)
-                    .foregroundColor(iconColor)
-
-                if syncManager.isSyncing {
-                    ProgressView()
-                        .scaleEffect(0.6)
-                }
-            }
-        }
-    }
-
-    private var iconName: String {
-        if syncManager.isSyncing {
-            return "arrow.triangle.2.circlepath"
-        }
-        return syncManager.syncState?.syncStatus.iconName ?? "cloud"
-    }
-
-    private var iconColor: Color {
-        switch syncManager.syncState?.syncStatus {
-        case .synced: return .green
-        case .hasConflicts: return .orange
-        case .newMatchesAvailable: return .blue
-        case .syncError: return .red
-        default: return .secondary
-        }
-    }
-}
-
 #Preview {
     VStack {
         ChallongeSyncStatusView()

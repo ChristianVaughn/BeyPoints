@@ -30,6 +30,20 @@ final class ChallongeService {
     private let baseDelay: TimeInterval = 1.0
     private let maxDelay: TimeInterval = 30.0
 
+    // MARK: - Debug Logging
+
+    #if DEBUG
+    private static let isDebugLogging = true
+    #else
+    private static let isDebugLogging = false
+    #endif
+
+    private func debugLog(_ message: String) {
+        if Self.isDebugLogging {
+            print("[Challonge DEBUG] \(message)")
+        }
+    }
+
     // MARK: - Initialization
 
     init(
@@ -150,6 +164,51 @@ final class ChallongeService {
         let endpoint = "/tournaments.json"
         _ = try await performRequest(endpoint: endpoint, queryItems: [])
         return true
+    }
+
+    // MARK: - Match Updates
+
+    /// Submits a match result to Challonge
+    /// - Parameters:
+    ///   - tournamentId: Tournament ID or URL slug
+    ///   - matchId: The Challonge match ID
+    ///   - winnerId: The Challonge participant ID of the winner
+    ///   - scoresCsv: Score in CSV format (e.g., "4-2" for single game, "2-1" for Best Of sets)
+    /// - Returns: Updated match from Challonge
+    func updateMatch(
+        tournamentId: String,
+        matchId: Int,
+        winnerId: Int,
+        scoresCsv: String
+    ) async throws -> ChallongeMatch {
+        let endpoint = "/tournaments/\(tournamentId)/matches/\(matchId).json"
+        let queryItems = [
+            URLQueryItem(name: "match[winner_id]", value: String(winnerId)),
+            URLQueryItem(name: "match[scores_csv]", value: scoresCsv)
+        ]
+
+        debugLog("PUT \(endpoint)")
+        debugLog("  - winnerId: \(winnerId)")
+        debugLog("  - scoresCsv: \(scoresCsv)")
+
+        let startTime = Date()
+        do {
+            let data = try await performPutRequest(endpoint: endpoint, queryItems: queryItems)
+            let elapsed = Date().timeIntervalSince(startTime)
+            debugLog("Request completed in \(String(format: "%.2f", elapsed))s")
+
+            let wrapper = try JSONDecoder().decode(ChallongeMatchWrapper.self, from: data)
+            debugLog("Successfully decoded response - match state: \(wrapper.match.state)")
+            return wrapper.match
+        } catch let error as ChallongeError {
+            let elapsed = Date().timeIntervalSince(startTime)
+            debugLog("FAILED after \(String(format: "%.2f", elapsed))s: \(error.localizedDescription ?? String(describing: error))")
+            throw error
+        } catch {
+            let elapsed = Date().timeIntervalSince(startTime)
+            debugLog("FAILED after \(String(format: "%.2f", elapsed))s (decoding): \(error.localizedDescription)")
+            throw ChallongeError.decodingError(error)
+        }
     }
 
     // MARK: - URL Parsing
@@ -276,5 +335,113 @@ final class ChallongeService {
         let exponentialDelay = baseDelay * pow(2.0, Double(attempt))
         let jitter = Double.random(in: 0...1)
         return min(exponentialDelay + jitter, maxDelay)
+    }
+
+    /// Performs a PUT request to the Challonge API
+    private func performPutRequest(
+        endpoint: String,
+        queryItems: [URLQueryItem]
+    ) async throws -> Data {
+        guard let credentials = getStoredCredentials() else {
+            debugLog("performPutRequest: No credentials stored")
+            throw ChallongeError.notAuthenticated
+        }
+
+        var components = URLComponents(string: baseURL + endpoint)!
+        components.queryItems = queryItems.isEmpty ? nil : queryItems
+
+        guard let url = components.url else {
+            debugLog("performPutRequest: Invalid URL for endpoint: \(endpoint)")
+            throw ChallongeError.invalidTournamentUrl
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.setValue(credentials.basicAuthHeader, forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.timeoutInterval = 30
+
+        debugLog("performPutRequest: Starting request to \(url.absoluteString)")
+
+        // Retry loop with exponential backoff
+        var lastError: Error?
+        for attempt in 0..<maxRetries {
+            debugLog("Attempt \(attempt + 1)/\(maxRetries)")
+
+            do {
+                let (data, response) = try await session.data(for: request)
+
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    debugLog("Response: Invalid (not HTTPURLResponse)")
+                    throw ChallongeError.invalidResponse
+                }
+
+                debugLog("Response: HTTP \(httpResponse.statusCode)")
+
+                switch httpResponse.statusCode {
+                case 200...299:
+                    let responsePreview = String(data: data.prefix(500), encoding: .utf8) ?? "(binary)"
+                    debugLog("Response body: \(responsePreview)")
+                    return data
+
+                case 401:
+                    debugLog("Response: 401 Unauthorized - Invalid credentials")
+                    throw ChallongeError.invalidCredentials
+
+                case 404:
+                    debugLog("Response: 404 Not Found")
+                    throw ChallongeError.tournamentNotFound
+
+                case 422:
+                    // Unprocessable entity - likely invalid winner_id or match state
+                    let message = String(data: data, encoding: .utf8)
+                    debugLog("Response: 422 Unprocessable Entity - \(message ?? "(no body)")")
+                    throw ChallongeError.apiError(statusCode: 422, message: message)
+
+                case 429:
+                    // Rate limited - wait and retry
+                    let delay = calculateDelay(attempt: attempt)
+                    debugLog("Response: 429 Rate Limited - Waiting \(String(format: "%.1f", delay))s before retry")
+                    print("[Challonge] Rate limited, waiting \(delay)s before retry \(attempt + 1)/\(maxRetries)")
+                    try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                    continue
+
+                default:
+                    let message = String(data: data, encoding: .utf8)
+                    debugLog("Response: HTTP \(httpResponse.statusCode) - \(message ?? "(no body)")")
+                    throw ChallongeError.apiError(statusCode: httpResponse.statusCode, message: message)
+                }
+
+            } catch let error as ChallongeError {
+                debugLog("ChallongeError: \(error.localizedDescription ?? String(describing: error))")
+                switch error {
+                case .invalidCredentials, .tournamentNotFound, .notAuthenticated:
+                    throw error
+                default:
+                    lastError = error
+                }
+
+            } catch {
+                debugLog("Network/other error: \(error.localizedDescription)")
+                lastError = error
+
+                if attempt < maxRetries - 1 {
+                    let delay = calculateDelay(attempt: attempt)
+                    debugLog("Waiting \(String(format: "%.1f", delay))s before retry")
+                    print("[Challonge] Network error, waiting \(delay)s before retry \(attempt + 1)/\(maxRetries)")
+                    try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                }
+            }
+        }
+
+        debugLog("All \(maxRetries) attempts failed")
+
+        if let challongeError = lastError as? ChallongeError {
+            throw challongeError
+        } else if let lastError = lastError {
+            throw ChallongeError.networkError(lastError)
+        } else {
+            throw ChallongeError.invalidResponse
+        }
     }
 }
