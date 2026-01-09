@@ -13,13 +13,26 @@ struct MasterMainView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @StateObject private var tournamentManager = TournamentManager.shared
+    @StateObject private var syncManager = ChallongeSyncManager.shared
     @State private var showingCreateTournament = false
+    @State private var showingChallongeImport = false
     @State private var selectedTab = 0
 
     // MARK: - Master Menu
 
     private var masterMenu: some View {
         Menu {
+            // Refresh from Challonge (only if linked)
+            if syncManager.isLinked {
+                Button {
+                    Task { try? await syncManager.refresh() }
+                } label: {
+                    Label("Refresh from Challonge", systemImage: "arrow.clockwise")
+                }
+
+                Divider()
+            }
+
             Button(role: .destructive) {
                 tournamentManager.clearTournament()
             } label: {
@@ -48,6 +61,12 @@ struct MasterMainView: View {
                 tournamentManager.setTournament(tournament)
             }
         }
+        .sheet(isPresented: $showingChallongeImport) {
+            ChallongeImportView { tournament in
+                print("[BeyScore] MasterMainView: Tournament imported from Challonge")
+                tournamentManager.setTournament(tournament)
+            }
+        }
     }
 
     // MARK: - iPad No Tournament Layout
@@ -55,9 +74,10 @@ struct MasterMainView: View {
     @ViewBuilder
     private var iPadNoTournamentLayout: some View {
         NavigationStack {
-            NoTournamentView(onCreateTournament: {
-                showingCreateTournament = true
-            })
+            NoTournamentView(
+                onCreateTournament: { showingCreateTournament = true },
+                onChallongeImport: { showingChallongeImport = true }
+            )
             .navigationTitle("Tournament Master")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -74,6 +94,28 @@ struct MasterMainView: View {
     }
 
     // MARK: - iPad Split Layout
+
+    @State private var iPadSelectedTab: TournamentTab = .standings
+
+    /// Available tabs for iPad (Devices shown in sidebar, not needed here)
+    private var iPadTabs: [TournamentTab] {
+        guard let tournament = tournamentManager.currentTournament else {
+            return []
+        }
+
+        switch tournament.tournamentType {
+        case .swiss, .roundRobin:
+            if tournament.stageConfig.isMultiStage {
+                return [.standings, .matches, .finals]
+            } else {
+                return [.standings, .matches]
+            }
+        case .singleElimination, .doubleElimination:
+            return [.bracket]
+        default:
+            return [.bracket]
+        }
+    }
 
     @ViewBuilder
     private var iPadSplitLayout: some View {
@@ -99,11 +141,56 @@ struct MasterMainView: View {
             }
         } detail: {
             if let tournament = tournamentManager.currentTournament {
-                BracketView(
-                    tournament: tournament,
-                    onMatchSelected: { _ in }
-                )
+                VStack(spacing: 0) {
+                    // Unified picker (no Devices - shown in sidebar)
+                    if iPadTabs.count > 1 {
+                        Picker("View", selection: $iPadSelectedTab) {
+                            ForEach(iPadTabs, id: \.self) { tab in
+                                Text(tab.rawValue).tag(tab)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .padding()
+                    }
+
+                    // Content based on selection
+                    switch iPadSelectedTab {
+                    case .standings:
+                        SwissBracketView(
+                            tournament: tournament,
+                            viewMode: .standings,
+                            onMatchSelected: { _ in }
+                        )
+                    case .matches:
+                        SwissBracketView(
+                            tournament: tournament,
+                            viewMode: .rounds,
+                            onMatchSelected: { _ in }
+                        )
+                    case .finals:
+                        SingleEliminationFinalsView(
+                            matches: tournament.matches.filter { $0.stage == .finals },
+                            finalsType: tournament.stageConfig.finalsType,
+                            selectedMatchId: .constant(nil),
+                            onMatchSelected: { _ in }
+                        )
+                    case .bracket:
+                        BracketView(
+                            tournament: tournament,
+                            onMatchSelected: { _ in }
+                        )
+                    case .devices:
+                        // Devices shown in sidebar on iPad
+                        EmptyView()
+                    }
+                }
                 .navigationTitle(tournament.name)
+                .onAppear {
+                    // Set default tab on appear
+                    if !iPadTabs.contains(iPadSelectedTab) {
+                        iPadSelectedTab = iPadTabs.first ?? .bracket
+                    }
+                }
             }
         }
         .navigationSplitViewStyle(.balanced)
@@ -116,9 +203,10 @@ struct MasterMainView: View {
         NavigationStack {
             Group {
                 if tournamentManager.currentTournament == nil {
-                    NoTournamentView(onCreateTournament: {
-                        showingCreateTournament = true
-                    })
+                    NoTournamentView(
+                        onCreateTournament: { showingCreateTournament = true },
+                        onChallongeImport: { showingChallongeImport = true }
+                    )
                 } else {
                     TournamentDashboardView(
                         tournamentManager: tournamentManager
@@ -139,6 +227,17 @@ struct MasterMainView: View {
                 if tournamentManager.currentTournament != nil {
                     ToolbarItem(placement: .primaryAction) {
                         Menu {
+                            // Refresh from Challonge (only if linked)
+                            if syncManager.isLinked {
+                                Button {
+                                    Task { try? await syncManager.refresh() }
+                                } label: {
+                                    Label("Refresh from Challonge", systemImage: "arrow.clockwise")
+                                }
+
+                                Divider()
+                            }
+
                             Button(role: .destructive) {
                                 tournamentManager.clearTournament()
                             } label: {
@@ -148,8 +247,6 @@ struct MasterMainView: View {
                             Image(systemName: "ellipsis.circle")
                         }
                     }
-                    // iPhone approval flow: tap match in bracket to view and approve
-                    // (ApprovalBadge removed - pending count shown in TournamentStatusBar)
                 }
             }
             .sheet(isPresented: $showingCreateTournament) {
@@ -166,6 +263,7 @@ struct MasterMainView: View {
 
 struct NoTournamentView: View {
     let onCreateTournament: () -> Void
+    let onChallongeImport: () -> Void
 
     var body: some View {
         VStack(spacing: 24) {
@@ -179,20 +277,33 @@ struct NoTournamentView: View {
                 .font(.title2)
                 .fontWeight(.semibold)
 
-            Text("Create a tournament to start managing matches and scoreboards.")
+            Text("Create a tournament or import from Challonge to start managing matches.")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
 
-            Button {
-                onCreateTournament()
-            } label: {
-                Label("Create Tournament", systemImage: "plus.circle.fill")
-                    .font(.headline)
-                    .padding()
+            VStack(spacing: 12) {
+                Button {
+                    onCreateTournament()
+                } label: {
+                    Label("Create Tournament", systemImage: "plus.circle.fill")
+                        .font(.headline)
+                        .frame(maxWidth: 280)
+                        .padding()
+                }
+                .buttonStyle(.borderedProminent)
+
+                Button {
+                    onChallongeImport()
+                } label: {
+                    Label("Import from Challonge", systemImage: "arrow.down.circle.fill")
+                        .font(.headline)
+                        .frame(maxWidth: 280)
+                        .padding()
+                }
+                .buttonStyle(.bordered)
             }
-            .buttonStyle(.borderedProminent)
 
             Spacer()
 
@@ -211,12 +322,57 @@ struct NoTournamentView: View {
     }
 }
 
+// MARK: - Tournament Tab
+
+/// Unified tabs for tournament navigation
+enum TournamentTab: String, CaseIterable {
+    case standings = "Standings"
+    case matches = "Matches"
+    case finals = "Finals"
+    case bracket = "Bracket"
+    case devices = "Devices"
+}
+
 // MARK: - Tournament Dashboard View
 
 struct TournamentDashboardView: View {
     @ObservedObject var tournamentManager: TournamentManager
-    @State private var selectedSegment = 0
+    @State private var selectedTab: TournamentTab = .standings
     @State private var sheetMatch: TournamentMatch?
+
+    /// Available tabs based on tournament type (iPhone - includes Devices)
+    private var availableTabs: [TournamentTab] {
+        guard let tournament = tournamentManager.currentTournament else {
+            return [.devices]
+        }
+
+        switch tournament.tournamentType {
+        case .swiss, .roundRobin:
+            if tournament.stageConfig.isMultiStage {
+                return [.standings, .matches, .finals, .devices]
+            } else {
+                return [.standings, .matches, .devices]
+            }
+        case .singleElimination, .doubleElimination:
+            return [.bracket, .devices]
+        default:
+            return [.bracket, .devices]
+        }
+    }
+
+    /// Default tab based on tournament type
+    private var defaultTab: TournamentTab {
+        guard let tournament = tournamentManager.currentTournament else {
+            return .devices
+        }
+
+        switch tournament.tournamentType {
+        case .swiss, .roundRobin:
+            return .standings
+        default:
+            return .bracket
+        }
+    }
 
     var body: some View {
         if let tournament = tournamentManager.currentTournament {
@@ -227,31 +383,52 @@ struct TournamentDashboardView: View {
                     pendingApprovals: tournamentManager.pendingSubmissions.count
                 )
 
-                // Segment picker (iPhone: Bracket and Devices only, approve via match tap)
-                Picker("View", selection: $selectedSegment) {
-                    Text("Bracket").tag(0)
-                    Text("Devices").tag(1)
+                // Single unified picker
+                Picker("View", selection: $selectedTab) {
+                    ForEach(availableTabs, id: \.self) { tab in
+                        Text(tab.rawValue).tag(tab)
+                    }
                 }
                 .pickerStyle(.segmented)
                 .padding()
 
                 // Content based on selection
-                switch selectedSegment {
-                case 0:
+                switch selectedTab {
+                case .standings:
+                    SwissBracketView(
+                        tournament: tournament,
+                        viewMode: .standings,
+                        onMatchSelected: { _ in }
+                    )
+                case .matches:
+                    SwissBracketView(
+                        tournament: tournament,
+                        viewMode: .rounds,
+                        onMatchSelected: { _ in }
+                    )
+                case .finals:
+                    SingleEliminationFinalsView(
+                        matches: tournament.matches.filter { $0.stage == .finals },
+                        finalsType: tournament.stageConfig.finalsType,
+                        selectedMatchId: .constant(nil),
+                        onMatchSelected: { _ in }
+                    )
+                case .bracket:
                     BracketView(
                         tournament: tournament,
-                        onMatchSelected: { match in
-                            // Show match details or quick assign
-                        }
+                        onMatchSelected: { _ in }
                     )
-                case 1:
+                case .devices:
                     DeviceListView()
-                default:
-                    EmptyView()
+                }
+            }
+            .onAppear {
+                // Set default tab on appear
+                if !availableTabs.contains(selectedTab) {
+                    selectedTab = defaultTab
                 }
             }
         } else {
-            // Tournament was cleared, show empty state
             EmptyView()
         }
     }
@@ -473,6 +650,7 @@ struct MasterSplitView: View {
     @StateObject private var tournamentManager = TournamentManager.shared
     @State private var selectedMatch: TournamentMatch?
     @State private var showingCreateTournament = false
+    @State private var showingChallongeImport = false
 
     var body: some View {
         NavigationSplitView {
@@ -542,13 +720,19 @@ struct MasterSplitView: View {
                 )
                 .navigationTitle(tournament.name)
             } else {
-                NoTournamentView(onCreateTournament: {
-                    showingCreateTournament = true
-                })
+                NoTournamentView(
+                    onCreateTournament: { showingCreateTournament = true },
+                    onChallongeImport: { showingChallongeImport = true }
+                )
             }
         }
         .sheet(isPresented: $showingCreateTournament) {
             TournamentCreationView { tournament in
+                tournamentManager.setTournament(tournament)
+            }
+        }
+        .sheet(isPresented: $showingChallongeImport) {
+            ChallongeImportView { tournament in
                 tournamentManager.setTournament(tournament)
             }
         }

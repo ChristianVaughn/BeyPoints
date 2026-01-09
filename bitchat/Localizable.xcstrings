@@ -204,6 +204,9 @@
         }
       }
     },
+    "%@ / 500" : {
+
+    },
     "%@ %@ - %@ %@" : {
       "localizations" : {
         "en" : {
@@ -394,6 +397,15 @@
         }
       }
     },
+    "%@ conflict(s) detected" : {
+
+    },
+    "%@ matches" : {
+
+    },
+    "%@ new match(es) imported" : {
+
+    },
     "%@ rounds" : {
 
     },
@@ -461,6 +473,9 @@
     "+1 to opponent" : {
 
     },
+    "3rd Place Match" : {
+
+    },
     "Abandon Match" : {
 
     },
@@ -468,6 +483,12 @@
 
     },
     "All scoreboards are busy" : {
+
+    },
+    "API Calls Remaining" : {
+
+    },
+    "API Usage" : {
 
     },
     "app_info.app_name" : {
@@ -6380,6 +6401,9 @@
     "Appearance" : {
 
     },
+    "Approaching API limit (%@ calls left)" : {
+
+    },
     "Are you sure you want to leave the tournament room?" : {
 
     },
@@ -6395,6 +6419,9 @@
     "Back" : {
 
     },
+    "Beyblade Generation" : {
+
+    },
     "beypoints" : {
 
     },
@@ -6405,6 +6432,15 @@
 
     },
     "Cannot switch modes while scoring a match. Please complete or abandon the current match first." : {
+
+    },
+    "Challonge" : {
+
+    },
+    "Challonge allows 500 free API calls per month" : {
+
+    },
+    "Challonge Credentials" : {
 
     },
     "Change" : {
@@ -8030,6 +8066,9 @@
       }
     },
     "Complete" : {
+
+    },
+    "Configure the tournament format below" : {
 
     },
     "Connecting..." : {
@@ -19341,7 +19380,7 @@
     "Continue" : {
 
     },
-    "Create a tournament to start managing matches and scoreboards." : {
+    "Create a tournament or import from Challonge to start managing matches." : {
 
     },
     "Current" : {
@@ -21158,7 +21197,31 @@
     "Enter the 6-digit room code from the tournament master" : {
 
     },
+    "Fetch Tournament" : {
+
+    },
+    "Fetching..." : {
+
+    },
     "Final Score" : {
+
+    },
+    "Finals" : {
+
+    },
+    "Finals bracket not yet available" : {
+
+    },
+    "Finals matches will use the same settings as preliminary stage." : {
+
+    },
+    "Finals Stage" : {
+
+    },
+    "Finals Stage Settings" : {
+
+    },
+    "Find your API key at challonge.com/settings/developer" : {
 
     },
     "fingerprint.action.mark_verified" : {
@@ -22951,7 +23014,16 @@
         }
       }
     },
+    "Format" : {
+
+    },
     "Format:" : {
+
+    },
+    "Generation" : {
+
+    },
+    "Generation applies to all matches in the tournament" : {
 
     },
     "Generation:" : {
@@ -24046,6 +24118,12 @@
         }
       }
     },
+    "Import Tournament" : {
+
+    },
+    "Importing..." : {
+
+    },
     "Join a room to participate in a tournament" : {
 
     },
@@ -24056,6 +24134,15 @@
 
     },
     "L" : {
+
+    },
+    "Last synced: %@ ago" : {
+
+    },
+    "Local" : {
+
+    },
+    "Local data matches Challonge" : {
 
     },
     "location_channels.action.open_settings" : {
@@ -31479,6 +31566,18 @@
     "Minimum 2 players required. Players are seeded in order (drag to reorder)." : {
 
     },
+    "Multi-Stage" : {
+
+    },
+    "Multi-Stage (Prelim + Finals)" : {
+
+    },
+    "Multi-stage structure detected from Challonge" : {
+
+    },
+    "Multi-stage tournaments have a preliminary stage (Swiss/Round Robin) followed by a finals bracket" : {
+
+    },
     "New Match" : {
 
     },
@@ -31489,6 +31588,9 @@
 
     },
     "No available scoreboards" : {
+
+    },
+    "No Conflicts" : {
 
     },
     "No devices connected" : {
@@ -31512,6 +31614,9 @@
     "Not in a Tournament Room" : {
 
     },
+    "Options" : {
+
+    },
     "Or start a practice match" : {
 
     },
@@ -31524,6 +31629,9 @@
     "Own Finish:" : {
 
     },
+    "Paste the full Challonge URL (e.g., challonge.com/mytournament) or just the tournament ID" : {
+
+    },
     "PEN" : {
 
     },
@@ -31534,6 +31642,12 @@
 
     },
     "Practice Match" : {
+
+    },
+    "Preliminary Stage" : {
+
+    },
+    "Preliminary Stage Settings" : {
 
     },
     "Profile" : {
@@ -31737,6 +31851,9 @@
     "Reset" : {
 
     },
+    "Resolved (%@)" : {
+
+    },
     "Resume Match" : {
 
     },
@@ -31755,10 +31872,7 @@
     "Round not yet generated" : {
 
     },
-    "Rounds" : {
-
-    },
-    "Same as Stage 1" : {
+    "Round Robin" : {
 
     },
     "save" : {
@@ -31941,6 +32055,9 @@
         }
       }
     },
+    "Save Credentials" : {
+
+    },
     "Score submissions from scoreboards will appear here for your review." : {
 
     },
@@ -31990,10 +32107,19 @@
     "Sets:" : {
 
     },
+    "Settings for %@ matches before the finals bracket." : {
+
+    },
     "Share this code with scoreboard devices to let them join" : {
 
     },
     "Single Elimination" : {
+
+    },
+    "Single Stage" : {
+
+    },
+    "Single stage tournaments run one format throughout" : {
 
     },
     "Standings" : {
@@ -32012,6 +32138,9 @@
 
     },
     "Submitted Score" : {
+
+    },
+    "Swiss" : {
 
     },
     "Switch to %@" : {
@@ -34714,15 +34843,24 @@
     "The tournament master rejected your score. Please re-score the match." : {
 
     },
+    "These settings apply to all matches scored in BeyScore" : {
+
+    },
+    "These settings apply to finals bracket matches" : {
+
+    },
+    "These settings apply to preliminary stage matches" : {
+
+    },
     "This match is waiting for previous matches to complete before players are determined." : {
 
     },
-    "Top %@ players from %@ advance to %@ finals." : {
+    "Top %@ players advance from %@ to %@ finals." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Top %1$@ players from %2$@ advance to %3$@ finals."
+            "value" : "Top %1$@ players advance from %2$@ to %3$@ finals."
           }
         }
       }
@@ -34745,10 +34883,13 @@
     "Tournament Info" : {
 
     },
+    "Tournament Preview" : {
+
+    },
     "Tournament Room Code" : {
 
     },
-    "Tournament Stages" : {
+    "Tournament Structure" : {
 
     },
     "Tournament Summary" : {
@@ -34757,7 +34898,16 @@
     "Tournament System" : {
 
     },
+    "Unresolved (%@)" : {
+
+    },
     "Upcoming" : {
+
+    },
+    "Update Challonge manually after resolving" : {
+
+    },
+    "Validating..." : {
 
     },
     "verification.my_qr.accessibility_label" : {
@@ -36775,6 +36925,9 @@
 
     },
     "You selected %@. You can change this later in settings." : {
+
+    },
+    "You'll need to manually update Challonge with the correct data" : {
 
     }
   },

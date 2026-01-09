@@ -18,154 +18,18 @@ struct TournamentCreationView: View {
     var body: some View {
         NavigationStack {
             Form {
-                // Tournament Info Section
-                Section {
-                    TextField("Tournament Name", text: $viewModel.tournamentName)
-                        .textContentType(.name)
-
-                    HStack {
-                        Text("Room Code")
-                        Spacer()
-                        Text(viewModel.roomCode)
-                            .font(.system(.body, design: .monospaced))
-                            .foregroundColor(.secondary)
-
-                        Button {
-                            viewModel.regenerateRoomCode()
-                        } label: {
-                            Image(systemName: "arrow.clockwise")
-                        }
-                        .buttonStyle(.borderless)
-                    }
-                } header: {
-                    Text("Tournament Info")
+                tournamentInfoSection
+                stageTypeSection
+                formatSelectionSection
+                generationSection
+                matchSettingsSection
+                if viewModel.isMultiStage {
+                    finalsSettingsSection
                 }
-
-                // Tournament Format Section
-                Section {
-                    Picker("Format", selection: $viewModel.tournamentType) {
-                        ForEach(TournamentType.allCases, id: \.self) { type in
-                            Text(type.displayName).tag(type)
-                        }
-                    }
-                } header: {
-                    Text("Tournament Format")
-                } footer: {
-                    Text(viewModel.tournamentType.description)
-                }
-
-                // Multi-Stage Section (for non-elimination formats)
-                if viewModel.showMultiStageOptions {
-                    Section {
-                        Toggle("Multi-Stage Tournament", isOn: $viewModel.isMultiStage)
-
-                        if viewModel.isMultiStage {
-                            Picker("Finals Format", selection: $viewModel.finalsType) {
-                                Text("Single Elimination").tag(TournamentType.singleElimination)
-                                Text("Double Elimination").tag(TournamentType.doubleElimination)
-                            }
-
-                            Picker("Finals Size", selection: $viewModel.finalsSize) {
-                                Text("Top 4").tag(4)
-                                Text("Top 8").tag(8)
-                                Text("Top 16").tag(16)
-                                Text("Top 32").tag(32)
-                            }
-
-                            Divider()
-
-                            // Finals match settings
-                            Picker("Finals Match Type", selection: $viewModel.finalsMatchType) {
-                                Text("Same as Stage 1").tag(nil as MatchType?)
-                                ForEach(MatchType.availableTypes(for: viewModel.generation), id: \.self) { type in
-                                    Text(type.displayName).tag(type as MatchType?)
-                                }
-                            }
-
-                            Picker("Finals Best Of", selection: $viewModel.finalsBestOf) {
-                                Text("Same as Stage 1").tag(nil as BestOf?)
-                                ForEach(BestOf.allCases, id: \.self) { bo in
-                                    Text(bo.displayName).tag(bo as BestOf?)
-                                }
-                            }
-                        }
-                    } header: {
-                        Text("Tournament Stages")
-                    } footer: {
-                        if viewModel.isMultiStage {
-                            Text("Top \(viewModel.finalsSize) players from \(viewModel.tournamentType.displayName) advance to \(viewModel.finalsType.displayName) finals.")
-                        }
-                    }
-                }
-
-                // Players Section
-                Section {
-                    PlayerListEditor(players: $viewModel.players)
-                } header: {
-                    HStack {
-                        Text("Players (\(viewModel.players.count))")
-                        Spacer()
-                        if viewModel.players.count >= 2 {
-                            Text(viewModel.roundsDescription)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                } footer: {
-                    Text(viewModel.playersFooterText)
-                }
-
-                // Match Settings Section
-                Section {
-                    // Generation
-                    Picker("Generation", selection: $viewModel.generation) {
-                        ForEach(BeybladeGeneration.allCases, id: \.self) { gen in
-                            Text(gen.displayName).tag(gen)
-                        }
-                    }
-
-                    // Match Type
-                    Picker("Match Type", selection: $viewModel.matchType) {
-                        ForEach(MatchType.availableTypes(for: viewModel.generation), id: \.self) { type in
-                            Text(type.displayName).tag(type)
-                        }
-                    }
-
-                    // Best Of
-                    Picker("Best Of", selection: $viewModel.bestOf) {
-                        ForEach(BestOf.allCases, id: \.self) { bestOf in
-                            Text(bestOf.displayName).tag(bestOf)
-                        }
-                    }
-
-                    // Own Finish (X only)
-                    if viewModel.generation.supportsOwnFinish {
-                        Toggle("Own Finish Enabled", isOn: $viewModel.ownFinishEnabled)
-                    }
-                } header: {
-                    Text("Match Settings")
-                }
-
-                // Shuffle Option
-                Section {
-                    Toggle("Shuffle Players", isOn: $viewModel.shufflePlayers)
-                } footer: {
-                    Text("Randomizes player seeding when creating the bracket.")
-                }
-
-                // Preview Section
+                playersSection
+                optionsSection
                 if viewModel.canCreateTournament {
-                    Section {
-                        BracketPreview(
-                            playerCount: viewModel.players.count,
-                            numberOfRounds: viewModel.numberOfRounds,
-                            tournamentType: viewModel.tournamentType,
-                            isMultiStage: viewModel.isMultiStage,
-                            finalsSize: viewModel.finalsSize
-                        )
-                    } header: {
-                        Text("Tournament Summary")
-                    }
+                    previewSection
                 }
             }
             .navigationTitle("Create Tournament")
@@ -189,6 +53,214 @@ struct TournamentCreationView: View {
             }
         }
     }
+
+    // MARK: - Tournament Info Section
+
+    private var tournamentInfoSection: some View {
+        Section {
+            TextField("Tournament Name", text: $viewModel.tournamentName)
+                .textContentType(.name)
+
+            HStack {
+                Text("Room Code")
+                Spacer()
+                Text(viewModel.roomCode)
+                    .font(.system(.body, design: .monospaced))
+                    .foregroundColor(.secondary)
+
+                Button {
+                    viewModel.regenerateRoomCode()
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                }
+                .buttonStyle(.borderless)
+            }
+        } header: {
+            Text("Tournament Info")
+        }
+    }
+
+    // MARK: - Stage Type Section (NEW)
+
+    private var stageTypeSection: some View {
+        Section {
+            Picker("Structure", selection: $viewModel.isMultiStage) {
+                Text("Single Stage").tag(false)
+                Text("Multi-Stage").tag(true)
+            }
+            .pickerStyle(.segmented)
+        } header: {
+            Text("Tournament Structure")
+        } footer: {
+            Text(viewModel.isMultiStage
+                ? "Preliminary stage (Swiss/Round Robin) followed by finals bracket."
+                : "All players compete in one bracket or format.")
+        }
+    }
+
+    // MARK: - Format Selection Section
+
+    private var formatSelectionSection: some View {
+        Section {
+            if viewModel.isMultiStage {
+                // Multi-stage: separate preliminary and finals pickers
+                Picker("Preliminary", selection: $viewModel.preliminaryFormat) {
+                    Text("Swiss").tag(TournamentType.swiss)
+                    Text("Round Robin").tag(TournamentType.roundRobin)
+                }
+
+                Picker("Finals", selection: $viewModel.finalsType) {
+                    Text("Single Elimination").tag(TournamentType.singleElimination)
+                    Text("Double Elimination").tag(TournamentType.doubleElimination)
+                }
+
+                Picker("Finals Size", selection: $viewModel.finalsSize) {
+                    Text("Top 4").tag(4)
+                    Text("Top 8").tag(8)
+                    Text("Top 16").tag(16)
+                    Text("Top 32").tag(32)
+                }
+            } else {
+                // Single stage: all format options (no Group RR for v1.0)
+                Picker("Format", selection: $viewModel.tournamentType) {
+                    Text("Single Elimination").tag(TournamentType.singleElimination)
+                    Text("Double Elimination").tag(TournamentType.doubleElimination)
+                    Text("Swiss").tag(TournamentType.swiss)
+                    Text("Round Robin").tag(TournamentType.roundRobin)
+                }
+            }
+        } header: {
+            Text("Format")
+        } footer: {
+            if viewModel.isMultiStage {
+                Text("Top \(viewModel.finalsSize) players advance from \(viewModel.preliminaryFormat.displayName) to \(viewModel.finalsType.displayName) finals.")
+            } else {
+                Text(viewModel.tournamentType.description)
+            }
+        }
+    }
+
+    // MARK: - Generation Section
+
+    private var generationSection: some View {
+        Section {
+            Picker("Generation", selection: $viewModel.generation) {
+                ForEach(BeybladeGeneration.allCases, id: \.self) { gen in
+                    Text(gen.displayName).tag(gen)
+                }
+            }
+        } header: {
+            Text("Generation")
+        }
+    }
+
+    // MARK: - Match Settings Section
+
+    private var matchSettingsSection: some View {
+        Section {
+            Picker("Match Type", selection: $viewModel.matchType) {
+                ForEach(MatchType.availableTypes(for: viewModel.generation), id: \.self) { type in
+                    Text(type.displayName).tag(type)
+                }
+            }
+
+            Picker("Best Of", selection: $viewModel.bestOf) {
+                ForEach(BestOf.allCases, id: \.self) { bestOf in
+                    Text(bestOf.displayName).tag(bestOf)
+                }
+            }
+
+            if viewModel.generation.supportsOwnFinish {
+                Toggle("Own Finish Enabled", isOn: $viewModel.ownFinishEnabled)
+            }
+        } header: {
+            Text(viewModel.isMultiStage ? "Preliminary Stage Settings" : "Match Settings")
+        } footer: {
+            if viewModel.isMultiStage {
+                Text("Settings for \(viewModel.preliminaryFormat.displayName) matches before the finals bracket.")
+            }
+        }
+    }
+
+    // MARK: - Finals Settings Section (Multi-Stage Only)
+
+    private var finalsSettingsSection: some View {
+        Section {
+            Toggle("Use same settings as preliminary", isOn: $viewModel.useSameFinalsSettings)
+
+            if !viewModel.useSameFinalsSettings {
+                Picker("Match Type", selection: $viewModel.finalsMatchTypeSelection) {
+                    ForEach(MatchType.availableTypes(for: viewModel.generation), id: \.self) { type in
+                        Text(type.displayName).tag(type)
+                    }
+                }
+
+                Picker("Best Of", selection: $viewModel.finalsBestOfSelection) {
+                    ForEach(BestOf.allCases, id: \.self) { bestOf in
+                        Text(bestOf.displayName).tag(bestOf)
+                    }
+                }
+
+                if viewModel.generation.supportsOwnFinish {
+                    Toggle("Own Finish Enabled", isOn: $viewModel.finalsOwnFinishEnabled)
+                }
+            }
+        } header: {
+            Text("Finals Stage Settings")
+        } footer: {
+            if viewModel.useSameFinalsSettings {
+                Text("Finals matches will use the same settings as preliminary stage.")
+            }
+        }
+    }
+
+    // MARK: - Players Section
+
+    private var playersSection: some View {
+        Section {
+            PlayerListEditor(players: $viewModel.players)
+        } header: {
+            HStack {
+                Text("Players (\(viewModel.players.count))")
+                Spacer()
+                if viewModel.players.count >= 2 {
+                    Text(viewModel.roundsDescription)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+        } footer: {
+            Text(viewModel.playersFooterText)
+        }
+    }
+
+    // MARK: - Options Section
+
+    private var optionsSection: some View {
+        Section {
+            Toggle("Shuffle Players", isOn: $viewModel.shufflePlayers)
+        } header: {
+            Text("Options")
+        } footer: {
+            Text("Randomizes player seeding when creating the bracket.")
+        }
+    }
+
+    // MARK: - Preview Section
+
+    private var previewSection: some View {
+        Section {
+            BracketPreview(
+                playerCount: viewModel.players.count,
+                numberOfRounds: viewModel.numberOfRounds,
+                tournamentType: viewModel.effectiveTournamentType,
+                isMultiStage: viewModel.isMultiStage,
+                finalsSize: viewModel.finalsSize
+            )
+        } header: {
+            Text("Tournament Summary")
+        }
+    }
 }
 
 // MARK: - View Model
@@ -204,18 +276,40 @@ final class TournamentCreationViewModel: ObservableObject {
     @Published var ownFinishEnabled: Bool = false
     @Published var shufflePlayers: Bool = false
 
-    // Tournament format
-    @Published var tournamentType: TournamentType = .singleElimination
+    // Stage selection
     @Published var isMultiStage: Bool = false
+
+    // Single stage format
+    @Published var tournamentType: TournamentType = .singleElimination
+
+    // Multi-stage formats
+    @Published var preliminaryFormat: TournamentType = .swiss
     @Published var finalsType: TournamentType = .singleElimination
     @Published var finalsSize: Int = 8
 
-    // Finals-specific match settings (nil = same as stage 1)
-    @Published var finalsMatchType: MatchType?
-    @Published var finalsBestOf: BestOf?
+    // Finals settings
+    @Published var useSameFinalsSettings: Bool = true
+    @Published var finalsMatchTypeSelection: MatchType = .points4
+    @Published var finalsBestOfSelection: BestOf = .none
+    @Published var finalsOwnFinishEnabled: Bool = false
 
     init() {
         regenerateRoomCode()
+    }
+
+    /// The effective tournament type based on stage selection.
+    var effectiveTournamentType: TournamentType {
+        isMultiStage ? preliminaryFormat : tournamentType
+    }
+
+    /// Finals match type (nil = same as preliminary).
+    var finalsMatchType: MatchType? {
+        useSameFinalsSettings ? nil : finalsMatchTypeSelection
+    }
+
+    /// Finals best of (nil = same as preliminary).
+    var finalsBestOf: BestOf? {
+        useSameFinalsSettings ? nil : finalsBestOfSelection
     }
 
     var canCreateTournament: Bool {
@@ -225,16 +319,13 @@ final class TournamentCreationViewModel: ObservableObject {
         (!isMultiStage || finalsSize <= players.count)
     }
 
-    /// Whether to show multi-stage options.
-    var showMultiStageOptions: Bool {
-        !tournamentType.isEliminationFormat
-    }
-
     /// Number of rounds based on tournament type.
     var numberOfRounds: Int {
         guard players.count > 1 else { return 0 }
 
-        switch tournamentType {
+        let format = effectiveTournamentType
+
+        switch format {
         case .singleElimination:
             return Int(ceil(log2(Double(players.count))))
         case .doubleElimination:
@@ -252,7 +343,9 @@ final class TournamentCreationViewModel: ObservableObject {
 
     /// Description of rounds for display.
     var roundsDescription: String {
-        switch tournamentType {
+        let format = effectiveTournamentType
+
+        switch format {
         case .singleElimination, .doubleElimination:
             return "\(numberOfRounds) rounds"
         case .swiss:
@@ -268,7 +361,9 @@ final class TournamentCreationViewModel: ObservableObject {
 
     /// Footer text for players section.
     var playersFooterText: String {
-        switch tournamentType {
+        let format = effectiveTournamentType
+
+        switch format {
         case .singleElimination, .doubleElimination:
             return "Minimum 2 players required. Players are seeded in order (drag to reorder)."
         case .swiss:
@@ -292,8 +387,8 @@ final class TournamentCreationViewModel: ObservableObject {
 
         // Build stage config
         var stageConfig = TournamentStageConfig()
-        stageConfig.isMultiStage = isMultiStage && showMultiStageOptions
-        stageConfig.stage1Type = tournamentType
+        stageConfig.isMultiStage = isMultiStage
+        stageConfig.stage1Type = effectiveTournamentType
         stageConfig.finalsType = finalsType
         stageConfig.finalsSize = finalsSize
         stageConfig.finalsMatchType = finalsMatchType
@@ -307,7 +402,7 @@ final class TournamentCreationViewModel: ObservableObject {
             matchType: matchType,
             bestOf: bestOf,
             ownFinishEnabled: ownFinishEnabled,
-            tournamentType: tournamentType,
+            tournamentType: effectiveTournamentType,
             stageConfig: stageConfig,
             shuffle: shufflePlayers
         )

@@ -114,8 +114,37 @@ struct Tournament: Codable, Identifiable, Equatable {
     }
 
     /// Total Swiss rounds (Challonge formula).
+    /// DEPRECATED: Use totalPreliminaryRounds instead for format-aware round count.
     var totalSwissRounds: Int {
-        SwissGenerator.numberOfRounds(for: players.count)
+        totalPreliminaryRounds
+    }
+
+    /// Total rounds in preliminary stage (Swiss/Round Robin).
+    /// Derives from actual match data when available (for imports), otherwise calculates.
+    var totalPreliminaryRounds: Int {
+        // Get preliminary stage matches (exclude finals)
+        let prelimMatches = matches.filter { $0.stage != .finals }
+
+        // If we have matches, use actual data (handles imports correctly)
+        if !prelimMatches.isEmpty {
+            return prelimMatches.map { $0.roundNumber }.max() ?? 0
+        }
+
+        // Fall back to calculation based on tournament type
+        guard players.count > 1 else { return 0 }
+
+        switch tournamentType {
+        case .swiss:
+            return SwissGenerator.numberOfRounds(for: players.count)
+        case .roundRobin:
+            // n-1 rounds for n players (or n for odd)
+            return players.count % 2 == 0 ? players.count - 1 : players.count
+        case .groupRoundRobin:
+            let groupSize = players.count / 2
+            return groupSize % 2 == 0 ? groupSize - 1 : groupSize
+        default:
+            return 0
+        }
     }
 
     /// Whether the tournament is in the finals stage (multi-stage).
@@ -168,6 +197,17 @@ struct Tournament: Codable, Identifiable, Equatable {
     /// The tournament winner, if complete.
     var winner: String? {
         guard status == .complete else { return nil }
+
+        // For multi-stage tournaments, get winner from finals
+        if stageConfig.isMultiStage {
+            let finalsMatches = matches.filter { $0.stage == .finals }
+            guard !finalsMatches.isEmpty else { return nil }
+            // Find the highest round in finals (the final match)
+            let maxFinalsRound = finalsMatches.map { $0.roundNumber }.max() ?? 0
+            return finalsMatches.first(where: { $0.roundNumber == maxFinalsRound })?.winner
+        }
+
+        // Single stage - winner from last round
         return matches.first(where: { $0.roundNumber == numberOfRounds })?.winner
     }
 
@@ -446,3 +486,4 @@ extension Tournament {
         matches[index].status = .pending
     }
 }
+
